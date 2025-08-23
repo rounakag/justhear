@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
@@ -9,7 +9,7 @@ import { AuthModal } from './components/auth/AuthModal';
 import { useAuth } from './hooks/useAuth';
 import { BubbleBackground } from '@/components/BubbleBackground';
 import { SharpButton } from '@/components/SharpButton';
-import { ReachOut } from '@/components/ReachOut';
+import { ReachOut } from '@/components/sections/ReachOut';
 import { SchedulerModal } from '@/components/SchedulerModal';
 
 const NAV_LINKS = [
