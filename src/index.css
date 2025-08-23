@@ -1,0 +1,61 @@
+.bubble {
+  animation: bubble-rise 20s linear infinite;
+}
+.delay-0  { animation-delay: 0s; }
+.delay-4  { animation-delay: 4s; }
+.delay-8  { animation-delay: 8s; }
+.delay-12 { animation-delay: 12s; }
+.delay-16 { animation-delay: 16s; }
+
+@keyframes bubble-rise {
+  0%   { transform: translateY(0) translateX(0); opacity: .3; }
+  50%  { opacity: .5; }
+  100% { transform: translateY(-260px) translateX(40px); opacity: 0; }
+}
+
+/* Mobile horizontal scrollbars hidden (for testimonials / emotion cards) */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
