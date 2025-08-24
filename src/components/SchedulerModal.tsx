@@ -17,9 +17,10 @@ const SLOTS: Record<string, string[]> = {
 interface SchedulerModalProps {
   triggerClassName?: string;
   children?: React.ReactNode;
+  onOpen?: () => void;
 }
 
-export function SchedulerModal({ triggerClassName, children }: SchedulerModalProps) {
+export function SchedulerModal({ triggerClassName, children, onOpen }: SchedulerModalProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -28,6 +29,11 @@ export function SchedulerModal({ triggerClassName, children }: SchedulerModalPro
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleOpen = () => {
+    // Call the onOpen callback if provided
+    if (onOpen) {
+      onOpen();
+    }
+    
     if (!user) {
       // Trigger login modal - find AuthModal trigger and click it
       const authTrigger = document.querySelector('[data-auth-trigger]') as HTMLElement;
