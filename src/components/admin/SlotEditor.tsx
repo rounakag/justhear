@@ -250,22 +250,21 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button
+            <button
               type="submit"
               disabled={loading}
-              className="flex-1"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Saving...' : slot ? 'Update Slot' : 'Create Slot'}
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="secondary"
               onClick={onClose}
               disabled={loading}
-              className="flex-1"
+              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
               Cancel
-            </Button>
+            </button>
           </div>
         </form>
       </DialogContent>

@@ -94,16 +94,28 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
                         📊 Dashboard
                       </a>
                       <p className="text-sm text-gray-600 mb-2">👤 {user.username}</p>
-                      <Button variant="outline" size="sm" onClick={logout} className="w-full">
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setNavOpen(false);
+                        }} 
+                        className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >
                         Logout
-                      </Button>
+                      </button>
                     </div>
                   ) : (
-                    <AuthModal>
-                      <SharpButton className="w-full">Login / Sign Up</SharpButton>
-                    </AuthModal>
+                    <div onClick={() => setNavOpen(false)}>
+                      <AuthModal>
+                        <button className="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-md hover:from-blue-700 hover:to-purple-700 transition-colors">
+                          Login / Sign Up
+                        </button>
+                      </AuthModal>
+                    </div>
                   )}
-                  <SchedulerModal />
+                  <div onClick={() => setNavOpen(false)}>
+                    <SchedulerModal />
+                  </div>
                 </div>
               </nav>
             </SheetContent>
