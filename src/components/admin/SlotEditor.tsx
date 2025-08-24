@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/design-system/components';
 import { useAdminSlots } from '@/hooks/useAdminSlots';
 import type { TimeSlot, SlotEditorData, Listener } from '@/types/admin.types';
 
