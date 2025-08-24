@@ -61,7 +61,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   title,
   originalPrice,
   currentPrice,
-  duration,
+  _duration,
   description,
   isPopular,
   isAvailable,
