@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import App from './App';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { UserDashboardPage } from './pages/UserDashboardPage';
 
 export const AppRouter: React.FC = () => {
   return (
@@ -14,6 +15,9 @@ export const AppRouter: React.FC = () => {
           <Routes>
             {/* Main App Route */}
             <Route path="/" element={<App />} />
+            
+            {/* User Dashboard Route */}
+            <Route path="/dashboard" element={<UserDashboardPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLoginPage />} />

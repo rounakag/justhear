@@ -41,6 +41,12 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
           
           {user ? (
             <div className="flex items-center gap-2">
+              <a
+                href="/dashboard"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                📊 Dashboard
+              </a>
               <span className="text-sm text-gray-600">👤 {user.username}</span>
               <Button variant="outline" size="sm" onClick={logout}>
                 Logout
@@ -80,6 +86,13 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
                 <div className="mt-6 pt-4 border-t border-gray-200 space-y-3">
                   {user ? (
                     <div>
+                      <a
+                        href="/dashboard"
+                        className="block text-lg py-2 text-gray-700 hover:text-blue-600 font-medium mb-2"
+                        onClick={() => setNavOpen(false)}
+                      >
+                        📊 Dashboard
+                      </a>
                       <p className="text-sm text-gray-600 mb-2">👤 {user.username}</p>
                       <Button variant="outline" size="sm" onClick={logout} className="w-full">
                         Logout
