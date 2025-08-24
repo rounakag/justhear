@@ -23,7 +23,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-accordion', '@radix-ui/react-sheet'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-accordion'],
         },
       },
     },

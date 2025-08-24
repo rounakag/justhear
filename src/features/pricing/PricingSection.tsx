@@ -50,7 +50,7 @@ interface PricingCardProps {
   title: string;
   originalPrice: number;
   currentPrice: number;
-  duration: number;
+  duration?: number;
   description: string;
   isPopular: boolean;
   isAvailable: boolean;
@@ -61,7 +61,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   title,
   originalPrice,
   currentPrice,
-  _duration,
+  duration: _duration,
   description,
   isPopular,
   isAvailable,

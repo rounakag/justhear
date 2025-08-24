@@ -1,3 +1,3 @@
 
-export { Button } from './Button.tsx'
+export { Button } from './button'
 export type { ButtonProps } from './Button.types'
