@@ -1,117 +1,118 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import Cookies from 'js-cookie';
+import { apiService } from '@/services/api';
 
 interface User {
+  id: number;
   username: string;
-  id: string;
+  email: string;
+  role: 'user' | 'listener' | 'admin';
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  signUp: (username: string, password: string) => Promise<boolean>;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (username: string, email: string, password: string, role?: string) => Promise<boolean>;
   logout: () => void;
-  isLoading: boolean;
-  error: string | null;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function useAuth() {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is logged in on app start
+    const token = localStorage.getItem('authToken');
+    const savedUser = localStorage.getItem('user');
+    
+    if (token && savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+      }
+    }
+    
+    setLoading(false);
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const response = await apiService.login(email, password);
+      
+      if (response.data && response.status === 200) {
+        const { user, token } = response.data;
+        setUser(user as User);
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+      } else {
+        console.error('Login failed:', response.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (username: string, email: string, password: string, role: string = 'user'): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const response = await apiService.signup(username, email, password, role);
+      
+      if (response.data && response.status === 201) {
+        const { user, token } = response.data;
+        setUser(user as User);
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+      } else {
+        console.error('Signup failed:', response.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+  };
+
+  const value: AuthContextType = {
+    user,
+    loading,
+    login,
+    signup,
+    logout,
+    isAuthenticated: !!user,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
-
-// Mock authentication functions - replace with real API calls
-const mockUsers = new Map<string, { password: string; id: string }>();
-
-export function useAuthProvider() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check if user is logged in on app start
-    const savedUser = Cookies.get('user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        Cookies.remove('user');
-      }
-    }
-  }, []);
-
-  const login = async (username: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const storedUser = mockUsers.get(username.toLowerCase());
-      if (!storedUser || storedUser.password !== password) {
-        setError('Invalid username or password');
-        return false;
-      }
-
-      const userData = { username, id: storedUser.id };
-      setUser(userData);
-      Cookies.set('user', JSON.stringify(userData), { expires: 7 });
-      return true;
-    } catch (err) {
-      setError('Login failed. Please try again.');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUp = async (username: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      if (mockUsers.has(username.toLowerCase())) {
-        setError('Username already exists');
-        return false;
-      }
-
-      const userId = Math.random().toString(36).substr(2, 9);
-      mockUsers.set(username.toLowerCase(), { password, id: userId });
-
-      const userData = { username, id: userId };
-      setUser(userData);
-      Cookies.set('user', JSON.stringify(userData), { expires: 7 });
-      return true;
-    } catch (err) {
-      setError('Sign up failed. Please try again.');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    Cookies.remove('user');
-  };
-
-  return {
-    user,
-    login,
-    signUp,
-    logout,
-    isLoading,
-    error,
-  };
-}
-
-export { AuthContext };

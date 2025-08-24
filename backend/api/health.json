@@ -1,0 +1,7 @@
+{
+  "status": "OK",
+  "message": "Backend API is running!",
+  "timestamp": "2024-01-15T10:00:00.000Z",
+  "environment": "development",
+  "version": "1.0.0"
+}

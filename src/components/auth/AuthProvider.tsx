@@ -1,12 +1,10 @@
 import React from 'react';
-import { AuthContext, useAuthProvider } from '@/hooks/useAuth';
+import { AuthProvider as AuthProviderComponent } from '@/hooks/useAuth';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const auth = useAuthProvider();
-  
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthProviderComponent>
       {children}
-    </AuthContext.Provider>
+    </AuthProviderComponent>
   );
 }

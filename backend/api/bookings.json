@@ -1,0 +1,33 @@
+{
+  "bookings": [
+    {
+      "id": 1,
+      "user_id": 3,
+      "listener_id": 2,
+      "time_slot_id": 2,
+      "status": "confirmed",
+      "payment_status": "paid",
+      "payment_amount": 25.00,
+      "transaction_id": "txn_123456789",
+      "meeting_link": "https://meet.google.com/abc-defg-hij",
+      "created_at": "2024-01-15T10:00:00.000Z",
+      "session_date": "2024-01-15",
+      "session_time": "14:00:00"
+    },
+    {
+      "id": 2,
+      "user_id": 3,
+      "listener_id": 2,
+      "time_slot_id": 3,
+      "status": "upcoming",
+      "payment_status": "paid",
+      "payment_amount": 25.00,
+      "transaction_id": "txn_987654321",
+      "meeting_link": "https://meet.google.com/xyz-uvw-rst",
+      "created_at": "2024-01-15T10:00:00.000Z",
+      "session_date": "2024-01-16",
+      "session_time": "09:00:00"
+    }
+  ],
+  "total": 2
+}
