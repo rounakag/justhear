@@ -9,7 +9,6 @@ import type { UserSession } from '@/types/user.types';
 
 export const UserDashboardPage: React.FC = () => {
   const {
-    sessions,
     profile,
     stats,
     loading,
@@ -20,7 +19,6 @@ export const UserDashboardPage: React.FC = () => {
     cancelBooking,
     createReview,
     updateReview,
-    deleteReview,
   } = useUserDashboard();
 
   const [selectedSession, setSelectedSession] = useState<UserSession | null>(null);

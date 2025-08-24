@@ -1,5 +1,5 @@
 // src/components/features/hero/Hero.tsx
-import React from 'react'
+
 
 export const Hero = () => {
   return (

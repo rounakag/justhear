@@ -91,7 +91,6 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
       {sessions.map((session) => {
         const timeUntil = timeUntilSessions[session.booking.id] || 0;
         const isSoon = timeUntil < 60; // Less than 1 hour
-        const isToday = timeUntil < 1440; // Less than 24 hours
 
         return (
           <div

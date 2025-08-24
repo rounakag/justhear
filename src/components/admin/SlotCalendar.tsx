@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/design-system/components';
 import type { TimeSlot, Listener } from '@/types/admin.types';
 

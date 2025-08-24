@@ -7,7 +7,7 @@ interface BookingHistoryProps {
 }
 
 export const BookingHistory: React.FC<BookingHistoryProps> = ({ sessions, onReviewSession }) => {
-  const formatDateTime = (date: string, startTime: string) => {
+  const formatDateTime = (_date: string, startTime: string) => {
     const sessionDate = new Date(startTime);
     return sessionDate.toLocaleDateString('en-US', {
       weekday: 'short',

@@ -1,7 +1,6 @@
 import type { 
   TimeSlot, 
   Listener, 
-  ListenerAvailability, 
   RecurringSchedule, 
   AdminStats 
 } from '@/types/admin.types';

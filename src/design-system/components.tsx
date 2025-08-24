@@ -77,7 +77,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps & React.HTMLAttributes<
 Card.displayName = 'Card';
 
 // Enhanced Input Component
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   variant?: 'default' | 'error' | 'success';
   size?: 'sm' | 'md' | 'lg';
   label?: string;

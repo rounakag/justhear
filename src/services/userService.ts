@@ -13,7 +13,7 @@ import {
 } from '@/constants/userData';
 
 class UserService {
-  private baseUrl = '/api/user';
+  private _baseUrl = '/api/user';
   private mockData = {
     bookings: [...MOCK_USER_BOOKINGS],
     reviews: [...MOCK_USER_REVIEWS],
@@ -124,7 +124,7 @@ class UserService {
       const now = new Date();
       const sessionTime = new Date(booking.startTime);
       const timeUntilSession = sessionTime > now ? 
-        Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : undefined;
+        Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : false;
       
       sessions.push({
         booking,

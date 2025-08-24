@@ -1,7 +1,7 @@
 import { config } from '@/config/environment';
 
 // API Base URL
-const API_BASE_URL = config.apiUrl || 'http://localhost:5000';
+const API_BASE_URL = config.api.baseUrl || 'http://localhost:5000';
 
 // Request timeout
 const REQUEST_TIMEOUT = 30000;

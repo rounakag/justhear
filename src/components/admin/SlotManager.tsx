@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { SlotEditor } from './SlotEditor';
 import { BulkSlotCreator } from './BulkSlotCreator';
 import { SlotCalendar } from './SlotCalendar';
 import { SlotFilters } from './SlotFilters';
 import { AdminStats } from './AdminStats';
 import { useAdminSlots } from '@/hooks/useAdminSlots';
-import type { TimeSlot, SlotFilters as SlotFiltersType } from '@/types/admin.types';
+import type { TimeSlot } from '@/types/admin.types';
 
 export const SlotManager: React.FC = () => {
   const {
@@ -32,7 +32,7 @@ export const SlotManager: React.FC = () => {
   };
 
   // Filter slots based on current filters
-  const filteredSlots = useMemo(() => {
+  const filteredSlots = React.useMemo(() => {
     let filtered = slots;
 
     if (filters.listenerId) {
@@ -90,9 +90,12 @@ export const SlotManager: React.FC = () => {
                   <p className="text-sm text-red-700 mt-1">{error}</p>
                 </div>
               </div>
-              <Button onClick={clearError} variant="secondary" size="sm">
+              <button 
+                onClick={clearError} 
+                className="px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors"
+              >
                 Dismiss
-              </Button>
+              </button>
             </div>
           </div>
         </div>

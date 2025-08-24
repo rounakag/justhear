@@ -50,14 +50,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               🎧 {ctaText}
             </Button>
           </SchedulerModal>
-          <Button 
-            variant="secondary" 
-            size="lg"
-            className="rounded-full text-blue-600 bg-white hover:bg-gray-50 text-base py-3 px-6" 
-            asChild
+          <a 
+            href={secondaryCtaHref}
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-gray-50 border border-gray-200 transition-colors"
           >
-            <a href={secondaryCtaHref}>{secondaryCtaText}</a>
-          </Button>
+            {secondaryCtaText}
+          </a>
         </div>
       </div>
     </section>

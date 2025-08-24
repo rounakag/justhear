@@ -1,6 +1,6 @@
 // Placeholder for PricingSection.tsx
 // src/components/features/pricing/PricingSection.tsx
-import React from 'react'
+
 
 export const PricingSection = () => {
   return (

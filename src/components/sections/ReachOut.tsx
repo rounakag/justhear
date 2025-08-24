@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Example } from "@/constants/data";
 
 interface ReachOutProps {
@@ -14,12 +14,12 @@ interface ReachOutProps {
 export const ReachOut = ({ feelings }: ReachOutProps) => {
   /* Default six feelings */
   const data: Example[] = feelings ?? [
-    { emoji:"😔", text:"Nobody is mine… it's my fault." },
-    { emoji:"🤔", text:"Am I really that wrong about everything?" },
-    { emoji:"🤗", text:"I wish someone could hug me until my soul melts." },
-    { emoji:"😢", text:"Life took something that stole my smile." },
-    { emoji:"😞", text:"I no longer want to prove I'm right." },
-    { emoji:"😤", text:"Nobody apologized; they blamed me for reacting." },
+    { id: "1", emoji:"😔", text:"Nobody is mine… it's my fault.", category: "loneliness" },
+    { id: "2", emoji:"🤔", text:"Am I really that wrong about everything?", category: "doubt" },
+    { id: "3", emoji:"🤗", text:"I wish someone could hug me until my soul melts.", category: "comfort" },
+    { id: "4", emoji:"😢", text:"Life took something that stole my smile.", category: "sadness" },
+    { id: "5", emoji:"😞", text:"I no longer want to prove I'm right.", category: "resignation" },
+    { id: "6", emoji:"😤", text:"Nobody apologized; they blamed me for reacting.", category: "frustration" },
   ];
 
   /* -----  DESKTOP (≥md)  ----- */
