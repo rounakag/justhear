@@ -64,10 +64,7 @@ interface ApiResponse<T> {
   };
 }
 
-interface ErrorResponse {
-  message: string;
-  errors?: Array<{ field: string; message: string }>;
-}
+
 
 // Generic API client
 class ApiClient {

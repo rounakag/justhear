@@ -13,7 +13,6 @@ import {
 } from '@/constants/userData';
 
 class UserService {
-  private _baseUrl = '/api/user';
   private mockData = {
     bookings: [...MOCK_USER_BOOKINGS],
     reviews: [...MOCK_USER_REVIEWS],
@@ -124,13 +123,13 @@ class UserService {
       const now = new Date();
       const sessionTime = new Date(booking.startTime);
       const timeUntilSession = sessionTime > now ? 
-        Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : false;
+        Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : undefined;
       
       sessions.push({
         booking,
         review,
         canReview: booking.status === 'completed' && !review,
-        canCancel: booking.status === 'upcoming' && timeUntilSession && timeUntilSession > 60, // Can cancel if more than 1 hour away
+        canCancel: booking.status === 'upcoming' && timeUntilSession !== undefined && timeUntilSession > 60, // Can cancel if more than 1 hour away
         timeUntilSession,
       });
     }

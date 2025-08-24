@@ -49,7 +49,7 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
     }
   };
 
-  const formatDateTime = (date: string, startTime: string) => {
+  const formatDateTime = (_date: string, startTime: string) => {
     const sessionDate = new Date(startTime);
     return sessionDate.toLocaleDateString('en-US', {
       weekday: 'long',
