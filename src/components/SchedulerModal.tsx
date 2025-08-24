@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/Button/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { TermsAndConditions } from "./TermsAndConditions";
 
 const SLOTS: Record<string, string[]> = {
   "2025-08-19": ["09:00", "10:30", "14:00", "15:30", "17:00", "19:00", "20:30"],
@@ -23,6 +24,8 @@ export function SchedulerModal({ triggerClassName, children }: SchedulerModalPro
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleOpen = () => {
     if (!user) {
@@ -54,11 +57,23 @@ export function SchedulerModal({ triggerClassName, children }: SchedulerModalPro
   const handleBooking = () => {
     if (!selectedDate || !selectedTime) return;
     
+    if (!termsAccepted) {
+      setShowTerms(true);
+      return;
+    }
+    
     alert(`Booking confirmed!\n\nDate: ${dates.find(d => d.value === selectedDate)?.label}\nTime: ${selectedTime}\nAmount: ₹49\n\nYou will receive a confirmation call 5 minutes before your session.`);
     
     setOpen(false);
     setSelectedDate(null);
     setSelectedTime(null);
+    setTermsAccepted(false);
+  };
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTerms(false);
+    handleBooking();
   };
 
   return (
@@ -135,6 +150,36 @@ export function SchedulerModal({ triggerClassName, children }: SchedulerModalPro
               </div>
             </div>
             
+            {/* Core Guidelines - Always Visible */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 space-y-3">
+              <h4 className="font-semibold text-blue-800 flex items-center">
+                💬 Session Guidelines
+              </h4>
+              <div className="text-sm text-blue-700 space-y-2">
+                <div className="flex items-start">
+                  <span className="mr-2">✅</span>
+                  <span>Share feelings, emotions, and life experiences</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="mr-2">✅</span>
+                  <span>Seek validation and emotional support</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="mr-2">❌</span>
+                  <span><strong>No sexual content, explicit language, or inappropriate topics</strong></span>
+                </div>
+                <div className="flex items-start">
+                  <span className="mr-2">❌</span>
+                  <span><strong>No harassment, threats, or abusive behavior</strong></span>
+                </div>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <p className="text-red-700 text-xs font-medium">
+                  ⚠️ <strong>Inappropriate conversations will result in immediate call termination.</strong>
+                </p>
+              </div>
+            </div>
+
             {/* Booking Summary */}
             {selectedDate && selectedTime && (
               <div className="rounded-xl bg-gray-50 p-4 mb-6">
@@ -177,6 +222,14 @@ export function SchedulerModal({ triggerClassName, children }: SchedulerModalPro
           </div>
         </DialogContent>
       )}
+
+      {/* Terms & Conditions Modal */}
+      <TermsAndConditions
+        open={showTerms}
+        onOpenChange={setShowTerms}
+        onAccept={handleAcceptTerms}
+        title="Terms & Conditions - Session Booking"
+      />
     </Dialog>
   );
 }

@@ -1,10 +1,9 @@
 import React from "react";
-
-type Feeling = { emoji:string; text:string };
+import { Example } from "@/constants/data";
 
 interface ReachOutProps {
   /* Pass a custom list if you need more/other boxes */
-  feelings?: Feeling[];
+  feelings?: Example[];
 }
 
 /**
@@ -14,7 +13,7 @@ interface ReachOutProps {
  */
 export const ReachOut = ({ feelings }: ReachOutProps) => {
   /* Default six feelings */
-  const data: Feeling[] = feelings ?? [
+  const data: Example[] = feelings ?? [
     { emoji:"😔", text:"Nobody is mine… it's my fault." },
     { emoji:"🤔", text:"Am I really that wrong about everything?" },
     { emoji:"🤗", text:"I wish someone could hug me until my soul melts." },

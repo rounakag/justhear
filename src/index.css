@@ -13,6 +13,162 @@
   100% { transform: translateY(-260px) translateX(40px); opacity: 0; }
 }
 
+/* Enhanced bubble animations */
+@keyframes float-slow {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); 
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-35px) translateX(15px) rotate(90deg) scale(1.1); 
+    opacity: 0.5;
+  }
+  50% { 
+    transform: translateY(-60px) translateX(-12px) rotate(180deg) scale(0.9); 
+    opacity: 0.4;
+  }
+  75% { 
+    transform: translateY(-30px) translateX(-25px) rotate(270deg) scale(1.15); 
+    opacity: 0.6;
+  }
+}
+
+@keyframes float-medium {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); 
+    opacity: 0.4;
+  }
+  33% { 
+    transform: translateY(-45px) translateX(22px) rotate(120deg) scale(1.12); 
+    opacity: 0.6;
+  }
+  66% { 
+    transform: translateY(-25px) translateX(-18px) rotate(240deg) scale(0.88); 
+    opacity: 0.5;
+  }
+}
+
+@keyframes float-fast {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); 
+    opacity: 0.3;
+  }
+  50% { 
+    transform: translateY(-40px) translateX(15px) rotate(180deg) scale(1.18); 
+    opacity: 0.5;
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 6s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 4s ease-in-out infinite;
+}
+
+/* Wave animations */
+@keyframes wave-slow {
+  0%, 100% { 
+    transform: translateX(-100%) translateY(0) rotate(0deg); 
+    opacity: 0.3;
+  }
+  50% { 
+    transform: translateX(100%) translateY(-30px) rotate(180deg); 
+    opacity: 0.5;
+  }
+}
+
+@keyframes wave-medium {
+  0%, 100% { 
+    transform: translateX(-100%) translateY(0) rotate(0deg); 
+    opacity: 0.25;
+  }
+  50% { 
+    transform: translateX(100%) translateY(20px) rotate(-180deg); 
+    opacity: 0.4;
+  }
+}
+
+@keyframes wave-fast {
+  0%, 100% { 
+    transform: translateX(-100%) translateY(0) rotate(0deg); 
+    opacity: 0.2;
+  }
+  50% { 
+    transform: translateX(100%) translateY(-15px) rotate(90deg); 
+    opacity: 0.35;
+  }
+}
+
+.animate-wave-slow {
+  animation: wave-slow 20s ease-in-out infinite;
+}
+
+.animate-wave-medium {
+  animation: wave-medium 15s ease-in-out infinite;
+}
+
+.animate-wave-fast {
+  animation: wave-fast 12s ease-in-out infinite;
+}
+
+/* Enhanced bubble positioning */
+.bubble-1 { top: 15%; left: 8%; animation-delay: 0s; }
+.bubble-2 { top: 65%; left: 85%; animation-delay: 1.5s; }
+.bubble-3 { top: 25%; left: 75%; animation-delay: 3s; }
+.bubble-4 { top: 85%; left: 15%; animation-delay: 4.5s; }
+.bubble-5 { top: 35%; left: 92%; animation-delay: 6s; }
+.bubble-6 { top: 75%; left: 3%; animation-delay: 7.5s; }
+.bubble-7 { top: 45%; left: 60%; animation-delay: 9s; }
+.bubble-8 { top: 55%; left: 25%; animation-delay: 10.5s; }
+
+/* Medium bubble positioning */
+.bubble-medium-1 { top: 20%; left: 45%; animation-delay: 1s; }
+.bubble-medium-2 { top: 70%; left: 70%; animation-delay: 2.5s; }
+.bubble-medium-3 { top: 40%; left: 20%; animation-delay: 4s; }
+.bubble-medium-4 { top: 80%; left: 80%; animation-delay: 5.5s; }
+.bubble-medium-5 { top: 30%; left: 90%; animation-delay: 7s; }
+
+/* Small bubble positioning */
+.bubble-small-1 { top: 12%; left: 30%; }
+.bubble-small-2 { top: 50%; left: 88%; }
+.bubble-small-3 { top: 78%; left: 12%; }
+.bubble-small-4 { top: 22%; left: 78%; }
+.bubble-small-5 { top: 88%; left: 50%; }
+.bubble-small-6 { top: 35%; left: 65%; }
+.bubble-small-7 { top: 62%; left: 35%; }
+.bubble-small-8 { top: 95%; left: 22%; }
+
+/* Particle positioning */
+.particle-1 { top: 18%; left: 55%; animation-delay: 0.5s; }
+.particle-2 { top: 72%; left: 25%; animation-delay: 2s; }
+.particle-3 { top: 38%; left: 85%; animation-delay: 3.5s; }
+.particle-4 { top: 82%; left: 45%; animation-delay: 5s; }
+.particle-5 { top: 28%; left: 15%; animation-delay: 6.5s; }
+.particle-6 { top: 68%; left: 95%; animation-delay: 8s; }
+
+/* Breathing animation for hero section */
+@keyframes breathing {
+  0%, 100% { 
+    background-size: 100% 100%;
+    opacity: 1;
+  }
+  50% { 
+    background-size: 105% 105%;
+    opacity: 0.98;
+  }
+}
+
+.animate-breathing {
+  animation: breathing 8s ease-in-out infinite;
+  background-attachment: fixed;
+}
+
 /* Mobile horizontal scrollbars hidden (for testimonials / emotion cards) */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */

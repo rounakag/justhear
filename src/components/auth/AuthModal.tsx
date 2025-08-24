@@ -17,16 +17,16 @@ export function AuthModal({ children }: AuthModalProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-md w-full p-0">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl py-6 px-7 text-center">
-          <DialogTitle className="text-xl font-bold">
+      <DialogContent className="max-w-md w-full p-0 max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl py-6 px-7 text-center flex-shrink-0">
+          <DialogTitle className="text-xl font-bold text-white">
             {mode === 'login' ? '🔐 Welcome Back' : '✨ Create Account'}
           </DialogTitle>
           <p className="text-blue-100 text-sm mt-1">
             {mode === 'login' ? 'Sign in to your anonymous account' : 'Join our anonymous community'}
           </p>
         </div>
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {mode === 'login' ? (
             <LoginForm 
               onSuccess={() => setOpen(false)}

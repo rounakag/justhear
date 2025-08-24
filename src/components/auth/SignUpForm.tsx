@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button/button";
 import { useAuth } from "@/hooks/useAuth";
+import { TermsAndConditions } from "../TermsAndConditions";
 
 const signUpSchema = z.object({
   username: z
@@ -33,6 +34,8 @@ interface SignUpFormProps {
 
 export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   const [usernameStatus, setUsernameStatus] = useState<'available' | 'taken' | 'checking' | null>(null);
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { signUp, isLoading } = useAuth();
   
   const {
@@ -70,9 +73,24 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   const onSubmit = async (data: SignUpFormData) => {
     if (usernameStatus !== 'available') return;
     
+    if (!termsAccepted) {
+      setShowTerms(true);
+      return;
+    }
+    
     const success = await signUp(data.username, data.password);
     if (success) {
       onSuccess();
+    }
+  };
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTerms(false);
+    // Re-submit the form
+    const formData = watch();
+    if (usernameStatus === 'available') {
+      onSubmit(formData);
     }
   };
 
@@ -154,9 +172,61 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         )}
       </div>
 
+      {/* Core Guidelines - Visible to All Users */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+        <h4 className="font-semibold text-blue-800 flex items-center">
+          💬 Important Guidelines
+        </h4>
+        <div className="text-sm text-blue-700 space-y-2">
+          <div className="flex items-start">
+            <span className="mr-2">✅</span>
+            <span>Share feelings, emotions, and life experiences</span>
+          </div>
+          <div className="flex items-start">
+            <span className="mr-2">✅</span>
+            <span>Seek validation and emotional support</span>
+          </div>
+          <div className="flex items-start">
+            <span className="mr-2">❌</span>
+            <span><strong>No sexual content, explicit language, or inappropriate topics</strong></span>
+          </div>
+          <div className="flex items-start">
+            <span className="mr-2">❌</span>
+            <span><strong>No harassment, threats, or abusive behavior</strong></span>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded p-3">
+          <p className="text-red-700 text-xs font-medium">
+            ⚠️ <strong>Inappropriate conversations will result in immediate call termination.</strong>
+          </p>
+        </div>
+      </div>
+
+      {/* Terms & Conditions Checkbox */}
+      <div className="flex items-start space-x-2">
+        <input
+          type="checkbox"
+          id="terms"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label htmlFor="terms" className="text-sm text-gray-600">
+          I agree to the{' '}
+          <button
+            type="button"
+            onClick={() => setShowTerms(true)}
+            className="text-blue-600 hover:text-blue-700 font-medium underline"
+          >
+            full Terms & Conditions
+          </button>
+          {' '}and understand this is for emotional support only
+        </label>
+      </div>
+
       <Button
         type="submit"
-        disabled={isLoading || usernameStatus !== 'available'}
+        disabled={isLoading || usernameStatus !== 'available' || !termsAccepted}
         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
       >
         {isLoading ? 'Creating Account...' : 'Create Anonymous Account'}
@@ -174,6 +244,14 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           </button>
         </p>
       </div>
+
+      {/* Terms & Conditions Modal */}
+      <TermsAndConditions
+        open={showTerms}
+        onOpenChange={setShowTerms}
+        onAccept={handleAcceptTerms}
+        title="Terms & Conditions - Account Creation"
+      />
     </form>
   );
 }
