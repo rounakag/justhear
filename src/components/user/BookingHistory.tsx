@@ -7,18 +7,32 @@ interface BookingHistoryProps {
 }
 
 export const BookingHistory: React.FC<BookingHistoryProps> = ({ sessions, onReviewSession }) => {
-  const formatDateTime = (_date: string, startTime: string) => {
-    const sessionDate = new Date(startTime);
-    return sessionDate.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }) + ' at ' + sessionDate.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+  const formatDateTime = (date: string, startTime: string) => {
+    try {
+      // Create a proper date string by combining date and time
+      const dateTimeString = `${date}T${startTime}`;
+      const sessionDate = new Date(dateTimeString);
+      
+      // Check if the date is valid
+      if (isNaN(sessionDate.getTime())) {
+        console.error('Invalid date/time:', { date, startTime, dateTimeString });
+        return 'Invalid Date';
+      }
+      
+      return sessionDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }) + ' at ' + sessionDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch (error) {
+      console.error('Error formatting date/time:', error, { date, startTime });
+      return 'Invalid Date';
+    }
   };
 
   const formatCurrency = (amount: number) => {

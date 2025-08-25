@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { UserSession } from '@/types/user.types';
+import { SchedulerModal } from '@/components/SchedulerModal';
 
 interface UpcomingSessionsProps {
   sessions: UserSession[];
@@ -49,18 +50,32 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
     }
   };
 
-  const formatDateTime = (_date: string, startTime: string) => {
-    const sessionDate = new Date(startTime);
-    return sessionDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }) + ' at ' + sessionDate.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+  const formatDateTime = (date: string, startTime: string) => {
+    try {
+      // Create a proper date string by combining date and time
+      const dateTimeString = `${date}T${startTime}`;
+      const sessionDate = new Date(dateTimeString);
+      
+      // Check if the date is valid
+      if (isNaN(sessionDate.getTime())) {
+        console.error('Invalid date/time:', { date, startTime, dateTimeString });
+        return 'Invalid Date';
+      }
+      
+      return sessionDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }) + ' at ' + sessionDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch (error) {
+      console.error('Error formatting date/time:', error, { date, startTime });
+      return 'Invalid Date';
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -76,12 +91,13 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
         <div className="text-gray-400 text-6xl mb-4">📅</div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming sessions</h3>
         <p className="text-gray-600 mb-6">You don't have any upcoming sessions scheduled.</p>
-        <button
-          onClick={() => window.location.href = '/'}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Book a Session
-        </button>
+        <SchedulerModal>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Book a Session
+          </button>
+        </SchedulerModal>
       </div>
     );
   }

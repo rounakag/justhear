@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const parsedUser = JSON.parse(savedUser);
         // Only restore if it's a valid user and not a test user
-        if (parsedUser.username && parsedUser.username !== 'rounak338') {
+        if (parsedUser.username && !parsedUser.username.includes('rounak338')) {
           console.log('AuthProvider: Found saved user:', parsedUser.username);
           setUser(parsedUser);
         } else {

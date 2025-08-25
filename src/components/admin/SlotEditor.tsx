@@ -59,6 +59,15 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
 
     if (!formData.date) {
       newErrors.date = 'Date is required';
+    } else {
+      // Check if date is in the past
+      const selectedDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      
+      if (selectedDate < today) {
+        newErrors.date = 'Cannot select past dates';
+      }
     }
 
     if (!formData.startTime) {
@@ -133,6 +142,7 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
               type="date"
               id="date"
               value={formData.date}
+              min={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleInputChange('date', e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.date ? 'border-red-500' : 'border-gray-300'
