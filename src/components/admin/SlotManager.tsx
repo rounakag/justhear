@@ -303,7 +303,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
 
   const formatDate = (date: string) => {
     try {
-      console.log('🔍 DEBUG - Raw date from database:', date, 'Type:', typeof date);
+      console.log('🔍 DEBUG - Raw date from database:', date, 'Type:', typeof date, 'Length:', date?.length);
       
       // BULLETPROOF DATE PARSING
       let parsedDate: Date;
