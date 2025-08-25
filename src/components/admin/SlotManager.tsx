@@ -1,10 +1,57 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, Suspense, ErrorBoundary } from 'react';
 import { SlotEditor } from './SlotEditor';
 import { SlotCalendar } from './SlotCalendar';
 import { SlotFilters } from './SlotFilters';
 import { AdminStats } from './AdminStats';
 import { useAdminSlots } from '@/hooks/useAdminSlots';
 import type { TimeSlot } from '@/types/admin.types';
+
+// Custom Error Boundary Component
+class SlotManagerErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('SlotManager Error Boundary caught an error:', error, errorInfo);
+    // In production, send to error reporting service (e.g., Sentry)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-red-800 mb-2">
+                Something went wrong
+              </h2>
+              <p className="text-sm text-red-600 mb-4">
+                The slot manager encountered an error. Please refresh the page.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 export const SlotManager: React.FC = () => {
   const {
@@ -24,9 +71,23 @@ export const SlotManager: React.FC = () => {
   const [showSlotEditor, setShowSlotEditor] = useState(false);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
-  const handleViewModeChange = (mode: 'calendar' | 'list') => {
+  const handleViewModeChange = useCallback((mode: 'calendar' | 'list') => {
     setViewMode(mode);
-  };
+  }, []);
+
+  // Memoized view mode buttons to prevent unnecessary re-renders
+  const viewModeButtons = useMemo(() => [
+    {
+      mode: 'calendar' as const,
+      label: '📅 Calendar',
+      icon: '📅'
+    },
+    {
+      mode: 'list' as const,
+      label: '📋 List',
+      icon: '📋'
+    }
+  ], []);
 
   // Optimized filtering with early returns and better performance
   const filteredSlots = useMemo(() => {
@@ -66,6 +127,8 @@ export const SlotManager: React.FC = () => {
     setShowSlotEditor(true);
   }, []);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDeleteAllSlots = async () => {
     // Enhanced confirmation with better UX
     const confirmed = await new Promise<boolean>((resolve) => {
@@ -92,6 +155,8 @@ export const SlotManager: React.FC = () => {
 
     if (!doubleConfirmed) return;
 
+    setIsDeleting(true);
+    
     try {
       console.log('🔍 DEBUG - Deleting all slots');
       
@@ -125,11 +190,13 @@ export const SlotManager: React.FC = () => {
       // Better success feedback
       alert(`✅ Successfully deleted ${result.count} slots.`);
       
-      // Refresh the slots list
-      window.location.reload();
+      // Optimistic update - refresh data instead of full page reload
+      await refreshData();
     } catch (error) {
       console.error('❌ ERROR deleting all slots:', error);
       alert(`❌ Failed to delete all slots: ${error.message}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -183,8 +250,9 @@ export const SlotManager: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <SlotManagerErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -201,21 +269,40 @@ export const SlotManager: React.FC = () => {
               </button>
               <button
                 onClick={handleDeleteAllSlots}
-                className="px-4 py-2 text-sm font-medium bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors sm:w-auto"
+                disabled={isDeleting || loading}
+                className="px-4 py-2 text-sm font-medium bg-red-600 text-white hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed rounded-md transition-colors sm:w-auto flex items-center"
+                aria-label="Delete all slots"
+                title={isDeleting ? "Deleting slots..." : "Delete all slots"}
               >
-                🗑️ Delete All Slots
+                {isDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    🗑️ Delete All Slots
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Loading State */}
+        {/* Loading State with Skeleton */}
         {loading && (
           <div className="mb-6">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-gray-600">Loading slot data...</span>
+              <div className="animate-pulse">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-3 text-gray-600">Loading slot data...</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-gray-200 h-20 rounded-lg"></div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -237,26 +324,20 @@ export const SlotManager: React.FC = () => {
         {/* View Toggle */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
-            <button
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'calendar'
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-              }`}
-              onClick={() => handleViewModeChange('calendar')}
-            >
-              📅 Calendar
-            </button>
-            <button
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-              }`}
-              onClick={() => handleViewModeChange('list')}
-            >
-              📋 List
-            </button>
+            {viewModeButtons.map(({ mode, label, icon }) => (
+              <button
+                key={mode}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  viewMode === mode
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                }`}
+                onClick={() => handleViewModeChange(mode)}
+                aria-label={`Switch to ${mode} view`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -272,32 +353,41 @@ export const SlotManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content with Suspense */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {loading ? (
+          <Suspense fallback={
             <div className="flex items-center justify-center p-12">
               <div className="flex items-center space-x-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                 <span className="text-gray-600">Loading slots...</span>
               </div>
             </div>
-          ) : (
-            <>
-              {viewMode === 'calendar' ? (
-                <SlotCalendar
-                  slots={filteredSlots}
-                  onSlotClick={handleSlotClick}
-                  listeners={listeners}
-                />
-              ) : (
-                <SlotList
-                  slots={filteredSlots}
-                  onSlotClick={handleSlotClick}
-                  listeners={listeners}
-                />
-              )}
-            </>
-          )}
+          }>
+            {loading ? (
+              <div className="flex items-center justify-center p-12">
+                <div className="flex items-center space-x-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <span className="text-gray-600">Loading slots...</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                {viewMode === 'calendar' ? (
+                  <SlotCalendar
+                    slots={filteredSlots}
+                    onSlotClick={handleSlotClick}
+                    listeners={listeners}
+                  />
+                ) : (
+                  <SlotList
+                    slots={filteredSlots}
+                    onSlotClick={handleSlotClick}
+                    listeners={listeners}
+                  />
+                )}
+              </>
+            )}
+          </Suspense>
         </div>
 
         {/* Modals */}
@@ -313,6 +403,7 @@ export const SlotManager: React.FC = () => {
         {/* Bulk slot creation is disabled */}
       </div>
     </div>
+    </SlotManagerErrorBoundary>
   );
 };
 

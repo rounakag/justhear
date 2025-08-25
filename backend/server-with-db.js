@@ -9,12 +9,37 @@ const databaseService = require('./services/databaseService');
 const meetingService = require('./services/meetingService');
 const { supabase } = require('./config/supabase');
 
-// Helper function to calculate duration in minutes
+// Helper function to calculate duration in minutes with validation
 function calculateDuration(startTime, endTime) {
-  const start = new Date(`2000-01-01T${startTime}`);
-  const end = new Date(`2000-01-01T${endTime}`);
-  const diffMs = end - start;
-  return Math.round(diffMs / (1000 * 60)); // Convert to minutes
+  // Input validation
+  if (!startTime || !endTime) {
+    throw new Error('Start time and end time are required');
+  }
+  
+  // Validate time format (HH:MM or HH:MM:SS)
+  const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+  if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+    throw new Error('Invalid time format. Expected HH:MM or HH:MM:SS');
+  }
+  
+  try {
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new Error('Invalid time values');
+    }
+    
+    const diffMs = end - start;
+    
+    if (diffMs <= 0) {
+      throw new Error('End time must be after start time');
+    }
+    
+    return Math.round(diffMs / (1000 * 60)); // Convert to minutes
+  } catch (error) {
+    throw new Error(`Duration calculation failed: ${error.message}`);
+  }
 }
 
 // Helper function to generate slots from bulk data
@@ -48,9 +73,71 @@ function generateSlotsFromBulkData(bulkData) {
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Security middleware
+app.use((req, res, next) => {
+  // Add security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Rate limiting (basic implementation)
+const requestCounts = new Map();
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+const MAX_REQUESTS = 100; // 100 requests per 15 minutes
+
+app.use((req, res, next) => {
+  const clientIP = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!requestCounts.has(clientIP)) {
+    requestCounts.set(clientIP, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+  } else {
+    const clientData = requestCounts.get(clientIP);
+    if (now > clientData.resetTime) {
+      clientData.count = 1;
+      clientData.resetTime = now + RATE_LIMIT_WINDOW;
+    } else {
+      clientData.count++;
+    }
+    
+    if (clientData.count > MAX_REQUESTS) {
+      return res.status(429).json({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests, please try again later',
+        retryAfter: Math.ceil((clientData.resetTime - now) / 1000)
+      });
+    }
+  }
+  
+  next();
+});
+
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'https://justhear.onrender.com'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`🔍 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`✅ ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+  });
+  
+  next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
