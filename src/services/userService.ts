@@ -36,7 +36,14 @@ class UserService {
       throw new Error(response.error);
     }
     
-    return response.data || [];
+    // Handle both array and object responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else if (response.data && Array.isArray(response.data.bookings)) {
+      return response.data.bookings;
+    } else {
+      return [];
+    }
   }
 
   async getBookingById(bookingId: string): Promise<UserBooking> {
@@ -85,7 +92,14 @@ class UserService {
       throw new Error(response.error);
     }
     
-    return response.data || [];
+    // Handle both array and object responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else if (response.data && Array.isArray(response.data.reviews)) {
+      return response.data.reviews;
+    } else {
+      return [];
+    }
   }
 
   async createReview(reviewData: Omit<UserReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserReview> {
@@ -167,13 +181,16 @@ class UserService {
       throw new Error(response.error);
     }
     
-    return response.data || {
-      totalBookings: 0,
-      completedSessions: 0,
-      upcomingSessions: 0,
-      totalSpent: 0,
-      totalReviews: 0,
-      averageRating: 0
+    // Handle both direct object and nested object responses
+    const stats = response.data || {};
+    
+    return {
+      totalBookings: stats.totalBookings || 0,
+      completedSessions: stats.completedSessions || 0,
+      upcomingSessions: stats.upcomingSessions || 0,
+      totalSpent: stats.totalSpent || 0,
+      totalReviews: stats.totalReviews || 0,
+      averageRating: stats.averageRating || 0
     };
   }
 
