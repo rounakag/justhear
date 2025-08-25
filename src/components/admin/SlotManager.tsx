@@ -246,13 +246,31 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
 
   const formatTime = (time: string) => {
     try {
+      // Handle time strings like "14:00:00" or "14:00"
+      const timeParts = time.split(':');
+      if (timeParts.length >= 2) {
+        const hours = parseInt(timeParts[0], 10);
+        const minutes = parseInt(timeParts[1], 10);
+        
+        // Create a date object with the time
+        const date = new Date();
+        date.setHours(hours, minutes, 0, 0);
+        
+        return date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
+      }
+      
+      // Fallback to original method
       return new Date(time).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
       });
     } catch (error) {
-      console.error('Error formatting time:', error);
+      console.error('Error formatting time:', error, { time });
       return 'Invalid Time';
     }
   };
