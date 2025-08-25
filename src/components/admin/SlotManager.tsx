@@ -58,31 +58,6 @@ export const SlotManager: React.FC = () => {
     setShowSlotEditor(true);
   };
 
-  const handleDeleteSlot = async (slotId: string) => {
-    if (!confirm('Are you sure you want to delete this slot? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${process.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/slots/${slotId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete slot');
-      }
-
-      // Refresh the slots list
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting slot:', error);
-      alert('Failed to delete slot. Please try again.');
-    }
-  };
-
   const handleDeleteAllSlots = async () => {
     if (!confirm('Are you sure you want to delete ALL slots? This action cannot be undone and will remove all existing slots.')) {
       return;
@@ -301,6 +276,31 @@ interface SlotListProps {
 }
 
 const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) => {
+  
+  const handleDeleteSlot = async (slotId: string) => {
+    if (!confirm('Are you sure you want to delete this slot? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/slots/${slotId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete slot');
+      }
+
+      // Refresh the slots list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting slot:', error);
+      alert('Failed to delete slot. Please try again.');
+    }
+  };
   
   const getListenerName = (listenerId?: string) => {
     if (!listenerId) return 'Unassigned';
