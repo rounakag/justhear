@@ -37,7 +37,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         listenerId: slot.listenerId || '',
         price: slot.price,
         isAvailable: slot.isAvailable,
-        timezone: slot.timezone,
       });
     } else {
       // Set default values for new slot
@@ -49,7 +48,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         listenerId: '',
         price: 50,
         isAvailable: true,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     }
   }, [slot]);

@@ -95,7 +95,6 @@ export interface SlotEditorData {
   listenerId?: string;
   price: number;
   isAvailable: boolean;
-  timezone: string;
 }
 
 export interface CalendarViewState {

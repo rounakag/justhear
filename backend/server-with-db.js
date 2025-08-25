@@ -86,8 +86,7 @@ app.post('/api/slots', async (req, res) => {
       end_time: slotData.endTime,
       price: slotData.price || 50,
       status: 'available',
-      listener_id: slotData.listenerId || null,
-      timezone: slotData.timezone || 'UTC'
+      listener_id: slotData.listenerId || null
     };
     
     console.log('Transformed slot data:', transformedData);
