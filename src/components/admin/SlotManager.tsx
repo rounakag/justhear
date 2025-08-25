@@ -248,8 +248,17 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
     try {
       console.log('🔍 DEBUG - Raw time from database:', time, 'Type:', typeof time);
       
+      // BULLETPROOF TIME PARSING
+      if (!time || time === 'null' || time === 'undefined') {
+        throw new Error('Time is null, undefined, or empty');
+      }
+      
+      // Clean the time string
+      const cleanTime = time.toString().trim();
+      console.log('🔍 DEBUG - Cleaned time:', cleanTime);
+      
       // Handle time strings like "14:00:00" or "14:00"
-      const timeParts = time.split(':');
+      const timeParts = cleanTime.split(':');
       console.log('🔍 DEBUG - Time parts:', timeParts);
       
       if (timeParts.length >= 2) {
@@ -257,6 +266,11 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
         const minutes = parseInt(timeParts[1], 10);
         
         console.log('🔍 DEBUG - Parsed hours:', hours, 'minutes:', minutes);
+        
+        // Validate hours and minutes
+        if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+          throw new Error(`Invalid time values: hours=${hours}, minutes=${minutes}`);
+        }
         
         // Create a date object with the time
         const date = new Date();
@@ -273,7 +287,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
       }
       
       // Fallback to original method
-      const fallbackResult = new Date(time).toLocaleTimeString('en-US', {
+      const fallbackResult = new Date(cleanTime).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
@@ -282,7 +296,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
       console.log('🔍 DEBUG - Fallback time result:', fallbackResult);
       return fallbackResult;
     } catch (error) {
-      console.error('❌ ERROR formatting time:', error, { time });
+      console.error('❌ ERROR formatting time:', error, 'Time value:', time);
       return 'Invalid Time';
     }
   };
@@ -291,20 +305,30 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
     try {
       console.log('🔍 DEBUG - Raw date from database:', date, 'Type:', typeof date);
       
-      // Handle different date formats
+      // BULLETPROOF DATE PARSING
       let parsedDate: Date;
       
+      if (!date || date === 'null' || date === 'undefined') {
+        throw new Error('Date is null, undefined, or empty');
+      }
+      
       if (typeof date === 'string') {
-        // If it's already a valid date string, use it directly
-        if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          // YYYY-MM-DD format
-          parsedDate = new Date(date + 'T00:00:00');
-        } else if (date.includes('T')) {
+        // Remove any extra whitespace
+        const cleanDate = date.trim();
+        
+        if (cleanDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // YYYY-MM-DD format - most common from database
+          parsedDate = new Date(cleanDate + 'T00:00:00.000Z');
+        } else if (cleanDate.includes('T')) {
           // ISO format with time
-          parsedDate = new Date(date);
+          parsedDate = new Date(cleanDate);
+        } else if (cleanDate.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+          // MM/DD/YYYY format
+          const [month, day, year] = cleanDate.split('/');
+          parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         } else {
           // Try parsing as is
-          parsedDate = new Date(date);
+          parsedDate = new Date(cleanDate);
         }
       } else {
         parsedDate = new Date(date);
@@ -312,9 +336,10 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
       
       console.log('🔍 DEBUG - Parsed date object:', parsedDate);
       console.log('🔍 DEBUG - Is valid date:', !isNaN(parsedDate.getTime()));
+      console.log('🔍 DEBUG - Date timestamp:', parsedDate.getTime());
       
       if (isNaN(parsedDate.getTime())) {
-        throw new Error('Invalid date object created');
+        throw new Error(`Invalid date object created from: ${date}`);
       }
       
       const formatted = parsedDate.toLocaleDateString('en-US', {
