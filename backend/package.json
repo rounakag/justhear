@@ -2,10 +2,10 @@
   "name": "justhear-backend",
   "version": "1.0.0",
   "description": "Backend API for JustHear - Anonymous Listening Platform",
-  "main": "server-simple.js",
+  "main": "server-with-db.js",
   "scripts": {
-    "start": "node server-simple.js",
-    "dev": "nodemon server-simple.js",
+    "start": "node server-with-db.js",
+    "dev": "nodemon server-with-db.js",
     "test": "jest",
     "build": "echo 'Build completed - no build step required'"
   },
