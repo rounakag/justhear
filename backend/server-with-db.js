@@ -70,14 +70,39 @@ app.get('/api/slots/listener/:listenerId', async (req, res) => {
 app.post('/api/slots', async (req, res) => {
   try {
     const slotData = req.body;
-    const slot = await databaseService.createTimeSlot(slotData);
+    console.log('Received slot data:', slotData);
+    
+    // Validate required fields
+    if (!slotData.date || !slotData.startTime || !slotData.endTime) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: date, startTime, endTime' 
+      });
+    }
+    
+    // Transform data to match database schema
+    const transformedData = {
+      date: slotData.date,
+      start_time: slotData.startTime,
+      end_time: slotData.endTime,
+      price: slotData.price || 50,
+      status: 'available',
+      listener_id: slotData.listenerId || null,
+      timezone: slotData.timezone || 'UTC'
+    };
+    
+    console.log('Transformed slot data:', transformedData);
+    
+    const slot = await databaseService.createTimeSlot(transformedData);
     res.status(201).json({
       message: 'Slot created successfully',
       slot
     });
   } catch (error) {
     console.error('Error creating slot:', error);
-    res.status(500).json({ error: 'Failed to create slot' });
+    res.status(500).json({ 
+      error: `Failed to create slot: ${error.message}`,
+      details: error.details || error.hint || error.code
+    });
   }
 });
 

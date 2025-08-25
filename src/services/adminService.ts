@@ -63,6 +63,7 @@ class AdminService {
 
   async createTimeSlot(slotData: SlotEditorData): Promise<TimeSlot> {
     try {
+      console.log('Sending slot data to backend:', slotData);
       const response = await fetch(`${this.baseUrl}/slots`, {
         method: 'POST',
         headers: {
@@ -71,15 +72,20 @@ class AdminService {
         body: JSON.stringify(slotData),
       });
       
+      console.log('Backend response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to create time slot');
+        const errorData = await response.text();
+        console.error('Backend error response:', errorData);
+        throw new Error(`Failed to create time slot: ${response.status} - ${errorData}`);
       }
       
       const data = await response.json();
+      console.log('Backend success response:', data);
       return data.slot || data;
     } catch (error) {
       console.error('Error creating time slot:', error);
-      throw new Error('Failed to create time slot');
+      throw error; // Re-throw the actual error instead of generic message
     }
   }
 

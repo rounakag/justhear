@@ -57,13 +57,20 @@ class DatabaseService {
 
   // Time Slots Management
   async createTimeSlot(slotData) {
+    console.log('Database service creating slot with data:', slotData);
+    
     const { data, error } = await supabase
       .from('time_slots')
       .insert([slotData])
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error creating slot:', error);
+      throw new Error(`Database error: ${error.message} (${error.code})`);
+    }
+    
+    console.log('Slot created successfully:', data);
     return data;
   }
 
