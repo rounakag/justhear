@@ -71,16 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (username: string, email: string, password: string, role: string = 'user'): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await apiService.signup(username, email, password, role);
+      console.log('Attempting signup with:', { username, email, role });
       
-      if (response.data && response.status === 201) {
+      const response = await apiService.signup(username, email, password, role);
+      console.log('Signup response:', response);
+      
+      if (response.data && (response.status === 201 || response.status === 200)) {
         const { user, token } = response.data;
         setUser(user as User);
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(user));
+        console.log('Signup successful:', user);
         return true;
       } else {
-        console.error('Signup failed:', response.error);
+        console.error('Signup failed:', response.error || 'Unknown error');
         return false;
       }
     } catch (error) {

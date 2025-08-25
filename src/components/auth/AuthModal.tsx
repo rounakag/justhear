@@ -17,12 +17,15 @@ export function AuthModal({ children }: AuthModalProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-md w-full p-0 max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogContent 
+          className="max-w-md w-full p-0 max-h-[90vh] overflow-hidden flex flex-col"
+          aria-describedby="auth-modal-description"
+        >
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl py-6 px-7 text-center flex-shrink-0">
           <DialogTitle className="text-xl font-bold text-white">
             {mode === 'login' ? '🔐 Welcome Back' : '✨ Create Account'}
           </DialogTitle>
-          <p className="text-blue-100 text-sm mt-1">
+          <p className="text-blue-100 text-sm mt-1" id="auth-modal-description">
             {mode === 'login' ? 'Sign in to your anonymous account' : 'Join our anonymous community'}
           </p>
         </div>
