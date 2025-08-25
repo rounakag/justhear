@@ -18,7 +18,7 @@ class DatabaseService {
       .from('users')
       .select('*')
       .eq('username', username)
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
     return data;

@@ -306,6 +306,7 @@ app.post('/api/auth/check-username', async (req, res) => {
     const existingUser = await databaseService.getUserByUsername(username);
     const available = !existingUser;
     
+    console.log(`Username check for "${username}": ${available ? 'available' : 'taken'}`);
     res.json({ available });
   } catch (error) {
     console.error('Error checking username:', error);
