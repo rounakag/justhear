@@ -111,20 +111,7 @@ class DatabaseService {
     return data;
   }
 
-  async getUserBookings(userId) {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select(`
-        *,
-        slot:time_slots(*),
-        listener:time_slots!bookings_slot_id_fkey(listener:users!time_slots_listener_id_fkey(username))
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
-  }
+
 
   async updateBooking(bookingId, updateData) {
     const { data, error } = await supabase
@@ -143,9 +130,9 @@ class DatabaseService {
       .from('bookings')
       .select(`
         *,
-        slot:time_slots(
+        slot:time_slots!bookings_slot_id_fkey(
           *,
-          listener:users(username)
+          listener:users!time_slots_listener_id_fkey(username)
         )
       `)
       .eq('user_id', userId)
