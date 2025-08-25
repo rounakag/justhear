@@ -270,6 +270,30 @@ app.get('/api/users/:userId/stats', async (req, res) => {
   }
 });
 
+// Get user bookings
+app.get('/api/bookings/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const bookings = await databaseService.getUserBookings(userId);
+    res.json(bookings);
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ error: 'Failed to fetch user bookings' });
+  }
+});
+
+// Get user reviews
+app.get('/api/reviews/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const reviews = await databaseService.getUserReviews(userId);
+    res.json(reviews);
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch user reviews' });
+  }
+});
+
 // Auth endpoints
 app.post('/api/auth/login', async (req, res) => {
   try {

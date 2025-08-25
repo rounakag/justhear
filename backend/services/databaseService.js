@@ -130,6 +130,21 @@ class DatabaseService {
     return data;
   }
 
+  async getUserBookings(userId) {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        slot:time_slots(*),
+        listener:users!bookings_listener_id_fkey(username)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  }
+
   // Reviews Management
   async createReview(reviewData) {
     const { data, error } = await supabase
@@ -195,7 +210,7 @@ class DatabaseService {
   async getUserStats(userId) {
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select('status')
+      .select('status, price')
       .eq('user_id', userId);
     
     if (bookingsError) throw bookingsError;
@@ -207,13 +222,22 @@ class DatabaseService {
     
     if (reviewsError) throw reviewsError;
 
+    const totalBookings = bookings.length;
+    const completedSessions = bookings.filter(b => b.status === 'completed').length;
+    const upcomingSessions = bookings.filter(b => b.status === 'upcoming').length;
+    const totalSpent = bookings.reduce((sum, b) => sum + (b.price || 0), 0);
+    const totalReviews = reviews.length;
+    const averageRating = reviews.length > 0 
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+      : 0;
+
     return {
-      totalBookings: bookings.length,
-      completedSessions: bookings.filter(b => b.status === 'completed').length,
-      totalReviews: reviews.length,
-      averageRating: reviews.length > 0 
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
-        : 0
+      totalBookings,
+      completedSessions,
+      upcomingSessions,
+      totalSpent,
+      totalReviews,
+      averageRating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
     };
   }
 }
