@@ -277,13 +277,16 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
 
   const formatDate = (date: string) => {
     try {
-      return new Date(date).toLocaleDateString('en-US', {
+      console.log('Formatting date:', date, 'Type:', typeof date);
+      const formatted = new Date(date).toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
       });
+      console.log('Formatted date result:', formatted);
+      return formatted;
     } catch (error) {
-      console.error('Error formatting date:', error);
+      console.error('Error formatting date:', error, 'Date value:', date);
       return 'Invalid Date';
     }
   };

@@ -19,16 +19,22 @@ function calculateDuration(startTime, endTime) {
 
 // Helper function to generate slots from bulk data
 function generateSlotsFromBulkData(bulkData) {
+  console.log('Generating slots from bulk data:', bulkData);
   const slots = [];
   const startDate = new Date(bulkData.startDate);
   const endDate = new Date(bulkData.endDate);
+  
+  console.log('Start date:', startDate, 'End date:', endDate);
   
   for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
     const dayOfWeek = date.getDay();
     
     if (bulkData.daysOfWeek.includes(dayOfWeek)) {
+      const slotDate = date.toISOString().split('T')[0];
+      console.log('Creating slot for date:', slotDate, 'Day of week:', dayOfWeek);
+      
       const slot = {
-        date: date.toISOString().split('T')[0],
+        date: slotDate,
         start_time: bulkData.startTime,
         end_time: bulkData.endTime,
         price: bulkData.price || 50,
@@ -40,6 +46,7 @@ function generateSlotsFromBulkData(bulkData) {
     }
   }
   
+  console.log('Generated slots:', slots.length, 'First slot:', slots[0]);
   return slots;
 }
 
@@ -96,6 +103,20 @@ app.get('/api/slots/admin-created', async (req, res) => {
   } catch (error) {
     console.error('Error fetching admin-created slots:', error);
     res.status(500).json({ error: 'Failed to fetch admin-created slots' });
+  }
+});
+
+// Get recurring schedules
+app.get('/api/schedules', async (req, res) => {
+  try {
+    const schedules = await databaseService.getRecurringSchedules();
+    res.json({
+      schedules,
+      total: schedules.length
+    });
+  } catch (error) {
+    console.error('Error fetching recurring schedules:', error);
+    res.status(500).json({ error: 'Failed to fetch recurring schedules' });
   }
 });
 

@@ -107,6 +107,16 @@ class DatabaseService {
     return data;
   }
 
+  async getRecurringSchedules() {
+    const { data, error } = await supabase
+      .from('recurring_schedules')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
   async getSlotsByListener(listenerId) {
     const { data, error } = await supabase
       .from('time_slots')
