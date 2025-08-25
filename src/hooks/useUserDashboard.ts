@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { userService } from '@/services/userService';
 import type { 
   UserSession, 
-  UserProfile, 
   UserDashboardStats, 
   UserReview 
 } from '@/types/user.types';
