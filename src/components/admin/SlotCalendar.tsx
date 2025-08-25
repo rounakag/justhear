@@ -201,10 +201,10 @@ export const SlotCalendar: React.FC<SlotCalendarProps> = ({
                       key={slot.id}
                       onClick={() => onSlotClick(slot)}
                       className={`w-full text-left px-2 py-1 text-xs rounded border ${getSlotStatusColor(slot)} hover:opacity-80 transition-opacity`}
-                      title={`${formatTime(slot.startTime)} - ${formatTime(slot.endTime)} - ${getListenerName(slot.listenerId)}`}
+                      title={`${formatTime(slot.start_time || slot.startTime || '')} - ${formatTime(slot.end_time || slot.endTime || '')} - ${getListenerName(slot.listenerId)}`}
                     >
                       <div className="font-medium truncate">
-                        {formatTime(slot.startTime)}
+                        {formatTime(slot.start_time || slot.startTime || '')}
                       </div>
                       <div className="truncate text-xs">
                         {getListenerName(slot.listenerId)}

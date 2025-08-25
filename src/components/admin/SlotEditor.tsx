@@ -46,11 +46,11 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
     if (slot) {
       setFormData({
         date: slot.date,
-        startTime: formatTimeForInput(slot.startTime),
-        endTime: formatTimeForInput(slot.endTime),
+        startTime: formatTimeForInput(slot.start_time || slot.startTime || ''),
+        endTime: formatTimeForInput(slot.end_time || slot.endTime || ''),
         listenerId: slot.listenerId || '',
         price: slot.price,
-        isAvailable: slot.isAvailable,
+        isAvailable: slot.isAvailable || true,
       });
     } else {
       // Set default values for new slot
