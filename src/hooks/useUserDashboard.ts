@@ -10,7 +10,6 @@ import type {
 interface UseUserDashboardReturn {
   // State
   sessions: UserSession[];
-  profile: UserProfile | null;
   stats: UserDashboardStats | null;
   loading: boolean;
   error: string | null;
@@ -21,7 +20,6 @@ interface UseUserDashboardReturn {
   createReview: (reviewData: Omit<UserReview, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateReview: (reviewId: string, reviewData: Partial<UserReview>) => Promise<void>;
   deleteReview: (reviewId: string) => Promise<void>;
-  updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
   
   // Computed
   upcomingSessions: UserSession[];
@@ -31,7 +29,6 @@ interface UseUserDashboardReturn {
 
 export function useUserDashboard(): UseUserDashboardReturn {
   const [sessions, setSessions] = useState<UserSession[]>([]);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<UserDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,14 +38,12 @@ export function useUserDashboard(): UseUserDashboardReturn {
     setError(null);
     
     try {
-      const [sessionsData, profileData, statsData] = await Promise.all([
+      const [sessionsData, statsData] = await Promise.all([
         userService.getUserSessions(),
-        userService.getUserProfile(),
         userService.getDashboardStats(),
       ]);
       
       setSessions(sessionsData);
-      setProfile(profileData);
       setStats(statsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch user data');
@@ -101,15 +96,7 @@ export function useUserDashboard(): UseUserDashboardReturn {
     }
   }, [refreshData]);
 
-  const updateProfile = useCallback(async (profileData: Partial<UserProfile>) => {
-    try {
-      const updatedProfile = await userService.updateUserProfile(profileData);
-      setProfile(updatedProfile);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update profile');
-      throw err;
-    }
-  }, []);
+
 
   // Initial data fetch
   useEffect(() => {
@@ -124,7 +111,6 @@ export function useUserDashboard(): UseUserDashboardReturn {
   return {
     // State
     sessions,
-    profile,
     stats,
     loading,
     error,
@@ -135,7 +121,6 @@ export function useUserDashboard(): UseUserDashboardReturn {
     createReview,
     updateReview,
     deleteReview,
-    updateProfile,
     
     // Computed
     upcomingSessions,

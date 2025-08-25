@@ -9,7 +9,6 @@ import type { UserSession } from '@/types/user.types';
 
 export const UserDashboardPage: React.FC = () => {
   const {
-    profile,
     stats,
     loading,
     error,
