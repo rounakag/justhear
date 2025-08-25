@@ -116,6 +116,15 @@ export const UserDashboardPage: React.FC = () => {
                   // Simple redirect to home page
                   window.location.href = '/';
                 }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                🎧 Book New Session
+              </button>
+              <button
+                onClick={() => {
+                  // Simple redirect to home page
+                  window.location.href = '/';
+                }}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
               >
                 ← Back to Main Site
