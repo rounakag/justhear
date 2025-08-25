@@ -32,9 +32,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('authToken');
     const savedUser = localStorage.getItem('user');
     
+    console.log('AuthProvider: Checking localStorage:', { hasToken: !!token, hasUser: !!savedUser });
+    
     if (token && savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        console.log('AuthProvider: Found saved user:', parsedUser.username);
+        setUser(parsedUser);
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('authToken');
