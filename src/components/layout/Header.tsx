@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
                   ⚙️ Admin
                 </a>
               )}
-              <span className="text-sm text-gray-600">👤 Anonymous User</span>
+              <span className="text-sm text-gray-600">👤 {user.username}</span>
               <Button variant="outline" size="sm" onClick={logout}>
                 Logout
               </Button>
@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
                           ⚙️ Admin Panel
                         </a>
                       )}
-                      <p className="text-sm text-gray-600 mb-2">👤 Anonymous User</p>
+                      <p className="text-sm text-gray-600 mb-2">👤 {user.username}</p>
                       <button 
                         onClick={() => {
                           logout();
