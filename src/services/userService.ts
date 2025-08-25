@@ -185,12 +185,12 @@ class UserService {
     const stats = response.data && typeof response.data === 'object' ? response.data : {};
     
     return {
-      totalBookings: 'totalBookings' in stats ? stats.totalBookings : 0,
-      completedSessions: 'completedSessions' in stats ? stats.completedSessions : 0,
-      upcomingSessions: 'upcomingSessions' in stats ? stats.upcomingSessions : 0,
-      totalSpent: 'totalSpent' in stats ? stats.totalSpent : 0,
-      totalReviews: 'totalReviews' in stats ? stats.totalReviews : 0,
-      averageRating: 'averageRating' in stats ? stats.averageRating : 0
+      totalBookings: 'totalBookings' in stats ? (stats.totalBookings as number) : 0,
+      completedSessions: 'completedSessions' in stats ? (stats.completedSessions as number) : 0,
+      upcomingSessions: 'upcomingSessions' in stats ? (stats.upcomingSessions as number) : 0,
+      totalSpent: 'totalSpent' in stats ? (stats.totalSpent as number) : 0,
+      totalReviews: 'totalReviews' in stats ? (stats.totalReviews as number) : 0,
+      averageRating: 'averageRating' in stats ? (stats.averageRating as number) : 0
     };
   }
 
