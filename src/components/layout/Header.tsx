@@ -46,6 +46,15 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
               >
                 📊 Dashboard
               </a>
+              {user.role === 'admin' && (
+                <a
+                  href="/admin"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                  title="Admin Panel"
+                >
+                  ⚙️ Admin
+                </a>
+              )}
               <span className="text-sm text-gray-600">👤 {user.username}</span>
               <Button variant="outline" size="sm" onClick={logout}>
                 Logout
@@ -92,6 +101,15 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
                       >
                         📊 Dashboard
                       </a>
+                      {user.role === 'admin' && (
+                        <a
+                          href="/admin"
+                          className="block text-lg py-2 text-gray-700 hover:text-blue-600 font-medium mb-2"
+                          onClick={() => setNavOpen(false)}
+                        >
+                          ⚙️ Admin Panel
+                        </a>
+                      )}
                       <p className="text-sm text-gray-600 mb-2">👤 {user.username}</p>
                       <button 
                         onClick={() => {

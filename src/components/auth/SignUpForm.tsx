@@ -73,6 +73,8 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     }
   }, [username]);
 
+  const [signupError, setSignupError] = useState<string | null>(null);
+
   const onSubmit = async (data: SignUpFormData) => {
     if (usernameStatus !== 'available') return;
     
@@ -81,9 +83,12 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
       return;
     }
     
+    setSignupError(null);
     const success = await signUp(data.username, `${data.username}@anonymous.com`, data.password);
     if (success) {
       onSuccess();
+    } else {
+      setSignupError('Signup failed. Please try again.');
     }
   };
 
@@ -206,6 +211,13 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           </p>
         </div>
       </div>
+
+      {/* Error Message */}
+      {signupError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-red-700 text-sm">{signupError}</p>
+        </div>
+      )}
 
       {/* Terms & Conditions Checkbox */}
       <div className="flex items-start space-x-2">
