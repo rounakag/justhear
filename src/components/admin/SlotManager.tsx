@@ -58,6 +58,63 @@ export const SlotManager: React.FC = () => {
     setShowSlotEditor(true);
   };
 
+  const handleDeleteSlot = async (slotId: string) => {
+    if (!confirm('Are you sure you want to delete this slot? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/slots/${slotId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete slot');
+      }
+
+      // Refresh the slots list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting slot:', error);
+      alert('Failed to delete slot. Please try again.');
+    }
+  };
+
+  const handleDeleteAllSlots = async () => {
+    if (!confirm('Are you sure you want to delete ALL slots? This action cannot be undone and will remove all existing slots.')) {
+      return;
+    }
+
+    if (!confirm('This will delete ALL slots in the system. Are you absolutely sure?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/slots`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete all slots');
+      }
+
+      const result = await response.json();
+      alert(`Successfully deleted ${result.count} slots.`);
+      
+      // Refresh the slots list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting all slots:', error);
+      alert('Failed to delete all slots. Please try again.');
+    }
+  };
+
   const handleCreateSlot = () => {
     setSelectedSlot(null);
     setShowSlotEditor(true);
@@ -114,16 +171,23 @@ export const SlotManager: React.FC = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => setShowBulkCreator(true)}
-                className="px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 rounded-md transition-colors sm:w-auto"
+                onClick={() => alert('Bulk slot creation is temporarily disabled')}
+                className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-500 border border-gray-300 rounded-md cursor-not-allowed sm:w-auto"
+                disabled
               >
-                📅 Bulk Create
+                📅 Bulk Create (Disabled)
               </button>
               <button
                 onClick={handleCreateSlot}
                 className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors sm:w-auto"
               >
                 ➕ Add Slot
+              </button>
+              <button
+                onClick={handleDeleteAllSlots}
+                className="px-4 py-2 text-sm font-medium bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors sm:w-auto"
+              >
+                🗑️ Delete All Slots
               </button>
             </div>
           </div>
@@ -418,9 +482,26 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
                 ${slot.price}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <button className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors">
-                  Edit
-                </button>
+                <div className="flex space-x-2">
+                  <button 
+                    className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSlotClick(slot);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 rounded-md transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteSlot(slot.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
             );

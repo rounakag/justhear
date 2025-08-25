@@ -189,24 +189,32 @@ app.post('/api/slots', async (req, res) => {
 });
 
 // Bulk create slots (admin only)
+// Create bulk slots (DISABLED FOR NOW)
 app.post('/api/slots/bulk', async (req, res) => {
+  res.status(403).json({ error: 'Bulk slot creation is temporarily disabled' });
+});
+
+// Delete slot
+app.delete('/api/slots/:id', async (req, res) => {
   try {
-    const bulkData = req.body;
-    console.log('Bulk slot creation request:', bulkData);
+    const { id } = req.params;
     
-    // Generate slots based on bulk data
-    const slots = generateSlotsFromBulkData(bulkData);
-    console.log('Generated slots:', slots.length);
-    
-    const createdSlots = await databaseService.createBulkSlots(slots);
-    res.status(201).json({
-      message: 'Slots created successfully',
-      slots: createdSlots,
-      total: createdSlots.length
-    });
+    const deletedSlot = await databaseService.deleteTimeSlot(id);
+    res.json({ message: 'Slot deleted successfully', deletedSlot });
   } catch (error) {
-    console.error('Error creating bulk slots:', error);
-    res.status(500).json({ error: 'Failed to create slots' });
+    console.error('Error deleting slot:', error);
+    res.status(500).json({ error: 'Failed to delete slot' });
+  }
+});
+
+// Delete all slots (cleanup)
+app.delete('/api/slots', async (req, res) => {
+  try {
+    const deletedSlots = await databaseService.deleteAllTimeSlots();
+    res.json({ message: 'All slots deleted successfully', count: deletedSlots.length });
+  } catch (error) {
+    console.error('Error deleting all slots:', error);
+    res.status(500).json({ error: 'Failed to delete all slots' });
   }
 });
 

@@ -157,6 +157,29 @@ class DatabaseService {
     return data;
   }
 
+  async deleteTimeSlot(id) {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async deleteAllTimeSlots() {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all slots
+      .select();
+    
+    if (error) throw error;
+    return data || [];
+  }
+
   // Bookings Management
   async createBooking(bookingData) {
     const { data, error } = await supabase
