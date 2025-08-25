@@ -5,7 +5,7 @@ import { UpcomingSessions } from '@/components/user/UpcomingSessions';
 import { BookingHistory } from '@/components/user/BookingHistory';
 import { ReviewModal } from '@/components/user/ReviewModal';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { SchedulerModal } from '@/components/SchedulerModal';
+
 import type { UserSession } from '@/types/user.types';
 
 export const UserDashboardPage: React.FC = () => {
@@ -112,13 +112,15 @@ export const UserDashboardPage: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <SchedulerModal>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-                >
-                  🎧 Book New Session
-                </button>
-              </SchedulerModal>
+              <button
+                onClick={() => {
+                  // Redirect to home page where booking works perfectly
+                  window.location.href = '/';
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                🎧 Book New Session
+              </button>
               <button
                 onClick={() => {
                   // Use navigate to maintain session
