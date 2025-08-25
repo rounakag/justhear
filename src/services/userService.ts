@@ -15,7 +15,7 @@ class UserService {
     throw new Error('Profile API not implemented yet');
   }
 
-  async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
+  async updateUserProfile(_profileData: Partial<UserProfile>): Promise<UserProfile> {
     // TODO: Implement when profile API is available
     throw new Error('Profile API not implemented yet');
   }
@@ -36,7 +36,7 @@ class UserService {
       throw new Error(response.error);
     }
     
-    return response.data?.bookings || [];
+    return response.data || [];
   }
 
   async getBookingById(bookingId: string): Promise<UserBooking> {
@@ -64,7 +64,7 @@ class UserService {
     }
   }
 
-  async rescheduleBooking(bookingId: string, newSlotId: string, newDate: string, newStartTime: string, newEndTime: string): Promise<UserBooking> {
+  async rescheduleBooking(_bookingId: string, _newSlotId: string, _newDate: string, _newStartTime: string, _newEndTime: string): Promise<UserBooking> {
     // TODO: Implement when reschedule API is available
     throw new Error('Reschedule API not implemented yet');
   }
@@ -85,7 +85,7 @@ class UserService {
       throw new Error(response.error);
     }
     
-    return response.data?.reviews || [];
+    return response.data || [];
   }
 
   async createReview(reviewData: Omit<UserReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserReview> {
@@ -150,12 +150,14 @@ class UserService {
     const user = localStorage.getItem('user');
     
     if (!token || !user) {
-      return {
-        totalBookings: 0,
-        completedSessions: 0,
-        totalReviews: 0,
-        averageRating: 0
-      };
+          return {
+      totalBookings: 0,
+      completedSessions: 0,
+      upcomingSessions: 0,
+      totalSpent: 0,
+      totalReviews: 0,
+      averageRating: 0
+    };
     }
     
     const userData = JSON.parse(user);
@@ -168,6 +170,8 @@ class UserService {
     return response.data || {
       totalBookings: 0,
       completedSessions: 0,
+      upcomingSessions: 0,
+      totalSpent: 0,
       totalReviews: 0,
       averageRating: 0
     };
@@ -176,21 +180,19 @@ class UserService {
   async getUserSessions(): Promise<UserSession[]> {
     const bookings = await this.getUserBookings();
     
-    return bookings.map(booking => ({
-      id: booking.id,
-      type: 'booking',
-      title: `Session with ${booking.listener?.listener?.username || 'Listener'}`,
-      date: booking.slot?.date || booking.date,
-      startTime: booking.slot?.start_time || booking.startTime,
-      endTime: booking.slot?.end_time || booking.endTime,
-      status: booking.status,
-      meetingLink: booking.meeting_link || booking.meetingLink,
-      price: booking.slot?.price || booking.price,
-      listenerName: booking.listener?.listener?.username || 'Listener',
-      listenerAvatar: '/api/placeholder/150/150',
-      canReview: booking.status === 'completed' && !booking.hasReview,
-      hasReview: booking.hasReview || false,
-    }));
+    return bookings.map(booking => {
+      const now = new Date();
+      const sessionTime = new Date(booking.startTime);
+      const timeUntilSession = sessionTime > now ? 
+        Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : undefined;
+      
+      return {
+        booking,
+        canReview: booking.status === 'completed',
+        canCancel: booking.status === 'upcoming' && timeUntilSession !== undefined && timeUntilSession > 60,
+        timeUntilSession,
+      };
+    });
   }
 
   // Utility Methods
