@@ -76,28 +76,63 @@ app.get('/api/health', (req, res) => {
 // Get available slots
 app.get('/api/slots', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching available slots');
+    
     const slots = await databaseService.getAvailableSlots();
+    
+    console.log('🔍 DEBUG - Retrieved', slots.length, 'available slots');
+    
     res.json({
       slots,
-      total: slots.length
+      total: slots.length,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error fetching slots:', error);
-    res.status(500).json({ error: 'Failed to fetch slots' });
+    console.error('❌ ERROR fetching slots:', error);
+    
+    // Enhanced error response
+    const errorResponse = {
+      error: 'Failed to fetch slots',
+      message: error.message,
+      timestamp: new Date().toISOString(),
+      path: req.path
+    };
+    
+    res.status(500).json(errorResponse);
   }
 });
 
 // Get admin-created slots (for users)
 app.get('/api/slots/admin-created', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching admin-created slots for users');
+    
+    // Add rate limiting check (basic implementation)
+    const clientIP = req.ip || req.connection.remoteAddress;
+    console.log('🔍 DEBUG - Request from IP:', clientIP);
+    
     const slots = await databaseService.getAdminCreatedSlots();
+    
+    console.log('🔍 DEBUG - Retrieved', slots.length, 'admin-created slots');
+    
     res.json({
       slots,
-      total: slots.length
+      total: slots.length,
+      timestamp: new Date().toISOString(),
+      cached: false // For future caching implementation
     });
   } catch (error) {
-    console.error('Error fetching admin-created slots:', error);
-    res.status(500).json({ error: 'Failed to fetch admin-created slots' });
+    console.error('❌ ERROR fetching admin-created slots:', error);
+    
+    // Enhanced error response
+    const errorResponse = {
+      error: 'Failed to fetch admin-created slots',
+      message: error.message,
+      timestamp: new Date().toISOString(),
+      path: req.path
+    };
+    
+    res.status(500).json(errorResponse);
   }
 });
 

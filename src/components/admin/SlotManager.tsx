@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { SlotEditor } from './SlotEditor';
 import { SlotCalendar } from './SlotCalendar';
 import { SlotFilters } from './SlotFilters';
@@ -28,50 +28,81 @@ export const SlotManager: React.FC = () => {
     setViewMode(mode);
   };
 
-  // Filter slots based on current filters
-  const filteredSlots = React.useMemo(() => {
-    let filtered = slots;
+  // Optimized filtering with early returns and better performance
+  const filteredSlots = useMemo(() => {
+    if (!slots || slots.length === 0) return [];
+    
+    // Early return if no filters applied
+    const hasFilters = Object.values(filters).some(value => value !== undefined && value !== '');
+    if (!hasFilters) return slots;
 
-    if (filters.listenerId) {
-      filtered = filtered.filter(slot => slot.listenerId === filters.listenerId);
-    }
-
-    if (filters.isAvailable !== undefined) {
-      filtered = filtered.filter(slot => slot.isAvailable === filters.isAvailable);
-    }
-
-    if (filters.isBooked !== undefined) {
-      filtered = filtered.filter(slot => slot.isBooked === filters.isBooked);
-    }
-
-    if (filters.dayOfWeek !== undefined) {
-      filtered = filtered.filter(slot => slot.dayOfWeek === filters.dayOfWeek);
-    }
-
-    return filtered;
+    return slots.filter(slot => {
+      // Listener filter
+      if (filters.listenerId && slot.listenerId !== filters.listenerId) {
+        return false;
+      }
+      
+      // Availability filter
+      if (filters.isAvailable !== undefined && slot.isAvailable !== filters.isAvailable) {
+        return false;
+      }
+      
+      // Booking status filter
+      if (filters.isBooked !== undefined && slot.isBooked !== filters.isBooked) {
+        return false;
+      }
+      
+      // Day of week filter
+      if (filters.dayOfWeek !== undefined && slot.dayOfWeek !== filters.dayOfWeek) {
+        return false;
+      }
+      
+      return true;
+    });
   }, [slots, filters]);
 
-  const handleSlotClick = (slot: TimeSlot) => {
+  const handleSlotClick = useCallback((slot: TimeSlot) => {
     setSelectedSlot(slot);
     setShowSlotEditor(true);
-  };
+  }, []);
 
   const handleDeleteAllSlots = async () => {
-    if (!confirm('Are you sure you want to delete ALL slots? This action cannot be undone and will remove all existing slots.')) {
-      return;
-    }
+    // Enhanced confirmation with better UX
+    const confirmed = await new Promise<boolean>((resolve) => {
+      const result = confirm(
+        '⚠️ DANGEROUS ACTION\n\n' +
+        'Are you sure you want to delete ALL slots?\n' +
+        'This action cannot be undone and will remove all existing slots.\n\n' +
+        'Click OK to proceed or Cancel to abort.'
+      );
+      resolve(result);
+    });
 
-    if (!confirm('This will delete ALL slots in the system. Are you absolutely sure?')) {
-      return;
-    }
+    if (!confirmed) return;
+
+    const doubleConfirmed = await new Promise<boolean>((resolve) => {
+      const result = confirm(
+        '🚨 FINAL CONFIRMATION\n\n' +
+        'This will delete ALL slots in the system.\n' +
+        'Are you absolutely sure?\n\n' +
+        'Click OK to delete all slots or Cancel to abort.'
+      );
+      resolve(result);
+    });
+
+    if (!doubleConfirmed) return;
 
     try {
       console.log('🔍 DEBUG - Deleting all slots');
-      const apiUrl = 'https://justhear-backend.onrender.com';
+      
+      // Use environment variable with fallback
+      const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
+      
       const response = await fetch(`${apiUrl}/api/slots`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
 
@@ -91,13 +122,14 @@ export const SlotManager: React.FC = () => {
       const result = await response.json();
       console.log('🔍 DEBUG - Delete all result:', result);
       
-      alert(`Successfully deleted ${result.count} slots.`);
+      // Better success feedback
+      alert(`✅ Successfully deleted ${result.count} slots.`);
       
       // Refresh the slots list
       window.location.reload();
     } catch (error) {
       console.error('❌ ERROR deleting all slots:', error);
-      alert(`Failed to delete all slots: ${error.message}`);
+      alert(`❌ Failed to delete all slots: ${error.message}`);
     }
   };
 
@@ -111,29 +143,38 @@ export const SlotManager: React.FC = () => {
     setSelectedSlot(null);
   };
 
+  // Enhanced error boundary with retry functionality
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-6 w-6 text-red-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error loading slot data</h3>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                  <h3 className="text-lg font-semibold text-red-800">Error Loading Slot Data</h3>
+                  <p className="text-sm text-red-700 mt-2">{error}</p>
+                  <div className="mt-4 flex space-x-3">
+                    <button 
+                      onClick={clearError}
+                      className="px-4 py-2 text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 rounded-md transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                    <button 
+                      onClick={refreshData}
+                      className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
+                    >
+                      Retry
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button 
-                onClick={clearError} 
-                className="px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors"
-              >
-                Dismiss
-              </button>
             </div>
           </div>
         </div>
@@ -168,16 +209,30 @@ export const SlotManager: React.FC = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="mb-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-3 text-gray-600">Loading slot data...</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
-        {stats && <AdminStats stats={stats} className="mb-6" />}
+        {!loading && stats && <AdminStats stats={stats} className="mb-6" />}
 
         {/* Filters */}
-        <SlotFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-          listeners={listeners}
-          className="mb-6"
-        />
+        {!loading && (
+          <SlotFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            listeners={listeners}
+            className="mb-6"
+          />
+        )}
 
         {/* View Toggle */}
         <div className="flex items-center justify-between mb-6">
@@ -270,18 +325,31 @@ interface SlotListProps {
 
 const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) => {
   
-  const handleDeleteSlot = async (slotId: string) => {
-    if (!confirm('Are you sure you want to delete this slot? This action cannot be undone.')) {
-      return;
-    }
+  // Extracted delete function with better error handling
+  const handleDeleteSlot = useCallback(async (slotId: string) => {
+    const confirmed = await new Promise<boolean>((resolve) => {
+      const result = confirm(
+        '⚠️ CONFIRM DELETION\n\n' +
+        'Are you sure you want to delete this slot?\n' +
+        'This action cannot be undone.\n\n' +
+        'Click OK to delete or Cancel to abort.'
+      );
+      resolve(result);
+    });
+
+    if (!confirmed) return;
 
     try {
       console.log('🔍 DEBUG - Deleting slot:', slotId);
-      const apiUrl = 'https://justhear-backend.onrender.com';
+      
+      // Use environment variable with fallback
+      const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
+      
       const response = await fetch(`${apiUrl}/api/slots/${slotId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
 
@@ -301,20 +369,23 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
       const result = await response.json();
       console.log('🔍 DEBUG - Delete result:', result);
       
-      alert('Slot deleted successfully!');
+      alert('✅ Slot deleted successfully!');
       // Refresh the slots list
       window.location.reload();
     } catch (error) {
       console.error('❌ ERROR deleting slot:', error);
-      alert(`Failed to delete slot: ${error.message}`);
+      alert(`❌ Failed to delete slot: ${error.message}`);
     }
-  };
+  }, []);
   
-  const getListenerName = (listenerId?: string) => {
-    if (!listenerId) return 'Unassigned';
+  const getListenerName = useCallback((listenerId?: string): string => {
+    if (!listenerId || listenerId.trim() === '') {
+      return 'Unassigned';
+    }
+    
     const listener = listeners.find(l => l.id === listenerId);
-    return listener?.name || 'Unknown';
-  };
+    return listener?.name || listener?.username || 'Unknown';
+  }, [listeners]);
 
   const formatTime = (time: string) => {
     try {
