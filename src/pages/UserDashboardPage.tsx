@@ -112,7 +112,12 @@ export const UserDashboardPage: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => {
+                  // Use history.pushState to avoid full page reload
+                  window.history.pushState({}, '', '/');
+                  // Trigger a custom event to notify the app
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
               >
                 ← Back to Main Site
