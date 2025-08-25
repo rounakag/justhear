@@ -16,7 +16,7 @@
     <script>
         async function testHealth() {
             try {
-                const response = await fetch('http://localhost:5001/health');
+                const response = await fetch('https://justhear-backend.onrender.com/health');
                 const data = await response.json();
                 document.getElementById('result').innerHTML = `
                     <h3>✅ Health API Response:</h3>
@@ -32,7 +32,7 @@
 
         async function testUsers() {
             try {
-                const response = await fetch('http://localhost:5001/api/users');
+                const response = await fetch('https://justhear-backend.onrender.com/api/users');
                 const data = await response.json();
                 document.getElementById('result').innerHTML = `
                     <h3>✅ Users API Response:</h3>
@@ -48,7 +48,7 @@
 
         async function testSlots() {
             try {
-                const response = await fetch('http://localhost:5001/api/slots');
+                const response = await fetch('https://justhear-backend.onrender.com/api/slots');
                 const data = await response.json();
                 document.getElementById('result').innerHTML = `
                     <h3>✅ Slots API Response:</h3>
@@ -64,7 +64,7 @@
 
         async function testBookings() {
             try {
-                const response = await fetch('http://localhost:5001/api/bookings');
+                const response = await fetch('https://justhear-backend.onrender.com/api/bookings');
                 const data = await response.json();
                 document.getElementById('result').innerHTML = `
                     <h3>✅ Bookings API Response:</h3>
