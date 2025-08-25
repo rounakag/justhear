@@ -285,15 +285,23 @@ app.post('/api/auth/login', async (req, res) => {
       return;
     }
 
-    // Try to find user by email
-    const users = await databaseService.getUserByUsername(email.split('@')[0]);
+    // Try to find user by email or username
+    let users;
+    if (email.includes('@')) {
+      users = await databaseService.getUserByUsername(email.split('@')[0]);
+    } else {
+      users = await databaseService.getUserByUsername(email);
+    }
     
     if (!users) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // In production, you'd verify password hash
-    // For now, accept any password for existing users
+    // Verify password hash
+    const isValidPassword = await bcrypt.compare(password, users.password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     const token = jwt.sign(
       { userId: users.id, username: users.username, role: users.role },
       process.env.JWT_SECRET || 'fallback-secret',
@@ -320,11 +328,26 @@ app.post('/api/auth/signup', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
     
+    // Validate required fields
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+    
+    // Check if username already exists
+    try {
+      const existingUser = await databaseService.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(409).json({ error: 'Username already exists' });
+      }
+    } catch (error) {
+      // User doesn't exist, continue
+    }
+    
     // Generate anonymous email if not provided
     const userEmail = email || `${username}@anonymous.com`;
     
     // Hash password
-    const passwordHash = await bcrypt.hash(password || 'default123', 10);
+    const passwordHash = await bcrypt.hash(password, 10);
     
     // Create user
     const userData = {

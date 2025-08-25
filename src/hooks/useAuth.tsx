@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
+      setError(null);
       const response = await apiService.login(email, password);
       
       if (response.data && response.status === 200) {
@@ -57,11 +58,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('user', JSON.stringify(user));
         return true;
       } else {
-        console.error('Login failed:', response.error);
+        const errorMessage = response.error || 'Login failed. Please check your credentials.';
+        console.error('Login failed:', errorMessage);
+        setError(errorMessage);
         return false;
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Login failed. Please check your credentials.';
+      console.error('Login error:', errorMessage);
+      setError(errorMessage);
       return false;
     } finally {
       setLoading(false);
@@ -71,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (username: string, email: string, password: string, role: string = 'user'): Promise<boolean> => {
     try {
       setLoading(true);
+      setError(null);
       console.log('Attempting signup with:', { username, email, role });
       
       const response = await apiService.signup(username, email, password, role);
@@ -84,11 +90,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Signup successful:', user);
         return true;
       } else {
-        console.error('Signup failed:', response.error || 'Unknown error');
+        const errorMessage = response.error || 'Signup failed. Please try again.';
+        console.error('Signup failed:', errorMessage);
+        setError(errorMessage);
         return false;
       }
-    } catch (error) {
-      console.error('Signup error:', error);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Signup failed. Please try again.';
+      console.error('Signup error:', errorMessage);
+      setError(errorMessage);
       return false;
     } finally {
       setLoading(false);
