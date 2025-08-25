@@ -23,11 +23,21 @@ export function useAdminAuth(): UseAdminAuthReturn {
   // Admin users will be fetched from backend
 
   useEffect(() => {
-    // For admin, always require explicit login - no auto-login
-    // Clear any existing admin data to force login
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('adminEmail');
-    localStorage.removeItem('authToken');
+    // Check if admin is already logged in from localStorage
+    const isAdmin = localStorage.getItem('isAdmin');
+    const adminEmail = localStorage.getItem('adminEmail');
+    const token = localStorage.getItem('authToken');
+    
+    if (isAdmin === 'true' && adminEmail && token) {
+      // Admin is logged in, restore the state
+      const adminUser: AdminUser = {
+        id: 'admin',
+        email: adminEmail,
+        role: 'admin',
+        permissions: ['manage_slots', 'manage_listeners', 'view_analytics', 'manage_schedules'],
+      };
+      setAdminUser(adminUser);
+    }
     
     // Set loading to false after a small delay to prevent race conditions
     setTimeout(() => {

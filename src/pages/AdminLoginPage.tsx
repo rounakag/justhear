@@ -12,7 +12,9 @@ export const AdminLoginPage: React.FC = () => {
 
   // Redirect to admin dashboard if already logged in
   useEffect(() => {
-      if (isAdmin) {
+    console.log('Admin login page - isAdmin state:', isAdmin);
+    if (isAdmin) {
+      console.log('Admin already logged in, redirecting to dashboard...');
       navigate('/admin/dashboard');
     }
   }, [isAdmin, navigate]);
@@ -23,13 +25,19 @@ export const AdminLoginPage: React.FC = () => {
     setError('');
 
     try {
+      console.log('Submitting admin login form...');
       const success = await loginAsAdmin(email, password);
+      console.log('Login result:', success);
+      
       if (success) {
+        console.log('Login successful, navigating to dashboard...');
         navigate('/admin/dashboard');
       } else {
+        console.log('Login failed, showing error...');
         setError('Invalid admin credentials');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
