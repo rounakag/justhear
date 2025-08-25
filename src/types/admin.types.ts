@@ -84,7 +84,6 @@ export interface BulkSlotCreation {
   duration: number;
   listenerId?: string;
   price: number;
-  timezone: string;
 }
 
 export interface SlotEditorData {

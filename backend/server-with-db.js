@@ -17,6 +17,32 @@ function calculateDuration(startTime, endTime) {
   return Math.round(diffMs / (1000 * 60)); // Convert to minutes
 }
 
+// Helper function to generate slots from bulk data
+function generateSlotsFromBulkData(bulkData) {
+  const slots = [];
+  const startDate = new Date(bulkData.startDate);
+  const endDate = new Date(bulkData.endDate);
+  
+  for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+    const dayOfWeek = date.getDay();
+    
+    if (bulkData.daysOfWeek.includes(dayOfWeek)) {
+      const slot = {
+        date: date.toISOString().split('T')[0],
+        start_time: bulkData.startTime,
+        end_time: bulkData.endTime,
+        price: bulkData.price || 50,
+        status: 'available',
+        listener_id: bulkData.listenerId || null,
+        duration_minutes: calculateDuration(bulkData.startTime, bulkData.endTime)
+      };
+      slots.push(slot);
+    }
+  }
+  
+  return slots;
+}
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
@@ -149,7 +175,13 @@ app.post('/api/slots', async (req, res) => {
 // Bulk create slots (admin only)
 app.post('/api/slots/bulk', async (req, res) => {
   try {
-    const { slots } = req.body;
+    const bulkData = req.body;
+    console.log('Bulk slot creation request:', bulkData);
+    
+    // Generate slots based on bulk data
+    const slots = generateSlotsFromBulkData(bulkData);
+    console.log('Generated slots:', slots.length);
+    
     const createdSlots = await databaseService.createBulkSlots(slots);
     res.status(201).json({
       message: 'Slots created successfully',

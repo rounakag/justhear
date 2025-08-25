@@ -327,7 +327,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
                   {formatDate(slot.date)}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                  {formatTime(slot.start_time || slot.startTime)} - {formatTime(slot.end_time || slot.endTime)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

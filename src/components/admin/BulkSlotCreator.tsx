@@ -27,7 +27,6 @@ export const BulkSlotCreator: React.FC<BulkSlotCreatorProps> = ({
     duration: 60,
     listenerId: '',
     price: 50,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedSchedule, setSelectedSchedule] = useState<string>('');
