@@ -5,136 +5,192 @@ import type {
   UserDashboardStats,
   UserSession 
 } from '@/types/user.types';
-import { 
-  MOCK_USER_BOOKINGS, 
-  MOCK_USER_REVIEWS, 
-  MOCK_USER_PROFILE, 
-  MOCK_USER_DASHBOARD_STATS 
-} from '@/constants/userData';
+import { apiService } from './api';
 
 class UserService {
-  private mockData = {
-    bookings: [...MOCK_USER_BOOKINGS],
-    reviews: [...MOCK_USER_REVIEWS],
-    profile: { ...MOCK_USER_PROFILE },
-    stats: { ...MOCK_USER_DASHBOARD_STATS },
-  };
 
   // User Profile Management
   async getUserProfile(): Promise<UserProfile> {
-    // Mock implementation
-    return this.mockData.profile;
+    // TODO: Implement when profile API is available
+    throw new Error('Profile API not implemented yet');
   }
 
   async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
-    // Mock implementation
-    this.mockData.profile = { ...this.mockData.profile, ...profileData };
-    return this.mockData.profile;
+    // TODO: Implement when profile API is available
+    throw new Error('Profile API not implemented yet');
   }
 
   // Booking Management
   async getUserBookings(): Promise<UserBooking[]> {
-    // Mock implementation
-    return this.mockData.bookings;
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    
+    if (!token || !user) {
+      return [];
+    }
+    
+    const userData = JSON.parse(user);
+    const response = await apiService.getUserBookings(userData.id);
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data?.bookings || [];
   }
 
   async getBookingById(bookingId: string): Promise<UserBooking> {
-    const booking = this.mockData.bookings.find(b => b.id === bookingId);
+    const bookings = await this.getUserBookings();
+    const booking = bookings.find(b => b.id === bookingId);
     if (!booking) throw new Error('Booking not found');
     return booking;
   }
 
   async cancelBooking(bookingId: string): Promise<void> {
-    const bookingIndex = this.mockData.bookings.findIndex(b => b.id === bookingId);
-    if (bookingIndex === -1) throw new Error('Booking not found');
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
     
-    this.mockData.bookings[bookingIndex] = {
-      ...this.mockData.bookings[bookingIndex],
-      status: 'cancelled',
-      updatedAt: new Date().toISOString(),
-    };
+    const response = await fetch(`${apiService.getBaseUrl()}/bookings/${bookingId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ status: 'cancelled' })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to cancel booking');
+    }
   }
 
   async rescheduleBooking(bookingId: string, newSlotId: string, newDate: string, newStartTime: string, newEndTime: string): Promise<UserBooking> {
-    const bookingIndex = this.mockData.bookings.findIndex(b => b.id === bookingId);
-    if (bookingIndex === -1) throw new Error('Booking not found');
-    
-    this.mockData.bookings[bookingIndex] = {
-      ...this.mockData.bookings[bookingIndex],
-      slotId: newSlotId,
-      date: newDate,
-      startTime: newStartTime,
-      endTime: newEndTime,
-      updatedAt: new Date().toISOString(),
-    };
-    
-    return this.mockData.bookings[bookingIndex];
+    // TODO: Implement when reschedule API is available
+    throw new Error('Reschedule API not implemented yet');
   }
 
   // Review Management
   async getUserReviews(): Promise<UserReview[]> {
-    // Mock implementation
-    return this.mockData.reviews;
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    
+    if (!token || !user) {
+      return [];
+    }
+    
+    const userData = JSON.parse(user);
+    const response = await apiService.getUserReviews(userData.id);
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data?.reviews || [];
   }
 
   async createReview(reviewData: Omit<UserReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserReview> {
-    const newReview: UserReview = {
-      ...reviewData,
-      id: `review-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
     
-    this.mockData.reviews.push(newReview);
-    return newReview;
+    const response = await fetch(`${apiService.getBaseUrl()}/reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(reviewData)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to create review');
+    }
+    
+    return response.json();
   }
 
   async updateReview(reviewId: string, reviewData: Partial<UserReview>): Promise<UserReview> {
-    const reviewIndex = this.mockData.reviews.findIndex(r => r.id === reviewId);
-    if (reviewIndex === -1) throw new Error('Review not found');
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
     
-    this.mockData.reviews[reviewIndex] = {
-      ...this.mockData.reviews[reviewIndex],
-      ...reviewData,
-      updatedAt: new Date().toISOString(),
-    };
+    const response = await fetch(`${apiService.getBaseUrl()}/reviews/${reviewId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(reviewData)
+    });
     
-    return this.mockData.reviews[reviewIndex];
+    if (!response.ok) {
+      throw new Error('Failed to update review');
+    }
+    
+    return response.json();
   }
 
   async deleteReview(reviewId: string): Promise<void> {
-    const reviewIndex = this.mockData.reviews.findIndex(r => r.id === reviewId);
-    if (reviewIndex === -1) throw new Error('Review not found');
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
     
-    this.mockData.reviews.splice(reviewIndex, 1);
+    const response = await fetch(`${apiService.getBaseUrl()}/reviews/${reviewId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete review');
+    }
   }
 
   // Dashboard and Stats
   async getDashboardStats(): Promise<UserDashboardStats> {
-    // Mock implementation - in real app, this would calculate from actual data
-    return this.mockData.stats;
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    
+    if (!token || !user) {
+      return {
+        totalBookings: 0,
+        completedSessions: 0,
+        totalReviews: 0,
+        averageRating: 0
+      };
+    }
+    
+    const userData = JSON.parse(user);
+    const response = await apiService.getUserStats(userData.id);
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data || {
+      totalBookings: 0,
+      completedSessions: 0,
+      totalReviews: 0,
+      averageRating: 0
+    };
   }
 
   async getUserSessions(): Promise<UserSession[]> {
-    const sessions: UserSession[] = [];
+    const bookings = await this.getUserBookings();
     
-    for (const booking of this.mockData.bookings) {
-      const review = this.mockData.reviews.find(r => r.bookingId === booking.id);
-      const now = new Date();
-      const sessionTime = new Date(booking.startTime);
-      const timeUntilSession = sessionTime > now ? 
-        Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : undefined;
-      
-      sessions.push({
-        booking,
-        review,
-        canReview: booking.status === 'completed' && !review,
-        canCancel: booking.status === 'upcoming' && timeUntilSession !== undefined && timeUntilSession > 60, // Can cancel if more than 1 hour away
-        timeUntilSession,
-      });
-    }
-    
-    return sessions.sort((a, b) => new Date(b.booking.startTime).getTime() - new Date(a.booking.startTime).getTime());
+    return bookings.map(booking => ({
+      id: booking.id,
+      type: 'booking',
+      title: `Session with ${booking.listener?.listener?.username || 'Listener'}`,
+      date: booking.slot?.date || booking.date,
+      startTime: booking.slot?.start_time || booking.startTime,
+      endTime: booking.slot?.end_time || booking.endTime,
+      status: booking.status,
+      meetingLink: booking.meeting_link || booking.meetingLink,
+      price: booking.slot?.price || booking.price,
+      listenerName: booking.listener?.listener?.username || 'Listener',
+      listenerAvatar: '/api/placeholder/150/150',
+      canReview: booking.status === 'completed' && !booking.hasReview,
+      hasReview: booking.hasReview || false,
+    }));
   }
 
   // Utility Methods

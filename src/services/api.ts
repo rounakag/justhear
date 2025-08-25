@@ -64,6 +64,22 @@ class ApiService {
     return this.request('bookings');
   }
 
+  async getUserBookings(userId: string) {
+    return this.request(`bookings/user/${userId}`);
+  }
+
+  async getUserReviews(userId: string) {
+    return this.request(`reviews/user/${userId}`);
+  }
+
+  async getUserStats(userId: string) {
+    return this.request(`users/${userId}/stats`);
+  }
+
+  getBaseUrl() {
+    return API_BASE_URL;
+  }
+
   // Auth (mock responses)
   async login(email: string, password: string) {
     try {
@@ -75,16 +91,20 @@ class ApiService {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return { 
+          error: data.error || `Login failed (${response.status})`, 
+          status: response.status 
+        };
       }
 
-      const data = await response.json();
       return { data, status: response.status };
     } catch (error) {
       console.error('Login request failed:', error);
       return { 
-        error: error instanceof Error ? error.message : 'Unknown error', 
+        error: 'Network error. Please try again.', 
         status: 500 
       };
     }
@@ -100,16 +120,20 @@ class ApiService {
         body: JSON.stringify({ username, email, password, role }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return { 
+          error: data.error || `Signup failed (${response.status})`, 
+          status: response.status 
+        };
       }
 
-      const data = await response.json();
       return { data, status: response.status };
     } catch (error) {
       console.error('Signup request failed:', error);
       return { 
-        error: error instanceof Error ? error.message : 'Unknown error', 
+        error: 'Network error. Please try again.', 
         status: 500 
       };
     }
