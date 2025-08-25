@@ -3,6 +3,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useAdminSlots } from '@/hooks/useAdminSlots';
 import type { TimeSlot, SlotEditorData, Listener } from '@/types/admin.types';
 
+// Helper function to format time for input field
+function formatTimeForInput(timeString: string): string {
+  try {
+    // Handle time strings like "09:00:00" or "09:00"
+    const timeParts = timeString.split(':');
+    if (timeParts.length >= 2) {
+      return `${timeParts[0].padStart(2, '0')}:${timeParts[1].padStart(2, '0')}`;
+    }
+    return timeString;
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return timeString;
+  }
+}
+
 interface SlotEditorProps {
   slot?: TimeSlot | null;
   listeners: Listener[];
@@ -31,8 +46,8 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
     if (slot) {
       setFormData({
         date: slot.date,
-        startTime: new Date(slot.startTime).toTimeString().slice(0, 5),
-        endTime: new Date(slot.endTime).toTimeString().slice(0, 5),
+        startTime: formatTimeForInput(slot.startTime),
+        endTime: formatTimeForInput(slot.endTime),
         listenerId: slot.listenerId || '',
         price: slot.price,
         isAvailable: slot.isAvailable,
