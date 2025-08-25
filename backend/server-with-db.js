@@ -19,19 +19,15 @@ function calculateDuration(startTime, endTime) {
 
 // Helper function to generate slots from bulk data
 function generateSlotsFromBulkData(bulkData) {
-  console.log('Generating slots from bulk data:', bulkData);
   const slots = [];
   const startDate = new Date(bulkData.startDate);
   const endDate = new Date(bulkData.endDate);
-  
-  console.log('Start date:', startDate, 'End date:', endDate);
   
   for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
     const dayOfWeek = date.getDay();
     
     if (bulkData.daysOfWeek.includes(dayOfWeek)) {
       const slotDate = date.toISOString().split('T')[0];
-      console.log('Creating slot for date:', slotDate, 'Day of week:', dayOfWeek);
       
       const slot = {
         date: slotDate,
@@ -46,7 +42,6 @@ function generateSlotsFromBulkData(bulkData) {
     }
   }
   
-  console.log('Generated slots:', slots.length, 'First slot:', slots[0]);
   return slots;
 }
 
