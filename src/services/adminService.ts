@@ -8,46 +8,43 @@ import type {
   SlotEditorData,
   AdminStats 
 } from '@/types/admin.types';
-import { 
-  MOCK_TIME_SLOTS, 
-  MOCK_LISTENERS, 
-  MOCK_SCHEDULES, 
-  MOCK_ADMIN_STATS 
-} from '@/constants/adminData';
+import { apiService } from './api';
 
 class AdminService {
-  private baseUrl = '/api/admin';
-  private mockData = {
-    slots: [...MOCK_TIME_SLOTS],
-    listeners: [...MOCK_LISTENERS],
-    schedules: [...MOCK_SCHEDULES],
-    stats: { ...MOCK_ADMIN_STATS },
-  };
+  private baseUrl = 'https://justhear-backend.onrender.com/api';
 
   // TimeSlot Management
   async getTimeSlots(filters?: SlotFilters): Promise<TimeSlot[]> {
-    // Mock implementation for now
-    let filteredSlots = [...this.mockData.slots];
+    try {
+      const response = await fetch(`${this.baseUrl}/slots`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch time slots');
+      }
+      
+      const data = await response.json();
+      let slots = data.slots || data || [];
 
-    if (filters?.dateRange) {
-      filteredSlots = filteredSlots.filter(slot => 
-        slot.date >= filters.dateRange!.start && slot.date <= filters.dateRange!.end
-      );
-    }
-    if (filters?.listenerId) {
-      filteredSlots = filteredSlots.filter(slot => slot.listenerId === filters.listenerId);
-    }
-    if (filters?.isAvailable !== undefined) {
-      filteredSlots = filteredSlots.filter(slot => slot.isAvailable === filters.isAvailable);
-    }
-    if (filters?.isBooked !== undefined) {
-      filteredSlots = filteredSlots.filter(slot => slot.isBooked === filters.isBooked);
-    }
-    if (filters?.dayOfWeek !== undefined) {
-      filteredSlots = filteredSlots.filter(slot => slot.dayOfWeek === filters.dayOfWeek);
-    }
+      // Apply filters
+      if (filters?.dateRange) {
+        slots = slots.filter((slot: TimeSlot) => 
+          slot.date >= filters.dateRange!.start && slot.date <= filters.dateRange!.end
+        );
+      }
+      if (filters?.listenerId) {
+        slots = slots.filter((slot: TimeSlot) => slot.listenerId === filters.listenerId);
+      }
+      if (filters?.isAvailable !== undefined) {
+        slots = slots.filter((slot: TimeSlot) => slot.status === 'available');
+      }
+      if (filters?.isBooked !== undefined) {
+        slots = slots.filter((slot: TimeSlot) => slot.status === 'booked');
+      }
 
-    return filteredSlots;
+      return slots;
+    } catch (error) {
+      console.error('Error fetching time slots:', error);
+      return [];
+    }
   }
 
   async getTimeSlot(id: string): Promise<TimeSlot> {
@@ -172,7 +169,34 @@ class AdminService {
 
   // Listener Management
   async getListeners(): Promise<Listener[]> {
-    return this.mockData.listeners;
+    try {
+      const response = await fetch(`${this.baseUrl}/users`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch listeners');
+      }
+      
+      const data = await response.json();
+      const users = data.users || [];
+      
+      // Filter only listeners
+      return users
+        .filter((user: any) => user.role === 'listener')
+        .map((user: any) => ({
+          id: user.id,
+          name: user.username,
+          email: user.email,
+          avatar: '/api/placeholder/150/150',
+          isActive: user.is_active,
+          hourlyRate: 25.00, // Default rate
+          specialties: [],
+          availability: {},
+          createdAt: user.created_at,
+          updatedAt: user.updated_at || user.created_at,
+        }));
+    } catch (error) {
+      console.error('Error fetching listeners:', error);
+      return [];
+    }
   }
 
   async getListener(id: string): Promise<Listener> {

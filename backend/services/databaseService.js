@@ -135,8 +135,10 @@ class DatabaseService {
       .from('bookings')
       .select(`
         *,
-        slot:time_slots(*),
-        listener:users!bookings_listener_id_fkey(username)
+        slot:time_slots(
+          *,
+          listener:users(username)
+        )
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
@@ -210,7 +212,10 @@ class DatabaseService {
   async getUserStats(userId) {
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select('status, price')
+      .select(`
+        status,
+        slot:time_slots(price)
+      `)
       .eq('user_id', userId);
     
     if (bookingsError) throw bookingsError;
@@ -224,8 +229,8 @@ class DatabaseService {
 
     const totalBookings = bookings.length;
     const completedSessions = bookings.filter(b => b.status === 'completed').length;
-    const upcomingSessions = bookings.filter(b => b.status === 'upcoming').length;
-    const totalSpent = bookings.reduce((sum, b) => sum + (b.price || 0), 0);
+    const upcomingSessions = bookings.filter(b => b.status === 'confirmed').length;
+    const totalSpent = bookings.reduce((sum, b) => sum + (b.slot?.price || 0), 0);
     const totalReviews = reviews.length;
     const averageRating = reviews.length > 0 
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 

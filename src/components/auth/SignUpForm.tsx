@@ -57,11 +57,21 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     
     setUsernameStatus('checking');
     
-    // Simulate API call - replace with actual API
-    setTimeout(() => {
-      const takenUsernames = ['admin', 'user', 'test', 'guest']; // Mock taken usernames
-      setUsernameStatus(takenUsernames.includes(username.toLowerCase()) ? 'taken' : 'available');
-    }, 500);
+    try {
+      const response = await fetch('https://justhear-backend.onrender.com/api/auth/check-username', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username }),
+      });
+      
+      const data = await response.json();
+      setUsernameStatus(data.available ? 'available' : 'taken');
+    } catch (error) {
+      console.error('Error checking username:', error);
+      setUsernameStatus(null);
+    }
   };
 
   React.useEffect(() => {
