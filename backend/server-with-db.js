@@ -318,14 +318,29 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // For now, keep admin login as mock (you can add admin to database later)
-    if (email === 'admin@justhear.com' && password === 'admin123') {
-      res.json({
-        message: 'Login successful',
-        user: { id: 'admin', username: 'admin', email: 'admin@justhear.com', role: 'admin' },
-        token: 'mock-jwt-token-admin'
-      });
-      return;
+    // Admin login - check if user exists and is admin
+    const adminUser = await databaseService.getUserByUsername(email);
+    if (adminUser && adminUser.role === 'admin') {
+      const isValidPassword = await bcrypt.compare(password, adminUser.password_hash);
+      if (isValidPassword) {
+        const token = jwt.sign(
+          { userId: adminUser.id, username: adminUser.username, role: adminUser.role },
+          process.env.JWT_SECRET || 'fallback-secret',
+          { expiresIn: '24h' }
+        );
+        
+        res.json({
+          message: 'Login successful',
+          user: { 
+            id: adminUser.id, 
+            username: adminUser.username, 
+            email: adminUser.email, 
+            role: adminUser.role 
+          },
+          token
+        });
+        return;
+      }
     }
 
     // Try to find user by email or username

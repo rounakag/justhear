@@ -20,21 +20,7 @@ export function useAdminAuth(): UseAdminAuthReturn {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock admin users - in production, this would come from your backend
-  const ADMIN_USERS: AdminUser[] = [
-    {
-      id: 'admin-1',
-      email: 'admin@justhear.com',
-      role: 'admin',
-      permissions: ['manage_slots', 'manage_listeners', 'view_analytics', 'manage_schedules'],
-    },
-    {
-      id: 'admin-2',
-      email: 'manager@justhear.com',
-      role: 'admin',
-      permissions: ['manage_slots', 'view_analytics'],
-    },
-  ];
+  // Admin users will be fetched from backend
 
   useEffect(() => {
     // Check if admin is already logged in from localStorage
@@ -67,20 +53,38 @@ export function useAdminAuth(): UseAdminAuthReturn {
   const loginAsAdmin = async (email: string, password: string): Promise<boolean> => {
     console.log('useAdminAuth: loginAsAdmin called with:', { email, password });
     
-    // Mock admin login - in production, this would validate against your backend
-    const adminUser = ADMIN_USERS.find(admin => admin.email === email);
-    console.log('useAdminAuth: found adminUser:', adminUser);
-    
-    if (adminUser && password === 'JustHearAdmin2024!') { // More secure demo password
-      console.log('useAdminAuth: Login successful, setting admin user');
-      setAdminUser(adminUser);
-      localStorage.setItem('isAdmin', 'true');
-      localStorage.setItem('adminEmail', email);
-      return true;
+    try {
+      const response = await fetch('https://justhear-backend.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.user && data.user.role === 'admin') {
+        console.log('useAdminAuth: Login successful, setting admin user');
+        const adminUser: AdminUser = {
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role,
+          permissions: ['manage_slots', 'manage_listeners', 'view_analytics', 'manage_schedules'],
+        };
+        setAdminUser(adminUser);
+        localStorage.setItem('isAdmin', 'true');
+        localStorage.setItem('adminEmail', email);
+        localStorage.setItem('authToken', data.token);
+        return true;
+      }
+      
+      console.log('useAdminAuth: Login failed');
+      return false;
+    } catch (error) {
+      console.error('useAdminAuth: Login error:', error);
+      return false;
     }
-    
-    console.log('useAdminAuth: Login failed');
-    return false;
   };
 
   const logoutAdmin = () => {

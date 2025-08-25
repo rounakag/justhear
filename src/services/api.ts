@@ -80,7 +80,7 @@ class ApiService {
     return API_BASE_URL;
   }
 
-  // Auth (mock responses)
+  // Auth endpoints
   async login(email: string, password: string) {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {

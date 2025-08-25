@@ -48,123 +48,99 @@ class AdminService {
   }
 
   async getTimeSlot(id: string): Promise<TimeSlot> {
-    const slot = this.mockData.slots.find(s => s.id === id);
-    if (!slot) throw new Error('Time slot not found');
-    return slot;
+    try {
+      const response = await fetch(`${this.baseUrl}/slots/${id}`);
+      if (!response.ok) {
+        throw new Error('Time slot not found');
+      }
+      const data = await response.json();
+      return data.slot || data;
+    } catch (error) {
+      console.error('Error fetching time slot:', error);
+      throw new Error('Failed to fetch time slot');
+    }
   }
 
   async createTimeSlot(slotData: SlotEditorData): Promise<TimeSlot> {
-    const newSlot: TimeSlot = {
-      id: `slot-${Date.now()}`,
-      startTime: new Date(`${slotData.date}T${slotData.startTime}`).toISOString(),
-      endTime: new Date(`${slotData.date}T${slotData.endTime}`).toISOString(),
-      date: slotData.date,
-      dayOfWeek: new Date(slotData.date).getDay(),
-      isAvailable: slotData.isAvailable,
-      isBooked: false,
-      listenerId: slotData.listenerId,
-      listenerName: this.mockData.listeners.find(l => l.id === slotData.listenerId)?.name,
-      listenerAvatar: this.mockData.listeners.find(l => l.id === slotData.listenerId)?.avatar,
-      price: slotData.price,
-      currency: 'USD',
-      timezone: slotData.timezone,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    this.mockData.slots.push(newSlot);
-    return newSlot;
+    try {
+      const response = await fetch(`${this.baseUrl}/slots`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(slotData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create time slot');
+      }
+      
+      const data = await response.json();
+      return data.slot || data;
+    } catch (error) {
+      console.error('Error creating time slot:', error);
+      throw new Error('Failed to create time slot');
+    }
   }
 
   async updateTimeSlot(id: string, slotData: Partial<SlotEditorData>): Promise<TimeSlot> {
-    const slotIndex = this.mockData.slots.findIndex(s => s.id === id);
-    if (slotIndex === -1) throw new Error('Time slot not found');
-    
-    const updatedSlot = { ...this.mockData.slots[slotIndex] };
-    
-    if (slotData.date) {
-      updatedSlot.date = slotData.date;
-      updatedSlot.dayOfWeek = new Date(slotData.date).getDay();
+    try {
+      const response = await fetch(`${this.baseUrl}/slots/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(slotData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update time slot');
+      }
+      
+      const data = await response.json();
+      return data.slot || data;
+    } catch (error) {
+      console.error('Error updating time slot:', error);
+      throw new Error('Failed to update time slot');
     }
-    if (slotData.startTime) {
-      updatedSlot.startTime = new Date(`${updatedSlot.date}T${slotData.startTime}`).toISOString();
-    }
-    if (slotData.endTime) {
-      updatedSlot.endTime = new Date(`${updatedSlot.date}T${slotData.endTime}`).toISOString();
-    }
-    if (slotData.listenerId !== undefined) {
-      updatedSlot.listenerId = slotData.listenerId;
-      updatedSlot.listenerName = this.mockData.listeners.find(l => l.id === slotData.listenerId)?.name;
-      updatedSlot.listenerAvatar = this.mockData.listeners.find(l => l.id === slotData.listenerId)?.avatar;
-    }
-    if (slotData.price !== undefined) {
-      updatedSlot.price = slotData.price;
-    }
-    if (slotData.isAvailable !== undefined) {
-      updatedSlot.isAvailable = slotData.isAvailable;
-    }
-    if (slotData.timezone) {
-      updatedSlot.timezone = slotData.timezone;
-    }
-    
-    updatedSlot.updatedAt = new Date().toISOString();
-    this.mockData.slots[slotIndex] = updatedSlot;
-    
-    return updatedSlot;
   }
 
   async deleteTimeSlot(id: string): Promise<void> {
-    const slotIndex = this.mockData.slots.findIndex(s => s.id === id);
-    if (slotIndex === -1) throw new Error('Time slot not found');
-    this.mockData.slots.splice(slotIndex, 1);
+    try {
+      const response = await fetch(`${this.baseUrl}/slots/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete time slot');
+      }
+    } catch (error) {
+      console.error('Error deleting time slot:', error);
+      throw new Error('Failed to delete time slot');
+    }
   }
 
   // Bulk Slot Creation
   async createBulkSlots(bulkData: BulkSlotCreation): Promise<TimeSlot[]> {
-    const newSlots: TimeSlot[] = [];
-    const startDate = new Date(bulkData.startDate);
-    const endDate = new Date(bulkData.endDate);
-    
-    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
-      if (bulkData.daysOfWeek.includes(date.getDay())) {
-        const dateString = date.toISOString().split('T')[0];
-        const startTime = new Date(`2000-01-01T${bulkData.startTime}`);
-        const endTime = new Date(`2000-01-01T${bulkData.endTime}`);
-        const timeDiff = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-        const slotsPerDay = Math.floor(timeDiff / bulkData.duration);
-        
-        for (let i = 0; i < slotsPerDay; i++) {
-          const slotStartTime = new Date(startTime);
-          slotStartTime.setMinutes(startTime.getMinutes() + (i * bulkData.duration));
-          
-          const slotEndTime = new Date(slotStartTime);
-          slotEndTime.setMinutes(slotStartTime.getMinutes() + bulkData.duration);
-          
-          const newSlot: TimeSlot = {
-            id: `slot-${Date.now()}-${i}`,
-            startTime: new Date(`${dateString}T${slotStartTime.toTimeString().slice(0, 5)}`).toISOString(),
-            endTime: new Date(`${dateString}T${slotEndTime.toTimeString().slice(0, 5)}`).toISOString(),
-            date: dateString,
-            dayOfWeek: date.getDay(),
-            isAvailable: true,
-            isBooked: false,
-            listenerId: bulkData.listenerId,
-            listenerName: this.mockData.listeners.find(l => l.id === bulkData.listenerId)?.name,
-            listenerAvatar: this.mockData.listeners.find(l => l.id === bulkData.listenerId)?.avatar,
-            price: bulkData.price,
-            currency: 'USD',
-            timezone: bulkData.timezone,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          
-          newSlots.push(newSlot);
-          this.mockData.slots.push(newSlot);
-        }
+    try {
+      const response = await fetch(`${this.baseUrl}/slots/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bulkData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create bulk slots');
       }
+      
+      const data = await response.json();
+      return data.slots || data;
+    } catch (error) {
+      console.error('Error creating bulk slots:', error);
+      throw new Error('Failed to create bulk slots');
     }
-    
-    return newSlots;
   }
 
   // Listener Management
@@ -270,7 +246,17 @@ class AdminService {
 
   // Recurring Schedules
   async getRecurringSchedules(): Promise<RecurringSchedule[]> {
-    return this.mockData.schedules;
+    try {
+      const response = await fetch(`${this.baseUrl}/schedules`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch recurring schedules');
+      }
+      const data = await response.json();
+      return data.schedules || data || [];
+    } catch (error) {
+      console.error('Error fetching recurring schedules:', error);
+      return [];
+    }
   }
 
   async createRecurringSchedule(scheduleData: Partial<RecurringSchedule>): Promise<RecurringSchedule> {
@@ -318,19 +304,35 @@ class AdminService {
 
   // Admin Statistics
   async getAdminStats(): Promise<AdminStats> {
-    // Recalculate stats based on current data
-    const stats: AdminStats = {
-      totalSlots: this.mockData.slots.length,
-      availableSlots: this.mockData.slots.filter(slot => slot.isAvailable && !slot.isBooked).length,
-      bookedSlots: this.mockData.slots.filter(slot => slot.isBooked).length,
-      totalListeners: this.mockData.listeners.length,
-      activeListeners: this.mockData.listeners.filter(listener => listener.isActive).length,
-      totalBookings: this.mockData.slots.filter(slot => slot.isBooked).length,
-      revenue: this.mockData.slots.filter(slot => slot.isBooked).reduce((sum, slot) => sum + slot.price, 0),
-      currency: 'USD',
-    };
-    
-    return stats;
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/stats`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin stats');
+      }
+      const data = await response.json();
+      return data.stats || data || {
+        totalSlots: 0,
+        availableSlots: 0,
+        bookedSlots: 0,
+        totalListeners: 0,
+        activeListeners: 0,
+        totalBookings: 0,
+        revenue: 0,
+        currency: 'USD',
+      };
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      return {
+        totalSlots: 0,
+        availableSlots: 0,
+        bookedSlots: 0,
+        totalListeners: 0,
+        activeListeners: 0,
+        totalBookings: 0,
+        revenue: 0,
+        currency: 'USD',
+      };
+    }
   }
 
   // Utility Methods
