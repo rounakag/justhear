@@ -77,22 +77,15 @@ export const BookingHistory: React.FC<BookingHistoryProps> = ({ sessions, onRevi
         <div className="text-gray-400 text-6xl mb-4">📚</div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No completed sessions</h3>
         <p className="text-gray-600 mb-6">You haven't completed any sessions yet.</p>
-        <div>
-          <SchedulerModal>
-            <button data-scheduler-trigger style={{ display: 'none' }}>
-              Hidden Trigger
-            </button>
-          </SchedulerModal>
-          <button
-            onClick={() => {
-              const trigger = document.querySelector('[data-scheduler-trigger]') as HTMLElement;
-              if (trigger) trigger.click();
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Book Your First Session
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            // Simple redirect to home page where booking works
+            window.location.href = '/';
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Book Your First Session
+        </button>
       </div>
     );
   }
