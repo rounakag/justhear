@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "npx serve -s dist -l $PORT",
+    "start": "node static-server.js",
     "serve": "npx serve -s dist -l $PORT",
     "lint": "eslint .",
     "preview": "vite preview"
