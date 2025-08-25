@@ -83,7 +83,14 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
       console.log('🔍 DEBUG - Admin-created slots response status:', response.status);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch slots: ${response.statusText}`);
+        let errorMessage = response.statusText;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.warn('Could not parse error response:', parseError);
+        }
+        throw new Error(`Failed to fetch slots: ${errorMessage}`);
       }
       
       const data = await response.json();

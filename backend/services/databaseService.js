@@ -170,14 +170,42 @@ class DatabaseService {
   }
 
   async deleteAllTimeSlots() {
-    const { data, error } = await supabase
-      .from('time_slots')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all slots
-      .select();
-    
-    if (error) throw error;
-    return data || [];
+    try {
+      console.log('🔍 DEBUG - Database: Deleting all time slots');
+      
+      // First, get all slots to return count
+      const { data: allSlots, error: fetchError } = await supabase
+        .from('time_slots')
+        .select('id');
+      
+      if (fetchError) {
+        console.error('Error fetching slots for deletion:', fetchError);
+        throw fetchError;
+      }
+      
+      console.log('🔍 DEBUG - Database: Found', allSlots?.length || 0, 'slots to delete');
+      
+      if (!allSlots || allSlots.length === 0) {
+        return [];
+      }
+      
+      // Delete all slots
+      const { data, error } = await supabase
+        .from('time_slots')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all slots
+      
+      if (error) {
+        console.error('Error deleting all slots:', error);
+        throw error;
+      }
+      
+      console.log('🔍 DEBUG - Database: Successfully deleted all slots');
+      return allSlots; // Return the deleted slots for count
+    } catch (error) {
+      console.error('Exception in deleteAllTimeSlots:', error);
+      throw error;
+    }
   }
 
   // Bookings Management

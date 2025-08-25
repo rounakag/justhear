@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { SlotEditor } from './SlotEditor';
-import { BulkSlotCreator } from './BulkSlotCreator';
 import { SlotCalendar } from './SlotCalendar';
 import { SlotFilters } from './SlotFilters';
 import { AdminStats } from './AdminStats';
@@ -23,7 +22,6 @@ export const SlotManager: React.FC = () => {
 
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [showSlotEditor, setShowSlotEditor] = useState(false);
-  const [showBulkCreator, setShowBulkCreator] = useState(false);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
   const handleViewModeChange = (mode: 'calendar' | 'list') => {
@@ -80,8 +78,14 @@ export const SlotManager: React.FC = () => {
       console.log('🔍 DEBUG - Delete all response status:', response.status);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to delete all slots: ${errorData.error || response.statusText}`);
+        let errorMessage = response.statusText;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.warn('Could not parse error response:', parseError);
+        }
+        throw new Error(`Failed to delete all slots: ${errorMessage}`);
       }
 
       const result = await response.json();
@@ -105,10 +109,6 @@ export const SlotManager: React.FC = () => {
   const handleCloseSlotEditor = () => {
     setShowSlotEditor(false);
     setSelectedSlot(null);
-  };
-
-  const handleCloseBulkCreator = () => {
-    setShowBulkCreator(false);
   };
 
   if (error) {
@@ -255,14 +255,7 @@ export const SlotManager: React.FC = () => {
           />
         )}
 
-        {showBulkCreator && (
-          <BulkSlotCreator
-            listeners={listeners}
-            schedules={schedules}
-            onClose={handleCloseBulkCreator}
-            onSave={refreshData}
-          />
-        )}
+        {/* Bulk slot creation is disabled */}
       </div>
     </div>
   );
@@ -295,8 +288,14 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
       console.log('🔍 DEBUG - Delete response status:', response.status);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to delete slot: ${errorData.error || response.statusText}`);
+        let errorMessage = response.statusText;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.warn('Could not parse error response:', parseError);
+        }
+        throw new Error(`Failed to delete slot: ${errorMessage}`);
       }
 
       const result = await response.json();

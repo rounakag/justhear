@@ -199,7 +199,19 @@ app.delete('/api/slots/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
+    // Validate slot ID
+    if (!id || id === 'undefined' || id === 'null') {
+      return res.status(400).json({ error: 'Invalid slot ID' });
+    }
+    
+    console.log('🔍 DEBUG - Deleting slot with ID:', id);
+    
     const deletedSlot = await databaseService.deleteTimeSlot(id);
+    
+    if (!deletedSlot) {
+      return res.status(404).json({ error: 'Slot not found' });
+    }
+    
     res.json({ message: 'Slot deleted successfully', deletedSlot });
   } catch (error) {
     console.error('Error deleting slot:', error);
@@ -210,7 +222,12 @@ app.delete('/api/slots/:id', async (req, res) => {
 // Delete all slots (cleanup)
 app.delete('/api/slots', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Deleting all slots');
+    
     const deletedSlots = await databaseService.deleteAllTimeSlots();
+    
+    console.log('🔍 DEBUG - Deleted slots count:', deletedSlots.length);
+    
     res.json({ message: 'All slots deleted successfully', count: deletedSlots.length });
   } catch (error) {
     console.error('Error deleting all slots:', error);
