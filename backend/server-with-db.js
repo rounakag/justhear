@@ -112,19 +112,16 @@ app.post('/api/slots', async (req, res) => {
       duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
     };
     
-    console.log('Transformed slot data:', transformedData);
-    
     const slot = await databaseService.createTimeSlot(transformedData);
     
     // Generate Google Meet link for the slot
     try {
       const meetingDetails = await meetingService.generateGoogleMeetLink({
         slot,
-        userId: 'admin' // Admin is creating the slot
+        userId: 'admin'
       });
       
-      // Update slot with meeting link
-      const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, {
+      await databaseService.updateSlotMeetingLink(slot.id, {
         meeting_link: meetingDetails.meetingLink,
         meeting_id: meetingDetails.meetingId,
         meeting_provider: meetingDetails.meetingProvider
@@ -132,13 +129,11 @@ app.post('/api/slots', async (req, res) => {
       
       res.status(201).json({
         message: 'Slot created successfully with meeting link',
-        slot: updatedSlot
+        slot
       });
     } catch (meetingError) {
-      console.error('Error generating meeting link:', meetingError);
-      // Still return success even if meeting link generation fails
       res.status(201).json({
-        message: 'Slot created successfully (meeting link generation failed)',
+        message: 'Slot created successfully',
         slot
       });
     }
@@ -416,16 +411,11 @@ app.post('/api/setup/admin', async (req, res) => {
 // Admin setup endpoint
 app.post('/api/auth/setup-admin', async (req, res) => {
   try {
-    console.log('Setting up admin user...');
-    
-    // Check if admin already exists
     const existingAdmin = await databaseService.getUserByUsername('admin');
     if (existingAdmin) {
-      console.log('Admin user already exists');
-      return res.json({ message: 'Admin user already exists', admin: existingAdmin });
+      return res.json({ message: 'Admin user already exists' });
     }
     
-    // Create admin user
     const adminData = {
       username: 'admin',
       email: 'admin2@justhear.com',
@@ -435,12 +425,7 @@ app.post('/api/auth/setup-admin', async (req, res) => {
     };
     
     const adminUser = await databaseService.createUser(adminData);
-    console.log('Admin user created:', adminUser);
-    
-    res.json({ 
-      message: 'Admin user created successfully', 
-      admin: adminUser 
-    });
+    res.json({ message: 'Admin user created successfully' });
   } catch (error) {
     console.error('Error setting up admin:', error);
     res.status(500).json({ error: 'Failed to setup admin' });
@@ -451,90 +436,43 @@ app.post('/api/auth/setup-admin', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt:', { email, password: password ? '***' : 'undefined' });
     
-    // First, try to find user by email or username
+    // Find user by email or username
     let user = null;
     
-    // Check if it's an admin email
     if (email === 'admin@justhear.com' || email === 'admin2@justhear.com') {
-      console.log('Admin email detected, looking for admin user...');
       user = await databaseService.getUserByUsername('admin');
-      console.log('Admin user found:', user);
     } else {
-      // Try to find by username
-      console.log('Looking for user by username:', email);
       user = await databaseService.getUserByUsername(email);
-      console.log('User found:', user);
     }
     
     if (!user) {
-      console.log('No user found');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     
-    console.log('User found, checking role and password...');
-    console.log('User role:', user.role);
-    
-    // Check if it's an admin user
-    if (user.role === 'admin') {
-      console.log('Admin user detected, checking password...');
-      // For admin users, check against hashed password
-      const isValidPassword = await bcrypt.compare(password, user.password_hash);
-      console.log('Admin password check result:', isValidPassword);
-      
-      if (isValidPassword) {
-        const token = jwt.sign(
-          { userId: user.id, username: user.username, role: user.role },
-          process.env.JWT_SECRET || 'fallback-secret',
-          { expiresIn: '24h' }
-        );
-        
-        console.log('Admin login successful, returning token');
-        res.json({
-          message: 'Login successful',
-          user: { 
-            id: user.id, 
-            username: user.username, 
-            email: user.email, 
-            role: user.role 
-          },
-          token
-        });
-        return;
-      } else {
-        console.log('Admin password incorrect');
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-    } else {
-      // Regular user login
-      console.log('Regular user login, checking password...');
-      const isValidPassword = await bcrypt.compare(password, user.password_hash);
-      console.log('User password check result:', isValidPassword);
-      
-      if (!isValidPassword) {
-        console.log('User password incorrect');
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-      
-      const token = jwt.sign(
-        { userId: user.id, username: user.username, role: user.role },
-        process.env.JWT_SECRET || 'fallback-secret',
-        { expiresIn: '24h' }
-      );
-
-      console.log('User login successful, returning token');
-      res.json({
-        message: 'Login successful',
-        user: { 
-          id: user.id, 
-          username: user.username, 
-          email: user.email, 
-          role: user.role 
-        },
-        token
-      });
+    // Check password
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    // Generate token
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      message: 'Login successful',
+      user: { 
+        id: user.id, 
+        username: user.username, 
+        email: user.email, 
+        role: user.role 
+      },
+      token
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
