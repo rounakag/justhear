@@ -246,47 +246,87 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
 
   const formatTime = (time: string) => {
     try {
+      console.log('🔍 DEBUG - Raw time from database:', time, 'Type:', typeof time);
+      
       // Handle time strings like "14:00:00" or "14:00"
       const timeParts = time.split(':');
+      console.log('🔍 DEBUG - Time parts:', timeParts);
+      
       if (timeParts.length >= 2) {
         const hours = parseInt(timeParts[0], 10);
         const minutes = parseInt(timeParts[1], 10);
+        
+        console.log('🔍 DEBUG - Parsed hours:', hours, 'minutes:', minutes);
         
         // Create a date object with the time
         const date = new Date();
         date.setHours(hours, minutes, 0, 0);
         
-        return date.toLocaleTimeString('en-US', {
+        const result = date.toLocaleTimeString('en-US', {
           hour: '2-digit',
           minute: '2-digit',
           hour12: true,
         });
+        
+        console.log('🔍 DEBUG - Final time result:', result);
+        return result;
       }
       
       // Fallback to original method
-      return new Date(time).toLocaleTimeString('en-US', {
+      const fallbackResult = new Date(time).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
       });
+      
+      console.log('🔍 DEBUG - Fallback time result:', fallbackResult);
+      return fallbackResult;
     } catch (error) {
-      console.error('Error formatting time:', error, { time });
+      console.error('❌ ERROR formatting time:', error, { time });
       return 'Invalid Time';
     }
   };
 
   const formatDate = (date: string) => {
     try {
-      console.log('Formatting date:', date, 'Type:', typeof date);
-      const formatted = new Date(date).toLocaleDateString('en-US', {
+      console.log('🔍 DEBUG - Raw date from database:', date, 'Type:', typeof date);
+      
+      // Handle different date formats
+      let parsedDate: Date;
+      
+      if (typeof date === 'string') {
+        // If it's already a valid date string, use it directly
+        if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // YYYY-MM-DD format
+          parsedDate = new Date(date + 'T00:00:00');
+        } else if (date.includes('T')) {
+          // ISO format with time
+          parsedDate = new Date(date);
+        } else {
+          // Try parsing as is
+          parsedDate = new Date(date);
+        }
+      } else {
+        parsedDate = new Date(date);
+      }
+      
+      console.log('🔍 DEBUG - Parsed date object:', parsedDate);
+      console.log('🔍 DEBUG - Is valid date:', !isNaN(parsedDate.getTime()));
+      
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error('Invalid date object created');
+      }
+      
+      const formatted = parsedDate.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
       });
-      console.log('Formatted date result:', formatted);
+      
+      console.log('🔍 DEBUG - Final formatted result:', formatted);
       return formatted;
     } catch (error) {
-      console.error('Error formatting date:', error, 'Date value:', date);
+      console.error('❌ ERROR formatting date:', error, 'Date value:', date);
       return 'Invalid Date';
     }
   };
