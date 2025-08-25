@@ -68,25 +68,32 @@ export const SlotManager: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/slots`, {
+      console.log('🔍 DEBUG - Deleting all slots');
+      const apiUrl = 'https://justhear-backend.onrender.com';
+      const response = await fetch(`${apiUrl}/api/slots`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
+      console.log('🔍 DEBUG - Delete all response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to delete all slots');
+        const errorData = await response.json();
+        throw new Error(`Failed to delete all slots: ${errorData.error || response.statusText}`);
       }
 
       const result = await response.json();
+      console.log('🔍 DEBUG - Delete all result:', result);
+      
       alert(`Successfully deleted ${result.count} slots.`);
       
       // Refresh the slots list
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting all slots:', error);
-      alert('Failed to delete all slots. Please try again.');
+      console.error('❌ ERROR deleting all slots:', error);
+      alert(`Failed to delete all slots: ${error.message}`);
     }
   };
 
@@ -145,13 +152,6 @@ export const SlotManager: React.FC = () => {
               <p className="text-gray-600 mt-1">Manage time slots, listeners, and schedules</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => alert('Bulk slot creation is temporarily disabled')}
-                className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-500 border border-gray-300 rounded-md cursor-not-allowed sm:w-auto"
-                disabled
-              >
-                📅 Bulk Create (Disabled)
-              </button>
               <button
                 onClick={handleCreateSlot}
                 className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors sm:w-auto"
@@ -283,22 +283,31 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
     }
 
     try {
-      const response = await fetch(`${process.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/slots/${slotId}`, {
+      console.log('🔍 DEBUG - Deleting slot:', slotId);
+      const apiUrl = 'https://justhear-backend.onrender.com';
+      const response = await fetch(`${apiUrl}/api/slots/${slotId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
+      console.log('🔍 DEBUG - Delete response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to delete slot');
+        const errorData = await response.json();
+        throw new Error(`Failed to delete slot: ${errorData.error || response.statusText}`);
       }
 
+      const result = await response.json();
+      console.log('🔍 DEBUG - Delete result:', result);
+      
+      alert('Slot deleted successfully!');
       // Refresh the slots list
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting slot:', error);
-      alert('Failed to delete slot. Please try again.');
+      console.error('❌ ERROR deleting slot:', error);
+      alert(`Failed to delete slot: ${error.message}`);
     }
   };
   

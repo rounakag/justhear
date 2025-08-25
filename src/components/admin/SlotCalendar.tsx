@@ -23,11 +23,60 @@ export const SlotCalendar: React.FC<SlotCalendarProps> = ({
   };
 
   const formatTime = (time: string) => {
-    return new Date(time).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+    try {
+      console.log('🔍 DEBUG - Calendar formatting time:', time, 'Type:', typeof time);
+      
+      // BULLETPROOF TIME PARSING
+      if (!time || time === 'null' || time === 'undefined') {
+        throw new Error('Time is null, undefined, or empty');
+      }
+      
+      // Clean the time string
+      const cleanTime = time.toString().trim();
+      console.log('🔍 DEBUG - Calendar cleaned time:', cleanTime);
+      
+      // Handle time strings like "14:00:00" or "14:00"
+      const timeParts = cleanTime.split(':');
+      console.log('🔍 DEBUG - Calendar time parts:', timeParts);
+      
+      if (timeParts.length >= 2) {
+        const hours = parseInt(timeParts[0], 10);
+        const minutes = parseInt(timeParts[1], 10);
+        
+        console.log('🔍 DEBUG - Calendar parsed hours:', hours, 'minutes:', minutes);
+        
+        // Validate hours and minutes
+        if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+          throw new Error(`Invalid time values: hours=${hours}, minutes=${minutes}`);
+        }
+        
+        // Create a date object with the time
+        const date = new Date();
+        date.setHours(hours, minutes, 0, 0);
+        
+        const result = date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
+        
+        console.log('🔍 DEBUG - Calendar final time result:', result);
+        return result;
+      }
+      
+      // Fallback to original method
+      const fallbackResult = new Date(cleanTime).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+      
+      console.log('🔍 DEBUG - Calendar fallback time result:', fallbackResult);
+      return fallbackResult;
+    } catch (error) {
+      console.error('❌ ERROR Calendar formatting time:', error, 'Time value:', time);
+      return 'Invalid Time';
+    }
   };
 
   const getDaysInMonth = (date: Date) => {

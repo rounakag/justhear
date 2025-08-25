@@ -75,17 +75,25 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
     setLoading(true);
     try {
       console.log('🔍 DEBUG - Fetching admin-created slots for users...');
-      const response = await apiService.getAdminCreatedSlots();
-      console.log('🔍 DEBUG - Admin-created slots response:', response);
       
-      if (response.data && Array.isArray(response.data)) {
-        setAvailableSlots(response.data as TimeSlot[]);
-        console.log('🔍 DEBUG - Set available slots:', response.data.length, 'slots');
-      } else if (response.data && typeof response.data === 'object' && 'slots' in response.data && Array.isArray((response.data as any).slots)) {
-        setAvailableSlots((response.data as any).slots as TimeSlot[]);
-        console.log('🔍 DEBUG - Set available slots from slots property:', (response.data as any).slots.length, 'slots');
+      // Use direct API call with correct URL
+      const apiUrl = 'https://justhear-backend.onrender.com';
+      const response = await fetch(`${apiUrl}/api/slots/admin-created`);
+      
+      console.log('🔍 DEBUG - Admin-created slots response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch slots: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('🔍 DEBUG - Admin-created slots data:', data);
+      
+      if (data.slots && Array.isArray(data.slots)) {
+        setAvailableSlots(data.slots as TimeSlot[]);
+        console.log('🔍 DEBUG - Set available slots:', data.slots.length, 'slots');
       } else {
-        console.log('🔍 DEBUG - No slots found in response:', response);
+        console.log('🔍 DEBUG - No slots found in response:', data);
         setAvailableSlots([]);
       }
     } catch (error) {
