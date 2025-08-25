@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { UserSession } from '@/types/user.types';
 
 
@@ -8,6 +9,7 @@ interface BookingHistoryProps {
 }
 
 export const BookingHistory: React.FC<BookingHistoryProps> = ({ sessions, onReviewSession }) => {
+  const navigate = useNavigate();
   const formatDateTime = (date: string, startTime: string) => {
     try {
       // Create a proper date string by combining date and time
@@ -79,8 +81,8 @@ export const BookingHistory: React.FC<BookingHistoryProps> = ({ sessions, onRevi
         <p className="text-gray-600 mb-6">You haven't completed any sessions yet.</p>
         <button
           onClick={() => {
-            // Redirect to home page where booking works perfectly
-            window.location.href = '/';
+            // Use React Router navigation to maintain session
+            navigate('/');
           }}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >

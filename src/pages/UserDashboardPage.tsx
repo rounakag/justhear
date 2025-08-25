@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUserDashboard } from '@/hooks/useUserDashboard';
 import { UserStats } from '@/components/user/UserStats';
 import { UpcomingSessions } from '@/components/user/UpcomingSessions';
@@ -9,6 +10,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import type { UserSession } from '@/types/user.types';
 
 export const UserDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const {
     stats,
     loading,
@@ -114,8 +116,8 @@ export const UserDashboardPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => {
-                  // Redirect to home page where booking works perfectly
-                  window.location.href = '/';
+                  // Use React Router navigation to maintain session
+                  navigate('/');
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
               >

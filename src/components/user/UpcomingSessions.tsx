@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { UserSession } from '@/types/user.types';
 
 
@@ -8,6 +9,7 @@ interface UpcomingSessionsProps {
 }
 
 export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, onCancelBooking }) => {
+  const navigate = useNavigate();
   const [timeUntilSessions, setTimeUntilSessions] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -93,8 +95,8 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
         <p className="text-gray-600 mb-6">You don't have any upcoming sessions scheduled.</p>
         <button
           onClick={() => {
-            // Redirect to home page where booking works perfectly
-            window.location.href = '/';
+            // Use React Router navigation to maintain session
+            navigate('/');
           }}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
