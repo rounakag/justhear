@@ -176,52 +176,132 @@ class AdminService {
   }
 
   async getListener(id: string): Promise<Listener> {
-    const listener = this.mockData.listeners.find(l => l.id === id);
-    if (!listener) throw new Error('Listener not found');
-    return listener;
+    try {
+      const response = await fetch(`${this.baseUrl}/users/${id}`);
+      if (!response.ok) {
+        throw new Error('Listener not found');
+      }
+      const data = await response.json();
+      return {
+        id: data.id,
+        name: data.username,
+        email: data.email,
+        avatar: '/api/placeholder/150/150',
+        bio: '',
+        specialties: [],
+        languages: [],
+        rating: 0,
+        totalSessions: 0,
+        isActive: data.is_active,
+        availability: [],
+        hourlyRate: 50,
+        currency: 'USD',
+        timezone: 'America/New_York',
+        createdAt: data.created_at,
+        updatedAt: data.updated_at || data.created_at,
+      };
+    } catch (error) {
+      console.error('Error fetching listener:', error);
+      throw new Error('Failed to fetch listener');
+    }
   }
 
   async createListener(listenerData: Partial<Listener>): Promise<Listener> {
-    const newListener: Listener = {
-      id: `listener-${Date.now()}`,
-      name: listenerData.name || '',
-      email: listenerData.email || '',
-      avatar: listenerData.avatar,
-      bio: listenerData.bio,
-      specialties: listenerData.specialties || [],
-      languages: listenerData.languages || [],
-      rating: listenerData.rating || 0,
-      totalSessions: listenerData.totalSessions || 0,
-      isActive: listenerData.isActive ?? true,
-      availability: listenerData.availability || [],
-      hourlyRate: listenerData.hourlyRate || 50,
-      currency: listenerData.currency || 'USD',
-      timezone: listenerData.timezone || 'America/New_York',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    this.mockData.listeners.push(newListener);
-    return newListener;
+    try {
+      const response = await fetch(`${this.baseUrl}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: listenerData.name,
+          email: listenerData.email,
+          password: 'defaultpassword123',
+          role: 'listener',
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create listener');
+      }
+      
+      const data = await response.json();
+      return {
+        id: data.id,
+        name: data.username,
+        email: data.email,
+        avatar: '/api/placeholder/150/150',
+        bio: listenerData.bio || '',
+        specialties: listenerData.specialties || [],
+        languages: listenerData.languages || [],
+        rating: listenerData.rating || 0,
+        totalSessions: listenerData.totalSessions || 0,
+        isActive: true,
+        availability: listenerData.availability || [],
+        hourlyRate: listenerData.hourlyRate || 50,
+        currency: listenerData.currency || 'USD',
+        timezone: listenerData.timezone || 'America/New_York',
+        createdAt: data.created_at,
+        updatedAt: data.updated_at || data.created_at,
+      };
+    } catch (error) {
+      console.error('Error creating listener:', error);
+      throw new Error('Failed to create listener');
+    }
   }
 
   async updateListener(id: string, listenerData: Partial<Listener>): Promise<Listener> {
-    const listenerIndex = this.mockData.listeners.findIndex(l => l.id === id);
-    if (listenerIndex === -1) throw new Error('Listener not found');
-    
-    this.mockData.listeners[listenerIndex] = {
-      ...this.mockData.listeners[listenerIndex],
-      ...listenerData,
-      updatedAt: new Date().toISOString(),
-    };
-    
-    return this.mockData.listeners[listenerIndex];
+    try {
+      const response = await fetch(`${this.baseUrl}/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(listenerData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update listener');
+      }
+      
+      const data = await response.json();
+      return {
+        id: data.id,
+        name: data.username,
+        email: data.email,
+        avatar: '/api/placeholder/150/150',
+        bio: listenerData.bio || '',
+        specialties: listenerData.specialties || [],
+        languages: listenerData.languages || [],
+        rating: listenerData.rating || 0,
+        totalSessions: listenerData.totalSessions || 0,
+        isActive: data.is_active,
+        availability: listenerData.availability || [],
+        hourlyRate: listenerData.hourlyRate || 50,
+        currency: listenerData.currency || 'USD',
+        timezone: listenerData.timezone || 'America/New_York',
+        createdAt: data.created_at,
+        updatedAt: data.updated_at || data.created_at,
+      };
+    } catch (error) {
+      console.error('Error updating listener:', error);
+      throw new Error('Failed to update listener');
+    }
   }
 
   async deleteListener(id: string): Promise<void> {
-    const listenerIndex = this.mockData.listeners.findIndex(l => l.id === id);
-    if (listenerIndex === -1) throw new Error('Listener not found');
-    this.mockData.listeners.splice(listenerIndex, 1);
+    try {
+      const response = await fetch(`${this.baseUrl}/users/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete listener');
+      }
+    } catch (error) {
+      console.error('Error deleting listener:', error);
+      throw new Error('Failed to delete listener');
+    }
   }
 
   // Listener Availability
@@ -260,46 +340,62 @@ class AdminService {
   }
 
   async createRecurringSchedule(scheduleData: Partial<RecurringSchedule>): Promise<RecurringSchedule> {
-    const newSchedule: RecurringSchedule = {
-      id: `schedule-${Date.now()}`,
-      name: scheduleData.name || '',
-      description: scheduleData.description,
-      startDate: scheduleData.startDate || '',
-      endDate: scheduleData.endDate || '',
-      daysOfWeek: scheduleData.daysOfWeek || [],
-      startTime: scheduleData.startTime || '09:00',
-      endTime: scheduleData.endTime || '17:00',
-      duration: scheduleData.duration || 60,
-      listenerId: scheduleData.listenerId,
-      price: scheduleData.price || 50,
-      currency: scheduleData.currency || 'USD',
-      timezone: scheduleData.timezone || 'America/New_York',
-      isActive: scheduleData.isActive ?? true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    this.mockData.schedules.push(newSchedule);
-    return newSchedule;
+    try {
+      const response = await fetch(`${this.baseUrl}/schedules`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scheduleData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create recurring schedule');
+      }
+      
+      const data = await response.json();
+      return data.schedule || data;
+    } catch (error) {
+      console.error('Error creating recurring schedule:', error);
+      throw new Error('Failed to create recurring schedule');
+    }
   }
 
   async updateRecurringSchedule(id: string, scheduleData: Partial<RecurringSchedule>): Promise<RecurringSchedule> {
-    const scheduleIndex = this.mockData.schedules.findIndex(s => s.id === id);
-    if (scheduleIndex === -1) throw new Error('Recurring schedule not found');
-    
-    this.mockData.schedules[scheduleIndex] = {
-      ...this.mockData.schedules[scheduleIndex],
-      ...scheduleData,
-      updatedAt: new Date().toISOString(),
-    };
-    
-    return this.mockData.schedules[scheduleIndex];
+    try {
+      const response = await fetch(`${this.baseUrl}/schedules/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scheduleData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update recurring schedule');
+      }
+      
+      const data = await response.json();
+      return data.schedule || data;
+    } catch (error) {
+      console.error('Error updating recurring schedule:', error);
+      throw new Error('Failed to update recurring schedule');
+    }
   }
 
   async deleteRecurringSchedule(id: string): Promise<void> {
-    const scheduleIndex = this.mockData.schedules.findIndex(s => s.id === id);
-    if (scheduleIndex === -1) throw new Error('Recurring schedule not found');
-    this.mockData.schedules.splice(scheduleIndex, 1);
+    try {
+      const response = await fetch(`${this.baseUrl}/schedules/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete recurring schedule');
+      }
+    } catch (error) {
+      console.error('Error deleting recurring schedule:', error);
+      throw new Error('Failed to delete recurring schedule');
+    }
   }
 
   // Admin Statistics
