@@ -108,10 +108,16 @@ export function useAdminSlots(): UseAdminSlotsReturn {
   const createSlot = useCallback(async (data: SlotEditorData) => {
     setLoading(true);
     try {
-      await adminService.createTimeSlot(data);
+      console.log('Creating slot with data:', data);
+      const result = await adminService.createTimeSlot(data);
+      console.log('Slot created successfully:', result);
       await fetchData();
     } catch (error) {
+      console.error('Failed to create slot:', error);
       setError(error instanceof Error ? error.message : 'Failed to create slot');
+      throw error; // Re-throw to show error in UI
+    } finally {
+      setLoading(false);
     }
   }, [fetchData, setLoading, setError]);
 

@@ -78,6 +78,16 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
       newErrors.endTime = 'End time is required';
     }
 
+    // Check if selected time is in the past for today's date
+    if (formData.date && formData.startTime) {
+      const selectedDateTime = new Date(`${formData.date}T${formData.startTime}`);
+      const now = new Date();
+      
+      if (selectedDateTime <= now) {
+        newErrors.startTime = 'Cannot select past times';
+      }
+    }
+
     if (formData.startTime && formData.endTime) {
       const start = new Date(`2000-01-01T${formData.startTime}`);
       const end = new Date(`2000-01-01T${formData.endTime}`);
@@ -103,6 +113,7 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
     }
 
     try {
+      console.log('Submitting slot data:', formData);
       if (slot) {
         await updateSlot(slot.id, formData);
       } else {
@@ -112,6 +123,7 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
       onClose();
     } catch (error) {
       console.error('Failed to save slot:', error);
+      alert(`Failed to save slot: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
