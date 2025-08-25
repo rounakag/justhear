@@ -14,14 +14,22 @@ class DatabaseService {
   }
 
   async getUserByUsername(username) {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('username', username)
-      .maybeSingle();
-    
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Database error in getUserByUsername:', error);
+        return null;
+      }
+      return data;
+    } catch (error) {
+      console.error('Exception in getUserByUsername:', error);
+      return null;
+    }
   }
 
   async getUserById(id) {
