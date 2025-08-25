@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { UserSession } from '@/types/user.types';
 
 
@@ -9,7 +8,6 @@ interface BookingHistoryProps {
 }
 
 export const BookingHistory: React.FC<BookingHistoryProps> = ({ sessions, onReviewSession }) => {
-  const navigate = useNavigate();
   const formatDateTime = (date: string, startTime: string) => {
     try {
       // Create a proper date string by combining date and time

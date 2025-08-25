@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useUserDashboard } from '@/hooks/useUserDashboard';
 import { UserStats } from '@/components/user/UserStats';
 import { UpcomingSessions } from '@/components/user/UpcomingSessions';
@@ -10,7 +9,6 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import type { UserSession } from '@/types/user.types';
 
 export const UserDashboardPage: React.FC = () => {
-  const navigate = useNavigate();
   const {
     stats,
     loading,

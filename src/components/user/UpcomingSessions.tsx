@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { UserSession } from '@/types/user.types';
 
 
@@ -9,7 +8,6 @@ interface UpcomingSessionsProps {
 }
 
 export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, onCancelBooking }) => {
-  const navigate = useNavigate();
   const [timeUntilSessions, setTimeUntilSessions] = useState<Record<string, number>>({});
 
   useEffect(() => {
