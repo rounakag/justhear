@@ -90,6 +90,23 @@ class DatabaseService {
     return data;
   }
 
+  async getAdminCreatedSlots() {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .select(`
+        *,
+        listener:users!time_slots_listener_id_fkey(username)
+      `)
+      .not('listener_id', 'is', null) // Only slots with assigned listeners (admin-created)
+      .eq('status', 'available')
+      .gte('date', new Date().toISOString().split('T')[0])
+      .order('date', { ascending: true })
+      .order('start_time', { ascending: true });
+    
+    if (error) throw error;
+    return data;
+  }
+
   async getSlotsByListener(listenerId) {
     const { data, error } = await supabase
       .from('time_slots')
@@ -106,6 +123,22 @@ class DatabaseService {
     const { data, error } = await supabase
       .from('time_slots')
       .update({ status })
+      .eq('id', slotId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateSlotMeetingLink(slotId, meetingData) {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .update({
+        meeting_link: meetingData.meeting_link,
+        meeting_id: meetingData.meeting_id,
+        meeting_provider: meetingData.meeting_provider
+      })
       .eq('id', slotId)
       .select()
       .single();

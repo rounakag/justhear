@@ -51,6 +51,10 @@ class ApiService {
     return this.request('slots');
   }
 
+  async getAdminCreatedSlots() {
+    return this.request('slots/admin-created');
+  }
+
   async getSlot(_id: number) {
     return this.request('slots');
   }

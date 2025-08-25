@@ -59,6 +59,20 @@ app.get('/api/slots', async (req, res) => {
   }
 });
 
+// Get admin-created slots (for users)
+app.get('/api/slots/admin-created', async (req, res) => {
+  try {
+    const slots = await databaseService.getAdminCreatedSlots();
+    res.json({
+      slots,
+      total: slots.length
+    });
+  } catch (error) {
+    console.error('Error fetching admin-created slots:', error);
+    res.status(500).json({ error: 'Failed to fetch admin-created slots' });
+  }
+});
+
 // Get slots by listener (admin only)
 app.get('/api/slots/listener/:listenerId', async (req, res) => {
   try {
@@ -101,10 +115,33 @@ app.post('/api/slots', async (req, res) => {
     console.log('Transformed slot data:', transformedData);
     
     const slot = await databaseService.createTimeSlot(transformedData);
-    res.status(201).json({
-      message: 'Slot created successfully',
-      slot
-    });
+    
+    // Generate Google Meet link for the slot
+    try {
+      const meetingDetails = await meetingService.generateGoogleMeetLink({
+        slot,
+        userId: 'admin' // Admin is creating the slot
+      });
+      
+      // Update slot with meeting link
+      const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, {
+        meeting_link: meetingDetails.meetingLink,
+        meeting_id: meetingDetails.meetingId,
+        meeting_provider: meetingDetails.meetingProvider
+      });
+      
+      res.status(201).json({
+        message: 'Slot created successfully with meeting link',
+        slot: updatedSlot
+      });
+    } catch (meetingError) {
+      console.error('Error generating meeting link:', meetingError);
+      // Still return success even if meeting link generation fails
+      res.status(201).json({
+        message: 'Slot created successfully (meeting link generation failed)',
+        slot
+      });
+    }
   } catch (error) {
     console.error('Error creating slot:', error);
     res.status(500).json({ 
