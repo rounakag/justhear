@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SlotManager } from '@/components/admin/SlotManager';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { SchedulerModal } from '@/components/SchedulerModal';
 
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -65,15 +66,13 @@ export const AdminDashboardPage: React.FC = () => {
               )}
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => {
-                  // Simple redirect to home page
-                  window.location.href = '/';
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                🎧 Book New Session
-              </button>
+              <SchedulerModal>
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  🎧 Book New Session
+                </button>
+              </SchedulerModal>
               <button
                 onClick={() => navigate('/')}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
