@@ -9,6 +9,14 @@ const databaseService = require('./services/databaseService');
 const meetingService = require('./services/meetingService');
 const { supabase } = require('./config/supabase');
 
+// Helper function to calculate duration in minutes
+function calculateDuration(startTime, endTime) {
+  const start = new Date(`2000-01-01T${startTime}`);
+  const end = new Date(`2000-01-01T${endTime}`);
+  const diffMs = end - start;
+  return Math.round(diffMs / (1000 * 60)); // Convert to minutes
+}
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
@@ -86,7 +94,8 @@ app.post('/api/slots', async (req, res) => {
       end_time: slotData.endTime,
       price: slotData.price || 50,
       status: 'available',
-      listener_id: slotData.listenerId || null
+      listener_id: slotData.listenerId || null,
+      duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
     };
     
     console.log('Transformed slot data:', transformedData);
