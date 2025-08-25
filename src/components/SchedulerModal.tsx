@@ -1,18 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth.tsx";
 import { TermsAndConditions } from "./TermsAndConditions";
+import { apiService } from "@/services/api";
 
-const SLOTS: Record<string, string[]> = {
-  "2025-08-19": ["09:00", "10:30", "14:00", "15:30", "17:00", "19:00", "20:30"],
-  "2025-08-20": ["10:00", "11:30", "13:00", "16:00", "18:00", "19:30", "21:00"],
-  "2025-08-21": ["08:30", "10:00", "12:00", "14:30", "16:30", "18:30", "20:00"],
-  "2025-08-22": ["09:30", "11:00", "13:30", "15:00", "17:30", "19:00", "21:30"],
-  "2025-08-23": ["10:30", "12:00", "14:00", "15:30", "17:00", "18:30", "20:30"],
-  "2025-08-24": ["09:00", "10:30", "12:30", "14:30", "16:00", "19:30", "21:00"],
-  "2025-08-25": ["08:00", "11:00", "13:00", "15:00", "17:30", "19:00", "20:30"]
-};
+interface TimeSlot {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  price: number;
+  listener_id: string;
+  listener?: {
+    username: string;
+  };
+}
 
 interface SchedulerModalProps {
   triggerClassName?: string;
@@ -27,6 +31,8 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showTerms, setShowTerms] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleOpen = () => {
     // Call the onOpen callback if provided
@@ -58,7 +64,35 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
     };
   });
 
-  const times = selectedDate ? SLOTS[selectedDate] || [] : [];
+  // Fetch available slots when modal opens
+  useEffect(() => {
+    if (open) {
+      fetchAvailableSlots();
+    }
+  }, [open]);
+
+  const fetchAvailableSlots = async () => {
+    setLoading(true);
+    try {
+      const response = await apiService.getSlots();
+      if (response.data && Array.isArray(response.data)) {
+        setAvailableSlots(response.data as TimeSlot[]);
+      }
+    } catch (error) {
+      console.error('Error fetching slots:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get available times for selected date
+  const getAvailableTimesForDate = (date: string): string[] => {
+    return availableSlots
+      .filter(slot => slot.date === date && slot.status === 'available')
+      .map(slot => slot.start_time);
+  };
+
+  const times = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
 
   const handleBooking = () => {
     if (!selectedDate || !selectedTime) return;
@@ -131,9 +165,13 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
             <div className="mb-6">
               <h3 className="font-semibold mb-3 text-gray-800">Available Time Slots</h3>
               <div className="grid grid-cols-3 gap-2">
-                {selectedDate ? (
+                {loading ? (
+                  <div className="col-span-3 text-center text-gray-500 py-4">
+                    Loading available slots...
+                  </div>
+                ) : selectedDate ? (
                   times.length > 0 ? (
-                    times.map((tm) => (
+                    times.map((tm: string) => (
                       <Button
                         key={tm}
                         variant={selectedTime === tm ? "default" : "outline"}
