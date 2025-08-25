@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { UserSession } from '@/types/user.types';
-import { SchedulerModal } from '@/components/SchedulerModal';
 
 interface UpcomingSessionsProps {
   sessions: UserSession[];
