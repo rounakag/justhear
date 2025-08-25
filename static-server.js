@@ -1,7 +1,6 @@
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { createServer } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,9 +16,7 @@ app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
-const server = createServer(app);
-
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Static file server running on port ${PORT}`);
   console.log(`Serving files from: ${join(__dirname, 'dist')}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
