@@ -18,6 +18,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  clearStorage: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,17 +29,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is logged in on app start
     const token = localStorage.getItem('authToken');
     const savedUser = localStorage.getItem('user');
     
     console.log('AuthProvider: Checking localStorage:', { hasToken: !!token, hasUser: !!savedUser });
     
+    // Clear any existing data to prevent default login
     if (token && savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
-        console.log('AuthProvider: Found saved user:', parsedUser.username);
-        setUser(parsedUser);
+        // Only restore if it's a valid user and not a test user
+        if (parsedUser.username && parsedUser.username !== 'rounak338') {
+          console.log('AuthProvider: Found saved user:', parsedUser.username);
+          setUser(parsedUser);
+        } else {
+          console.log('AuthProvider: Clearing invalid user data');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+        }
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('authToken');
@@ -105,6 +113,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('adminEmail');
+  };
+
+  const clearStorage = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('adminEmail');
   };
 
   const value: AuthContextType = {
@@ -114,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signup,
     signUp: signup,
     logout,
+    clearStorage,
     isAuthenticated: !!user,
     isLoading: loading,
     error,
