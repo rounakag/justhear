@@ -1,19 +1,21 @@
 export interface TimeSlot {
   id: string;
-  startTime: string; // ISO string
-  endTime: string; // ISO string
+  start_time: string; // Database field name
+  end_time: string; // Database field name
+  startTime?: string; // Legacy field for compatibility
+  endTime?: string; // Legacy field for compatibility
   date: string; // YYYY-MM-DD
-  dayOfWeek: number; // 0-6 (Sunday-Saturday)
-  isAvailable: boolean;
-  isBooked: boolean;
+  dayOfWeek?: number; // 0-6 (Sunday-Saturday)
+  isAvailable?: boolean;
+  isBooked?: boolean;
   listenerId?: string;
   listenerName?: string;
   listenerAvatar?: string;
   price: number;
-  currency: string;
-  timezone: string;
-  createdAt: string;
-  updatedAt: string;
+  currency?: string;
+  timezone?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Listener {

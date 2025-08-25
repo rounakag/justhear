@@ -341,24 +341,7 @@ export const BulkSlotCreator: React.FC<BulkSlotCreatorProps> = ({
             {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
           </div>
 
-          {/* Timezone */}
-          <div>
-            <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1">
-              Timezone
-            </label>
-            <select
-              id="timezone"
-              value={formData.timezone}
-              onChange={(e) => handleInputChange('timezone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="America/New_York">Eastern Time (ET)</option>
-              <option value="America/Chicago">Central Time (CT)</option>
-              <option value="America/Denver">Mountain Time (MT)</option>
-              <option value="America/Los_Angeles">Pacific Time (PT)</option>
-              <option value="UTC">UTC</option>
-            </select>
-          </div>
+
 
           {/* Summary */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
