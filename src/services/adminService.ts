@@ -8,7 +8,7 @@ import type {
   SlotEditorData,
   AdminStats 
 } from '@/types/admin.types';
-import { apiService } from './api';
+
 
 class AdminService {
   private baseUrl = 'https://justhear-backend.onrender.com/api';
@@ -34,10 +34,10 @@ class AdminService {
         slots = slots.filter((slot: TimeSlot) => slot.listenerId === filters.listenerId);
       }
       if (filters?.isAvailable !== undefined) {
-        slots = slots.filter((slot: TimeSlot) => slot.status === 'available');
+        slots = slots.filter((slot: TimeSlot) => slot.isAvailable === filters.isAvailable);
       }
       if (filters?.isBooked !== undefined) {
-        slots = slots.filter((slot: TimeSlot) => slot.status === 'booked');
+        slots = slots.filter((slot: TimeSlot) => slot.isBooked === filters.isBooked);
       }
 
       return slots;
