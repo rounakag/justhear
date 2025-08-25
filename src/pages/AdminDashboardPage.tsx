@@ -66,15 +66,7 @@ export const AdminDashboardPage: React.FC = () => {
               )}
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => {
-                  // Use React Router navigation to maintain session
-                  navigate('/');
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                🎧 Book New Session
-              </button>
+
               <button
                 onClick={() => navigate('/')}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
