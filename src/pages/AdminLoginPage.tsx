@@ -64,7 +64,7 @@ export const AdminLoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="admin@justhear.com"
+                  placeholder="admin2@justhear.com"
                 />
               </div>
             </div>
@@ -96,9 +96,9 @@ export const AdminLoginPage: React.FC = () => {
 
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
               <p className="text-sm text-blue-600">
-                <strong>Demo Credentials:</strong><br />
-                Email: admin@justhear.com<br />
-                Password: JustHearAdmin2024!
+                <strong>Admin Credentials:</strong><br />
+                Email: admin2@justhear.com<br />
+                Password: admin123
               </p>
             </div>
 
