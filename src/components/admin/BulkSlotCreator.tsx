@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/design-system/components';
+
 import { useAdminSlots } from '@/hooks/useAdminSlots';
 import type { BulkSlotCreation, Listener, RecurringSchedule } from '@/types/admin.types';
 
