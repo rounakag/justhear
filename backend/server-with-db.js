@@ -413,88 +413,128 @@ app.post('/api/setup/admin', async (req, res) => {
   }
 });
 
+// Admin setup endpoint
+app.post('/api/auth/setup-admin', async (req, res) => {
+  try {
+    console.log('Setting up admin user...');
+    
+    // Check if admin already exists
+    const existingAdmin = await databaseService.getUserByUsername('admin');
+    if (existingAdmin) {
+      console.log('Admin user already exists');
+      return res.json({ message: 'Admin user already exists', admin: existingAdmin });
+    }
+    
+    // Create admin user
+    const adminData = {
+      username: 'admin',
+      email: 'admin2@justhear.com',
+      password_hash: await bcrypt.hash('admin123', 10),
+      role: 'admin',
+      is_active: true
+    };
+    
+    const adminUser = await databaseService.createUser(adminData);
+    console.log('Admin user created:', adminUser);
+    
+    res.json({ 
+      message: 'Admin user created successfully', 
+      admin: adminUser 
+    });
+  } catch (error) {
+    console.error('Error setting up admin:', error);
+    res.status(500).json({ error: 'Failed to setup admin' });
+  }
+});
+
 // Auth endpoints
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log('Login attempt:', { email, password: password ? '***' : 'undefined' });
     
-    // Admin login - check if user exists and is admin
-    // Try to find admin by email first, then by username
-    let adminUser = null;
+    // First, try to find user by email or username
+    let user = null;
     
     // Check if it's an admin email
     if (email === 'admin@justhear.com' || email === 'admin2@justhear.com') {
       console.log('Admin email detected, looking for admin user...');
-      adminUser = await databaseService.getUserByUsername('admin');
-      console.log('Admin user found:', adminUser);
+      user = await databaseService.getUserByUsername('admin');
+      console.log('Admin user found:', user);
     } else {
       // Try to find by username
       console.log('Looking for user by username:', email);
-      adminUser = await databaseService.getUserByUsername(email);
-      console.log('User found:', adminUser);
+      user = await databaseService.getUserByUsername(email);
+      console.log('User found:', user);
     }
     
-    if (adminUser && adminUser.role === 'admin') {
-      console.log('Admin user found, checking password...');
-      // For admin users, we'll use a simple password check for now
-      // In production, this should be properly hashed
-      const isValidPassword = password === 'admin123' || password === 'JustHearAdmin2024!';
-      console.log('Password check result:', isValidPassword);
+    if (!user) {
+      console.log('No user found');
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    console.log('User found, checking role and password...');
+    console.log('User role:', user.role);
+    
+    // Check if it's an admin user
+    if (user.role === 'admin') {
+      console.log('Admin user detected, checking password...');
+      // For admin users, check against hashed password
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      console.log('Admin password check result:', isValidPassword);
+      
       if (isValidPassword) {
         const token = jwt.sign(
-          { userId: adminUser.id, username: adminUser.username, role: adminUser.role },
+          { userId: user.id, username: user.username, role: user.role },
           process.env.JWT_SECRET || 'fallback-secret',
           { expiresIn: '24h' }
         );
         
+        console.log('Admin login successful, returning token');
         res.json({
           message: 'Login successful',
           user: { 
-            id: adminUser.id, 
-            username: adminUser.username, 
-            email: adminUser.email, 
-            role: adminUser.role 
+            id: user.id, 
+            username: user.username, 
+            email: user.email, 
+            role: user.role 
           },
           token
         });
         return;
+      } else {
+        console.log('Admin password incorrect');
+        return res.status(401).json({ error: 'Invalid credentials' });
       }
-    }
-
-    // Try to find user by email or username
-    let users;
-    if (email.includes('@')) {
-      users = await databaseService.getUserByUsername(email.split('@')[0]);
     } else {
-      users = await databaseService.getUserByUsername(email);
-    }
-    
-    if (!users) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+      // Regular user login
+      console.log('Regular user login, checking password...');
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      console.log('User password check result:', isValidPassword);
+      
+      if (!isValidPassword) {
+        console.log('User password incorrect');
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      const token = jwt.sign(
+        { userId: user.id, username: user.username, role: user.role },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '24h' }
+      );
 
-    // Verify password hash
-    const isValidPassword = await bcrypt.compare(password, users.password_hash);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      console.log('User login successful, returning token');
+      res.json({
+        message: 'Login successful',
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email, 
+          role: user.role 
+        },
+        token
+      });
     }
-    const token = jwt.sign(
-      { userId: users.id, username: users.username, role: users.role },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      message: 'Login successful',
-      user: { 
-        id: users.id, 
-        username: users.username, 
-        email: users.email, 
-        role: users.role 
-      },
-      token
-    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });

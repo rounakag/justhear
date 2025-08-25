@@ -102,6 +102,31 @@ export const AdminLoginPage: React.FC = () => {
               </p>
             </div>
 
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <p className="text-sm text-yellow-600">
+                <strong>First Time Setup:</strong><br />
+                If admin login fails, click the button below to create admin user
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const response = await fetch('https://justhear-backend.onrender.com/api/auth/setup-admin', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                  } catch (error) {
+                    alert('Failed to setup admin: ' + error);
+                  }
+                }}
+                className="mt-2 w-full px-4 py-2 text-sm font-medium text-yellow-800 bg-yellow-100 border border-yellow-300 rounded-md hover:bg-yellow-200"
+              >
+                Setup Admin User
+              </button>
+            </div>
+
             <div>
               <button
                 type="submit"
