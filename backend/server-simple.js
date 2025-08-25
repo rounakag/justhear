@@ -85,9 +85,12 @@ app.post('/api/auth/login', (req, res) => {
 app.post('/api/auth/signup', (req, res) => {
   const { username, email, password, role } = req.body;
   
+  // Generate anonymous email if not provided
+  const userEmail = email || `${username}@anonymous.com`;
+  
   res.json({
     message: 'User created successfully',
-    user: { id: Math.floor(Math.random() * 1000) + 4, username, email, role: role || 'user' },
+    user: { id: Math.floor(Math.random() * 1000) + 4, username, email: userEmail, role: role || 'user' },
     token: 'mock-jwt-token-new-user'
   });
 });
