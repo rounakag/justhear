@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth.tsx";
 import { TermsAndConditions } from "../TermsAndConditions";
 
 const signUpSchema = z.object({
@@ -12,6 +12,9 @@ const signUpSchema = z.object({
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username must be less than 20 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  email: z
+    .string()
+    .email("Please enter a valid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -78,7 +81,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
       return;
     }
     
-    const success = await signUp(data.username, data.password);
+    const success = await signUp(data.username, data.email, data.password);
     if (success) {
       onSuccess();
     }
@@ -131,6 +134,21 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           <p className={`text-sm mt-1 ${getUsernameStatusColor()}`}>
             {getUsernameStatusText()}
           </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Email *
+        </label>
+        <input
+          {...register("email")}
+          type="email"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Enter your email address"
+        />
+        {errors.email && (
+          <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
         )}
       </div>
 

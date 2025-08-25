@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/Button/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth.tsx";
 import { TermsAndConditions } from "./TermsAndConditions";
 
 const SLOTS: Record<string, string[]> = {

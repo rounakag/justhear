@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { apiService } from '@/services/api';
 
 interface User {
@@ -13,8 +13,11 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (username: string, email: string, password: string, role?: string) => Promise<boolean>;
+  signUp: (username: string, email: string, password: string, role?: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is logged in on app start
@@ -98,8 +102,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     login,
     signup,
+    signUp: signup,
     logout,
     isAuthenticated: !!user,
+    isLoading: loading,
+    error,
   };
 
   return (

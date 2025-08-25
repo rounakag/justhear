@@ -3,7 +3,7 @@ import { Button } from '@/design-system/components';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { SchedulerModal } from '@/components/SchedulerModal';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth.tsx';
 import type { NavLink, AppConfig } from '@/types';
 
 interface HeaderProps {

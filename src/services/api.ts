@@ -42,7 +42,7 @@ class ApiService {
     return this.request('users');
   }
 
-  async getUser(id: number) {
+  async getUser(_id: number) {
     return this.request(`users`);
   }
 
@@ -51,7 +51,7 @@ class ApiService {
     return this.request('slots');
   }
 
-  async getSlot(id: number) {
+  async getSlot(_id: number) {
     return this.request('slots');
   }
 
@@ -60,7 +60,7 @@ class ApiService {
     return this.request('bookings');
   }
 
-  async getBooking(id: number) {
+  async getBooking(_id: number) {
     return this.request('bookings');
   }
 
