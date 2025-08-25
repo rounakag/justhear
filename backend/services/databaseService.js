@@ -13,6 +13,18 @@ class DatabaseService {
     return data;
   }
 
+  async updateUser(userId, updateData) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
   async getUserByUsername(username) {
     try {
       const { data, error } = await supabase
@@ -126,20 +138,28 @@ class DatabaseService {
   }
 
   async getUserBookings(userId) {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select(`
-        *,
-        slot:time_slots!bookings_slot_id_fkey(
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select(`
           *,
-          listener:users!time_slots_listener_id_fkey(username)
-        )
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
+          slot:time_slots!bookings_slot_id_fkey(
+            *,
+            listener:users!time_slots_listener_id_fkey(username)
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching user bookings:', error);
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Exception in getUserBookings:', error);
+      return [];
+    }
   }
 
   // Reviews Management
@@ -155,19 +175,27 @@ class DatabaseService {
   }
 
   async getUserReviews(userId) {
-    const { data, error } = await supabase
-      .from('reviews')
-      .select(`
-        *,
-        booking:bookings!reviews_booking_id_fkey(
-          slot:time_slots(*)
-        )
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          *,
+          booking:bookings!reviews_booking_id_fkey(
+            slot:time_slots(*)
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching user reviews:', error);
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Exception in getUserReviews:', error);
+      return [];
+    }
   }
 
   async updateReview(reviewId, updateData) {
@@ -205,40 +233,59 @@ class DatabaseService {
 
   // Statistics
   async getUserStats(userId) {
-    const { data: bookings, error: bookingsError } = await supabase
-      .from('bookings')
-      .select(`
-        status,
-        slot:time_slots(price)
-      `)
-      .eq('user_id', userId);
-    
-    if (bookingsError) throw bookingsError;
+    try {
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select(`
+          status,
+          slot:time_slots!bookings_slot_id_fkey(price)
+        `)
+        .eq('user_id', userId);
+      
+      if (bookingsError) {
+        console.error('Error fetching bookings for stats:', bookingsError);
+        throw bookingsError;
+      }
 
-    const { data: reviews, error: reviewsError } = await supabase
-      .from('reviews')
-      .select('rating')
-      .eq('user_id', userId);
-    
-    if (reviewsError) throw reviewsError;
+      const { data: reviews, error: reviewsError } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('user_id', userId);
+      
+      if (reviewsError) {
+        console.error('Error fetching reviews for stats:', reviewsError);
+        throw reviewsError;
+      }
 
-    const totalBookings = bookings.length;
-    const completedSessions = bookings.filter(b => b.status === 'completed').length;
-    const upcomingSessions = bookings.filter(b => b.status === 'confirmed').length;
-    const totalSpent = bookings.reduce((sum, b) => sum + (b.slot?.price || 0), 0);
-    const totalReviews = reviews.length;
-    const averageRating = reviews.length > 0 
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
-      : 0;
+      const totalBookings = bookings?.length || 0;
+      const completedSessions = bookings?.filter(b => b.status === 'completed').length || 0;
+      const upcomingSessions = bookings?.filter(b => b.status === 'confirmed').length || 0;
+      const totalSpent = bookings?.reduce((sum, b) => sum + (b.slot?.price || 0), 0) || 0;
+      const totalReviews = reviews?.length || 0;
+      const averageRating = reviews && reviews.length > 0 
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+        : 0;
 
-    return {
-      totalBookings,
-      completedSessions,
-      upcomingSessions,
-      totalSpent,
-      totalReviews,
-      averageRating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
-    };
+      return {
+        totalBookings,
+        completedSessions,
+        upcomingSessions,
+        totalSpent,
+        totalReviews,
+        averageRating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
+      };
+    } catch (error) {
+      console.error('Error in getUserStats:', error);
+      // Return default values if there's an error
+      return {
+        totalBookings: 0,
+        completedSessions: 0,
+        upcomingSessions: 0,
+        totalSpent: 0,
+        totalReviews: 0,
+        averageRating: 0
+      };
+    }
   }
 }
 
