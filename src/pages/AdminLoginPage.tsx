@@ -12,29 +12,24 @@ export const AdminLoginPage: React.FC = () => {
 
   // Redirect to admin dashboard if already logged in
   useEffect(() => {
-    console.log('AdminLoginPage: isAdmin changed to:', isAdmin);
-    if (isAdmin) {
-      console.log('AdminLoginPage: Redirecting to dashboard...');
+      if (isAdmin) {
       navigate('/admin/dashboard');
     }
   }, [isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with:', { email, password });
     setLoading(true);
     setError('');
 
     try {
       const success = await loginAsAdmin(email, password);
-      console.log('Login result:', success);
       if (success) {
         navigate('/admin/dashboard');
       } else {
         setError('Invalid admin credentials');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -111,7 +106,7 @@ export const AdminLoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                onClick={() => console.log('Button clicked!')}
+
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in...' : 'Sign in to Admin Panel'}

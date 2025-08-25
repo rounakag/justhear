@@ -27,7 +27,6 @@ export const SlotManager: React.FC = () => {
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
   const handleViewModeChange = (mode: 'calendar' | 'list') => {
-    console.log('Changing view mode to:', mode);
     setViewMode(mode);
   };
 
@@ -238,7 +237,7 @@ interface SlotListProps {
 }
 
 const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) => {
-  console.log('SlotList rendering with:', { slotsCount: slots.length, listenersCount: listeners.length });
+  
   const getListenerName = (listenerId?: string) => {
     if (!listenerId) return 'Unassigned';
     const listener = listeners.find(l => l.id === listenerId);

@@ -27,21 +27,18 @@ export function useAdminAuth(): UseAdminAuthReturn {
     const isAdmin = localStorage.getItem('isAdmin');
     const adminEmail = localStorage.getItem('adminEmail');
     
-    console.log('useAdminAuth: Checking localStorage:', { isAdmin, adminEmail });
-    
     if (isAdmin === 'true' && adminEmail) {
-      const adminUser = ADMIN_USERS.find(admin => admin.email === adminEmail);
-      console.log('useAdminAuth: Found admin user from localStorage:', adminUser);
-      if (adminUser) {
-        setAdminUser(adminUser);
+      // Admin user will be fetched from backend on login
+      // For now, just check if we have a valid token
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        // Token exists, admin is logged in
+        // We'll validate this on actual API calls
       } else {
         // Clear invalid admin data
-        console.log('useAdminAuth: Clearing invalid admin data');
         localStorage.removeItem('isAdmin');
         localStorage.removeItem('adminEmail');
       }
-    } else {
-      console.log('useAdminAuth: No admin data in localStorage');
     }
     
     // Set loading to false after a small delay to prevent race conditions
@@ -51,8 +48,6 @@ export function useAdminAuth(): UseAdminAuthReturn {
   }, []);
 
   const loginAsAdmin = async (email: string, password: string): Promise<boolean> => {
-    console.log('useAdminAuth: loginAsAdmin called with:', { email, password });
-    
     try {
       const response = await fetch('https://justhear-backend.onrender.com/api/auth/login', {
         method: 'POST',
@@ -65,7 +60,6 @@ export function useAdminAuth(): UseAdminAuthReturn {
       const data = await response.json();
       
       if (response.ok && data.user && data.user.role === 'admin') {
-        console.log('useAdminAuth: Login successful, setting admin user');
         const adminUser: AdminUser = {
           id: data.user.id,
           email: data.user.email,
@@ -79,10 +73,8 @@ export function useAdminAuth(): UseAdminAuthReturn {
         return true;
       }
       
-      console.log('useAdminAuth: Login failed');
       return false;
     } catch (error) {
-      console.error('useAdminAuth: Login error:', error);
       return false;
     }
   };

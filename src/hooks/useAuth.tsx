@@ -59,13 +59,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return true;
       } else {
         const errorMessage = response.error || 'Login failed. Please check your credentials.';
-        console.error('Login failed:', errorMessage);
         setError(errorMessage);
         return false;
       }
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.message || 'Login failed. Please check your credentials.';
-      console.error('Login error:', errorMessage);
       setError(errorMessage);
       return false;
     } finally {
@@ -77,27 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      console.log('Attempting signup with:', { username, email, role });
-      
       const response = await apiService.signup(username, email, password, role);
-      console.log('Signup response:', response);
       
       if (response.data && (response.status === 201 || response.status === 200)) {
         const { user, token } = response.data;
         setUser(user as User);
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(user));
-        console.log('Signup successful:', user);
         return true;
       } else {
         const errorMessage = response.error || 'Signup failed. Please try again.';
-        console.error('Signup failed:', errorMessage);
         setError(errorMessage);
         return false;
       }
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.message || 'Signup failed. Please try again.';
-      console.error('Signup error:', errorMessage);
       setError(errorMessage);
       return false;
     } finally {

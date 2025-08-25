@@ -16,7 +16,6 @@ class UserService {
   }
 
   async updateUserProfile(_profileData: Partial<UserProfile>): Promise<UserProfile> {
-    // TODO: Implement when profile API is available
     throw new Error('Profile API not implemented yet');
   }
 
@@ -72,7 +71,6 @@ class UserService {
   }
 
   async rescheduleBooking(_bookingId: string, _newSlotId: string, _newDate: string, _newStartTime: string, _newEndTime: string): Promise<UserBooking> {
-    // TODO: Implement when reschedule API is available
     throw new Error('Reschedule API not implemented yet');
   }
 

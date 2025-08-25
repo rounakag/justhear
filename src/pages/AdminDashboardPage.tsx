@@ -9,9 +9,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   // Redirect to admin login if not authenticated (but only after loading is complete)
   useEffect(() => {
-    console.log('AdminDashboardPage: Auth state changed:', { isAdmin, loading });
     if (!loading && !isAdmin) {
-      console.log('AdminDashboardPage: Redirecting to login...');
       navigate('/admin/login');
     }
   }, [isAdmin, loading, navigate]);
