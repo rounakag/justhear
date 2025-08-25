@@ -417,6 +417,7 @@ app.post('/api/setup/admin', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt:', { email, password: password ? '***' : 'undefined' });
     
     // Admin login - check if user exists and is admin
     // Try to find admin by email first, then by username
@@ -424,16 +425,22 @@ app.post('/api/auth/login', async (req, res) => {
     
     // Check if it's an admin email
     if (email === 'admin@justhear.com' || email === 'admin2@justhear.com') {
+      console.log('Admin email detected, looking for admin user...');
       adminUser = await databaseService.getUserByUsername('admin');
+      console.log('Admin user found:', adminUser);
     } else {
       // Try to find by username
+      console.log('Looking for user by username:', email);
       adminUser = await databaseService.getUserByUsername(email);
+      console.log('User found:', adminUser);
     }
     
     if (adminUser && adminUser.role === 'admin') {
+      console.log('Admin user found, checking password...');
       // For admin users, we'll use a simple password check for now
       // In production, this should be properly hashed
       const isValidPassword = password === 'admin123' || password === 'JustHearAdmin2024!';
+      console.log('Password check result:', isValidPassword);
       if (isValidPassword) {
         const token = jwt.sign(
           { userId: adminUser.id, username: adminUser.username, role: adminUser.role },

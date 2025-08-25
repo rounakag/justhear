@@ -48,7 +48,12 @@ export function useAdminAuth(): UseAdminAuthReturn {
       });
       
       const data = await response.json();
-      console.log('Admin login response:', { status: response.status, data });
+      console.log('Admin login response:', { 
+        status: response.status, 
+        ok: response.ok,
+        data,
+        headers: Object.fromEntries(response.headers.entries())
+      });
       
       if (response.ok && data.user && data.user.role === 'admin') {
         const adminUser: AdminUser = {
@@ -63,6 +68,14 @@ export function useAdminAuth(): UseAdminAuthReturn {
         localStorage.setItem('authToken', data.token);
         console.log('Admin login successful:', adminUser);
         return true;
+      } else {
+        console.log('Admin login failed - response details:', {
+          responseOk: response.ok,
+          hasUser: !!data.user,
+          userRole: data.user?.role,
+          expectedRole: 'admin',
+          fullData: data
+        });
       }
       
       console.log('Admin login failed:', data);
