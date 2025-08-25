@@ -105,13 +105,11 @@ export const UserDashboardPage: React.FC = () => {
               <div className="flex-shrink-0">
                 <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
               </div>
-              {profile && (
-                <div className="hidden sm:block">
-                  <p className="text-sm text-gray-600">
-                    Welcome back, <span className="font-medium">{profile.name}</span>
-                  </p>
-                </div>
-              )}
+              <div className="hidden sm:block">
+                <p className="text-sm text-gray-600">
+                  Welcome to your anonymous dashboard
+                </p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <button
