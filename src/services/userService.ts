@@ -39,7 +39,7 @@ class UserService {
     // Handle both array and object responses
     if (Array.isArray(response.data)) {
       return response.data;
-    } else if (response.data && Array.isArray(response.data.bookings)) {
+    } else if (response.data && typeof response.data === 'object' && 'bookings' in response.data && Array.isArray(response.data.bookings)) {
       return response.data.bookings;
     } else {
       return [];
@@ -95,7 +95,7 @@ class UserService {
     // Handle both array and object responses
     if (Array.isArray(response.data)) {
       return response.data;
-    } else if (response.data && Array.isArray(response.data.reviews)) {
+    } else if (response.data && typeof response.data === 'object' && 'reviews' in response.data && Array.isArray(response.data.reviews)) {
       return response.data.reviews;
     } else {
       return [];
@@ -182,15 +182,15 @@ class UserService {
     }
     
     // Handle both direct object and nested object responses
-    const stats = response.data || {};
+    const stats = response.data && typeof response.data === 'object' ? response.data : {};
     
     return {
-      totalBookings: stats.totalBookings || 0,
-      completedSessions: stats.completedSessions || 0,
-      upcomingSessions: stats.upcomingSessions || 0,
-      totalSpent: stats.totalSpent || 0,
-      totalReviews: stats.totalReviews || 0,
-      averageRating: stats.averageRating || 0
+      totalBookings: 'totalBookings' in stats ? stats.totalBookings : 0,
+      completedSessions: 'completedSessions' in stats ? stats.completedSessions : 0,
+      upcomingSessions: 'upcomingSessions' in stats ? stats.upcomingSessions : 0,
+      totalSpent: 'totalSpent' in stats ? stats.totalSpent : 0,
+      totalReviews: 'totalReviews' in stats ? stats.totalReviews : 0,
+      averageRating: 'averageRating' in stats ? stats.averageRating : 0
     };
   }
 
