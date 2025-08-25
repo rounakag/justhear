@@ -74,12 +74,23 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
   const fetchAvailableSlots = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getSlots();
+      console.log('🔍 DEBUG - Fetching admin-created slots for users...');
+      const response = await apiService.getAdminCreatedSlots();
+      console.log('🔍 DEBUG - Admin-created slots response:', response);
+      
       if (response.data && Array.isArray(response.data)) {
         setAvailableSlots(response.data as TimeSlot[]);
+        console.log('🔍 DEBUG - Set available slots:', response.data.length, 'slots');
+      } else if (response.data && typeof response.data === 'object' && 'slots' in response.data && Array.isArray((response.data as any).slots)) {
+        setAvailableSlots((response.data as any).slots as TimeSlot[]);
+        console.log('🔍 DEBUG - Set available slots from slots property:', (response.data as any).slots.length, 'slots');
+      } else {
+        console.log('🔍 DEBUG - No slots found in response:', response);
+        setAvailableSlots([]);
       }
     } catch (error) {
-      console.error('Error fetching slots:', error);
+      console.error('❌ ERROR fetching admin-created slots:', error);
+      setAvailableSlots([]);
     } finally {
       setLoading(false);
     }
