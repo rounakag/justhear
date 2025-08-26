@@ -294,12 +294,25 @@ app.post('/api/slots', async (req, res) => {
       });
     }
     
+    // Get default price from CMS pricing plans
+    let defaultPrice = 50; // fallback
+    try {
+      const pricingPlans = await databaseService.getPricingPlans();
+      if (pricingPlans && pricingPlans.length > 0) {
+        // Use the first active pricing plan as default
+        const defaultPlan = pricingPlans.find(plan => plan.is_active) || pricingPlans[0];
+        defaultPrice = defaultPlan.price || 50;
+      }
+    } catch (error) {
+      console.log('Could not fetch pricing plans, using default price:', defaultPrice);
+    }
+
     // Transform data to match database schema
     const transformedData = {
       date: slotData.date,
       start_time: slotData.startTime,
       end_time: slotData.endTime,
-      price: slotData.price || 50,
+      price: slotData.price || defaultPrice,
       status: 'available',
       listener_id: slotData.listenerId && slotData.listenerId.trim() !== '' ? slotData.listenerId : null,
       duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)

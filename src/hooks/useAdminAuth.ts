@@ -23,16 +23,28 @@ export function useAdminAuth(): UseAdminAuthReturn {
   // Admin users will be fetched from backend
 
   useEffect(() => {
-    // Check if admin is already logged in from localStorage
+    // Check if admin is already logged in from localStorage and cookies
     const isAdmin = localStorage.getItem('isAdmin');
     const adminEmail = localStorage.getItem('adminEmail');
     const token = localStorage.getItem('authToken');
     
-    if (isAdmin === 'true' && adminEmail && token) {
+    // Also check cookies for consistency with regular auth
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    
+    const cookieToken = getCookie('authToken');
+    const cookieIsAdmin = getCookie('isAdmin');
+    
+    // Check both localStorage and cookies for admin status
+    if ((isAdmin === 'true' && adminEmail && token) || (cookieIsAdmin === 'true' && cookieToken)) {
       // Admin is logged in, restore the state
       const adminUser: AdminUser = {
         id: 'admin',
-        email: adminEmail,
+        email: adminEmail || 'admin@justhear.com',
         role: 'admin',
         permissions: ['manage_slots', 'manage_listeners', 'view_analytics', 'manage_schedules'],
       };
@@ -73,9 +85,16 @@ export function useAdminAuth(): UseAdminAuthReturn {
           permissions: ['manage_slots', 'manage_listeners', 'view_analytics', 'manage_schedules'],
         };
         setAdminUser(adminUser);
+        
+        // Store in both localStorage and cookies for consistency
         localStorage.setItem('isAdmin', 'true');
         localStorage.setItem('adminEmail', email);
         localStorage.setItem('authToken', data.token);
+        
+        // Also set cookies to match regular auth system
+        document.cookie = `isAdmin=true; path=/; max-age=86400`; // 24 hours
+        document.cookie = `authToken=${data.token}; path=/; max-age=86400`; // 24 hours
+        
         console.log('Admin login successful:', adminUser);
         return true;
       } else {
@@ -100,6 +119,11 @@ export function useAdminAuth(): UseAdminAuthReturn {
     setAdminUser(null);
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('adminEmail');
+    localStorage.removeItem('authToken');
+    
+    // Also clear cookies for consistency
+    document.cookie = 'isAdmin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
   const checkAdminPermissions = (permission: string): boolean => {
