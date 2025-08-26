@@ -52,13 +52,31 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
 
   const formatDateTime = (date: string, startTime: string) => {
     try {
-      // Create a proper date string by combining date and time
-      const dateTimeString = `${date}T${startTime}`;
-      const sessionDate = new Date(dateTimeString);
+      console.log('🔍 DEBUG - Formatting date/time:', { date, startTime });
+      
+      // Handle different date formats
+      let sessionDate: Date;
+      
+      if (date && startTime) {
+        // Try combining date and time
+        const dateTimeString = `${date}T${startTime}`;
+        sessionDate = new Date(dateTimeString);
+        
+        // If that fails, try parsing date separately
+        if (isNaN(sessionDate.getTime())) {
+          sessionDate = new Date(date);
+        }
+      } else if (date) {
+        // Only date available
+        sessionDate = new Date(date);
+      } else {
+        console.error('No date or startTime provided');
+        return 'Date not available';
+      }
       
       // Check if the date is valid
       if (isNaN(sessionDate.getTime())) {
-        console.error('Invalid date/time:', { date, startTime, dateTimeString });
+        console.error('Invalid date/time:', { date, startTime });
         return 'Invalid Date';
       }
       
@@ -79,6 +97,11 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
   };
 
   const formatCurrency = (amount: number) => {
+    // Handle NaN or invalid amounts
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
+    }
+    
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -120,9 +143,9 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
                        <h3 className="text-lg font-semibold text-gray-900">
                          Anonymous Listener
                        </h3>
-                       {isSoon && (
+                       {timeUntil > 0 && (
                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                           ⏰ Soon
+                           ⏰ {formatTimeUntil(timeUntil)}
                          </span>
                        )}
                      </div>
@@ -149,7 +172,14 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
                  )}
                  {timeUntil <= 0 ? (
                    <button
-                     onClick={() => window.open(`/session/${session.booking.id}`, '_blank')}
+                     onClick={() => {
+                       // Open Google Meet link if available
+                       if (session.booking.meetingLink) {
+                         window.open(session.booking.meetingLink, '_blank');
+                       } else {
+                         window.open(`/session/${session.booking.id}`, '_blank');
+                       }
+                     }}
                      className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-md hover:bg-green-700 transition-colors"
                    >
                      Join Session

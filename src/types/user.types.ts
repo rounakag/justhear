@@ -16,6 +16,9 @@ export interface UserBooking {
   updatedAt: string;
   notes?: string;
   transactionId: string;
+  meetingLink?: string;
+  meetingId?: string;
+  meetingProvider?: string;
 }
 
 export interface UserReview {
