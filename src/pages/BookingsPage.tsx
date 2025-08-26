@@ -101,20 +101,55 @@ export const BookingsPage: React.FC = () => {
 
   const times = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
 
-  const handleBooking = () => {
-    if (!selectedDate || !selectedTime) return;
+  const handleBooking = async () => {
+    if (!selectedDate || !selectedTime || !user) return;
     
     if (!termsAccepted) {
       setShowTerms(true);
       return;
     }
-    
-    alert(`Booking confirmed!\n\nDate: ${dates.find(d => d.value === selectedDate)?.label}\nTime: ${selectedTime}\nAmount: ₹49\n\nYou will receive a confirmation call 5 minutes before your session.`);
-    
-    // Reset form
-    setSelectedDate(null);
-    setSelectedTime(null);
-    setTermsAccepted(false);
+
+    try {
+      // Find the selected slot
+      const selectedSlot = availableSlots.find(slot => 
+        slot.date === selectedDate && slot.start_time === selectedTime
+      );
+
+      if (!selectedSlot) {
+        alert('Selected slot is no longer available. Please choose another slot.');
+        return;
+      }
+
+      // Create booking
+      const response = await fetch('https://justhear-backend.onrender.com/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          slotId: selectedSlot.id
+        })
+      });
+
+      if (response.ok) {
+        const bookingData = await response.json();
+        alert(`✅ Booking confirmed!\n\nDate: ${dates.find(d => d.value === selectedDate)?.label}\nTime: ${selectedTime}\nAmount: ₹49\n\nYou will receive a confirmation call 5 minutes before your session.`);
+        
+        // Reset form and refresh slots
+        setSelectedDate(null);
+        setSelectedTime(null);
+        setTermsAccepted(false);
+        await fetchAvailableSlots(); // Refresh available slots
+      } else {
+        const errorData = await response.json();
+        alert(`❌ Booking failed: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert('❌ Booking failed. Please try again.');
+    }
   };
 
   const handleAcceptTerms = () => {

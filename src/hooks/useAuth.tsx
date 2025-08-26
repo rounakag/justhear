@@ -21,7 +21,7 @@ const getCookie = (name: string): string | null => {
 
 const deleteCookie = (name: string) => {
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
-};
+}; 
 
 interface User {
   id: number;
@@ -60,8 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (token && savedUser) {
       try {
         const parsedUser = typeof savedUser === 'string' ? JSON.parse(savedUser) : savedUser;
-        // Only restore if it's a valid user and not a test user
-        if (parsedUser.username && !parsedUser.username.includes('rounak338')) {
+        // Restore user session if valid
+        if (parsedUser.username) {
           console.log('AuthProvider: Found saved user:', parsedUser.username);
           setUser(parsedUser);
           
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setCookie('user', JSON.stringify(parsedUser), 30);
           }
         } else {
-          console.log('AuthProvider: Clearing invalid user data');
+          console.log('AuthProvider: Invalid user data, clearing session');
           clearSession();
         }
       } catch (error) {

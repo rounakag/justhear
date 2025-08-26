@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button/button';
 export const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: '',
     confirmPassword: ''
   });
@@ -72,11 +71,7 @@ export const SignupPage: React.FC = () => {
       errors.username = 'Username can only contain letters, numbers, and underscores';
     }
 
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
+    // Email validation removed - using username instead
 
     if (!formData.password) {
       errors.password = 'Password is required';
@@ -103,7 +98,7 @@ export const SignupPage: React.FC = () => {
     }
 
     try {
-      const success = await signup(formData.username, formData.email, formData.password);
+      const success = await signup(formData.username, formData.username, formData.password);
       if (success) {
         // Redirect to home page in logged-in state instead of dashboard
         navigate('/');
@@ -177,26 +172,7 @@ export const SignupPage: React.FC = () => {
               )}
             </div>
 
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                  validationErrors.email ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Enter your email"
-                required
-              />
-              {validationErrors.email && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
-              )}
-            </div>
+            {/* Email field removed - using username instead */}
 
             {/* Password Field */}
             <div>
