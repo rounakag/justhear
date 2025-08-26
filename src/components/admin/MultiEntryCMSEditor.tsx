@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button/button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
@@ -221,7 +221,7 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
                         {field.label}
                         {field.required && <span className="text-red-500">*</span>}
                       </label>
-                      {renderField(field, editingItem[field.name], (value) => 
+                      {renderField(field, editingItem![field.name], (value) => 
                         setEditingItem(prev => prev ? { ...prev, [field.name]: value } : null)
                       )}
                     </div>
