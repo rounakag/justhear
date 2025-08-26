@@ -97,7 +97,6 @@ class DatabaseService {
         *,
         listener:users!time_slots_listener_id_fkey(username)
       `)
-      .not('listener_id', 'is', null) // Only slots with assigned listeners (admin-created)
       .eq('status', 'available')
       .gte('date', new Date().toISOString().split('T')[0])
       .order('date', { ascending: true })

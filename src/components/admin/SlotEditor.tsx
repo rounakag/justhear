@@ -227,6 +227,9 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
                 </option>
               ))}
             </select>
+            <p className="text-sm text-gray-500 mt-1">
+              {formData.listenerId ? '✅ Listener assigned - slot will be visible to users' : '⚠️ No listener assigned - slot will still be visible but marked as "Unassigned"'}
+            </p>
           </div>
 
           {/* Price */}

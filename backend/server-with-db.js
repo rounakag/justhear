@@ -223,6 +223,35 @@ app.get('/api/slots/admin-created', async (req, res) => {
   }
 });
 
+// Get all available slots for users (including unassigned ones)
+app.get('/api/slots/available', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG - Fetching all available slots for users');
+    
+    const slots = await databaseService.getAvailableSlots();
+    
+    console.log('🔍 DEBUG - Retrieved', slots.length, 'available slots');
+    
+    res.json({
+      slots,
+      total: slots.length,
+      timestamp: new Date().toISOString(),
+      cached: false
+    });
+  } catch (error) {
+    console.error('❌ ERROR fetching available slots:', error);
+    
+    const errorResponse = {
+      error: 'Failed to fetch available slots',
+      message: error.message,
+      timestamp: new Date().toISOString(),
+      path: req.path
+    };
+    
+    res.status(500).json(errorResponse);
+  }
+});
+
 // Get recurring schedules
 app.get('/api/schedules', async (req, res) => {
   try {
@@ -272,9 +301,11 @@ app.post('/api/slots', async (req, res) => {
       end_time: slotData.endTime,
       price: slotData.price || 50,
       status: 'available',
-      listener_id: slotData.listenerId || null,
+      listener_id: slotData.listenerId && slotData.listenerId.trim() !== '' ? slotData.listenerId : null,
       duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
     };
+    
+    console.log('🔍 DEBUG - Creating slot with data:', transformedData);
     
     const slot = await databaseService.createTimeSlot(transformedData);
     

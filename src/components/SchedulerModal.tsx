@@ -74,13 +74,13 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
   const fetchAvailableSlots = async () => {
     setLoading(true);
     try {
-      console.log('🔍 DEBUG - Fetching admin-created slots for users...');
+      console.log('🔍 DEBUG - Fetching available slots for users...');
       
       // Use direct API call with correct URL
       const apiUrl = 'https://justhear-backend.onrender.com';
-      const response = await fetch(`${apiUrl}/api/slots/admin-created`);
+      const response = await fetch(`${apiUrl}/api/slots/available`);
       
-      console.log('🔍 DEBUG - Admin-created slots response status:', response.status);
+      console.log('🔍 DEBUG - Available slots response status:', response.status);
       
       if (!response.ok) {
         let errorMessage = response.statusText;
@@ -94,7 +94,7 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
       }
       
       const data = await response.json();
-      console.log('🔍 DEBUG - Admin-created slots data:', data);
+      console.log('🔍 DEBUG - Available slots data:', data);
       
       if (data.slots && Array.isArray(data.slots)) {
         setAvailableSlots(data.slots as TimeSlot[]);
@@ -104,7 +104,7 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
         setAvailableSlots([]);
       }
     } catch (error) {
-      console.error('❌ ERROR fetching admin-created slots:', error);
+      console.error('❌ ERROR fetching available slots:', error);
       setAvailableSlots([]);
     } finally {
       setLoading(false);
