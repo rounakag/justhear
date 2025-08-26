@@ -372,6 +372,29 @@ app.delete('/api/slots/:id', async (req, res) => {
   }
 });
 
+// Mark slot as done
+app.put('/api/slots/:id/done', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id || id === 'undefined' || id === 'null') {
+      return res.status(400).json({ error: 'Invalid slot ID' });
+    }
+    
+    console.log('🔍 DEBUG - Marking slot as done:', id);
+    
+    const updatedSlot = await databaseService.markSlotAsDone(id);
+    
+    res.json({ 
+      message: 'Slot marked as done successfully', 
+      slot: updatedSlot 
+    });
+  } catch (error) {
+    console.error('Error marking slot as done:', error);
+    res.status(500).json({ error: 'Failed to mark slot as done' });
+  }
+});
+
 // Delete all slots (cleanup)
 app.delete('/api/slots', async (req, res) => {
   try {
@@ -862,7 +885,9 @@ app.post('/api/cms/initialize', async (req, res) => {
 // Testimonials
 app.get('/api/cms/testimonials', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching testimonials from database');
     const testimonials = await databaseService.getTestimonials();
+    console.log('🔍 DEBUG - Retrieved testimonials:', testimonials);
     res.json({
       testimonials,
       total: testimonials.length,
@@ -922,7 +947,9 @@ app.delete('/api/cms/testimonials/:id', async (req, res) => {
 // Features
 app.get('/api/cms/features', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching features from database');
     const features = await databaseService.getFeatures();
+    console.log('🔍 DEBUG - Retrieved features:', features);
     res.json({
       features,
       total: features.length,
@@ -982,7 +1009,9 @@ app.delete('/api/cms/features/:id', async (req, res) => {
 // FAQ
 app.get('/api/cms/faq', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching FAQs from database');
     const faqs = await databaseService.getFAQs();
+    console.log('🔍 DEBUG - Retrieved FAQs:', faqs);
     res.json({
       faqs,
       total: faqs.length,
@@ -1042,7 +1071,9 @@ app.delete('/api/cms/faq/:id', async (req, res) => {
 // Pricing Plans
 app.get('/api/cms/pricing', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching pricing plans from database');
     const pricingPlans = await databaseService.getPricingPlans();
+    console.log('🔍 DEBUG - Retrieved pricing plans:', pricingPlans);
     res.json({
       pricingPlans,
       total: pricingPlans.length,

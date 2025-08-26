@@ -126,6 +126,38 @@ export const SlotManager: React.FC = () => {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const handleMarkAsDone = async (slotId: string) => {
+    try {
+      const confirmed = confirm('Mark this slot as done? This will change the status from "booked" to "done".');
+      if (!confirmed) return;
+
+      const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
+      
+      const response = await fetch(`${apiUrl}/api/slots/${slotId}/done`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to mark slot as done');
+      }
+
+      const result = await response.json();
+      console.log('🔍 DEBUG - Mark as done result:', result);
+      
+      alert('✅ Slot marked as done successfully!');
+      await refreshData();
+    } catch (error) {
+      console.error('❌ ERROR marking slot as done:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`❌ Failed to mark slot as done: ${errorMessage}`);
+    }
+  };
+
   const handleDeleteAllSlots = async () => {
     // Enhanced confirmation with better UX
     const confirmed = await new Promise<boolean>((resolve) => {
@@ -661,6 +693,17 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
                       }}
                     >
                       Join Session
+                    </button>
+                  )}
+                  {slot.isBooked && (
+                    <button 
+                      className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 rounded-md transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkAsDone(slot.id);
+                      }}
+                    >
+                      Mark Done
                     </button>
                   )}
                   <button 

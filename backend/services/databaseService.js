@@ -144,6 +144,18 @@ class DatabaseService {
     return data;
   }
 
+  async markSlotAsDone(slotId) {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .update({ status: 'done' })
+      .eq('id', slotId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
   async updateSlotMeetingLink(slotId, meetingData) {
     const { data, error } = await supabase
       .from('time_slots')
