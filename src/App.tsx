@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider } from './components/auth/AuthProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Header } from '@/components/layout/Header';
@@ -109,6 +109,24 @@ export default function App() {
             
             {/* Admin Pages */}
             <Route path="/admin" element={<AdminDashboardPage />} />
+            
+            {/* Fallback Route */}
+            <Route path="*" element={
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">😔</div>
+                  <h1 className="text-2xl font-bold text-gray-800 mb-4">
+                    Page Not Found
+                  </h1>
+                  <p className="text-gray-600 mb-6">
+                    The page you're looking for doesn't exist.
+                  </p>
+                  <Link to="/" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    Go Home
+                  </Link>
+                </div>
+              </div>
+            } />
           </Routes>
         </Router>
       </AuthProvider>
