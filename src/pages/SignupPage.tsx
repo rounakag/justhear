@@ -12,8 +12,15 @@ export const SignupPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { signup, error, clearError } = useAuth();
+  const { user, signup, error, clearError } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   // Debounced username validation
   const [usernameChecking, setUsernameChecking] = useState(false);
@@ -98,7 +105,8 @@ export const SignupPage: React.FC = () => {
     try {
       const success = await signup(formData.username, formData.email, formData.password);
       if (success) {
-        navigate('/dashboard');
+        // Redirect to home page in logged-in state instead of dashboard
+        navigate('/');
       }
     } catch (err) {
       console.error('Signup error:', err);

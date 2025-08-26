@@ -1,6 +1,28 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { apiService } from '@/services/api';
 
+// Cookie utility functions
+const setCookie = (name: string, value: string, days: number = 30) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+};
+
+const getCookie = (name: string): string | null => {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+};
+
 interface User {
   id: number;
   username: string;
@@ -30,33 +52,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const savedUser = localStorage.getItem('user');
+    const token = getCookie('authToken') || localStorage.getItem('authToken');
+    const savedUser = getCookie('user') || localStorage.getItem('user');
     
-    console.log('AuthProvider: Checking localStorage:', { hasToken: !!token, hasUser: !!savedUser });
+    console.log('AuthProvider: Checking session:', { hasToken: !!token, hasUser: !!savedUser });
     
-    // Clear any existing data to prevent default login
     if (token && savedUser) {
       try {
-        const parsedUser = JSON.parse(savedUser);
+        const parsedUser = typeof savedUser === 'string' ? JSON.parse(savedUser) : savedUser;
         // Only restore if it's a valid user and not a test user
         if (parsedUser.username && !parsedUser.username.includes('rounak338')) {
           console.log('AuthProvider: Found saved user:', parsedUser.username);
           setUser(parsedUser);
+          
+          // Ensure token is in both cookie and localStorage for redundancy
+          if (!getCookie('authToken')) {
+            setCookie('authToken', token, 30);
+          }
+          if (!getCookie('user')) {
+            setCookie('user', JSON.stringify(parsedUser), 30);
+          }
         } else {
           console.log('AuthProvider: Clearing invalid user data');
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
+          clearSession();
         }
       } catch (error) {
         console.error('Error parsing saved user:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
+        clearSession();
       }
     }
     
     setLoading(false);
   }, []);
+
+  const clearSession = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    deleteCookie('authToken');
+    deleteCookie('user');
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -67,8 +101,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.data && response.status === 200) {
         const { user, token } = response.data;
         setUser(user as User);
+        
+        // Store in both localStorage and cookies for redundancy
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(user));
+        setCookie('authToken', token, 30);
+        setCookie('user', JSON.stringify(user), 30);
+        
         return true;
       } else {
         const errorMessage = response.error || 'Login failed. Please check your credentials.';
@@ -93,8 +132,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.data && (response.status === 201 || response.status === 200)) {
         const { user, token } = response.data;
         setUser(user as User);
+        
+        // Store in both localStorage and cookies for redundancy
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(user));
+        setCookie('authToken', token, 30);
+        setCookie('user', JSON.stringify(user), 30);
+        
         return true;
       } else {
         const errorMessage = response.error || 'Signup failed. Please try again.';
@@ -112,15 +156,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    clearSession();
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('adminEmail');
   };
 
   const clearStorage = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    clearSession();
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('adminEmail');
   };

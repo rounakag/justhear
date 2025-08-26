@@ -7,8 +7,15 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, error, clearError } = useAuth();
+  const { user, login, error, clearError } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +25,8 @@ export const LoginPage: React.FC = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate('/dashboard');
+        // Redirect to home page in logged-in state instead of dashboard
+        navigate('/');
       }
     } catch (err) {
       console.error('Login error:', err);
