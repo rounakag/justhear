@@ -704,7 +704,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
                       className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 rounded-md transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleMarkAsDone(slot.id);
+                        onMarkAsDone(slot.id);
                       }}
                     >
                       Mark Done
