@@ -109,6 +109,7 @@ export default function App() {
             
             {/* Admin Pages */}
             <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/login" element={<AdminDashboardPage />} />
             
             {/* Fallback Route */}
             <Route path="*" element={

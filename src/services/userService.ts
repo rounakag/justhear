@@ -35,14 +35,22 @@ class UserService {
       throw new Error(response.error);
     }
     
+    console.log('🔍 DEBUG - getUserBookings response:', response);
+    
     // Handle both array and object responses
+    let bookings: UserBooking[] = [];
     if (Array.isArray(response.data)) {
-      return response.data;
+      bookings = response.data;
     } else if (response.data && typeof response.data === 'object' && 'bookings' in response.data && Array.isArray(response.data.bookings)) {
-      return response.data.bookings;
+      bookings = response.data.bookings;
     } else {
-      return [];
+      bookings = [];
     }
+    
+    console.log('🔍 DEBUG - Processed bookings:', bookings);
+    console.log('🔍 DEBUG - First booking sample:', bookings[0]);
+    
+    return bookings;
   }
 
   async getBookingById(bookingId: string): Promise<UserBooking> {
