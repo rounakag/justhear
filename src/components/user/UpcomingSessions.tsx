@@ -16,7 +16,9 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
       const newTimeUntil: Record<string, number> = {};
 
       sessions.forEach(session => {
-        const sessionTime = new Date(session.booking.startTime).getTime();
+        // Combine date and time for proper calculation
+        const dateTimeString = `${session.booking.date}T${session.booking.startTime}`;
+        const sessionTime = new Date(dateTimeString).getTime();
         const timeDiff = sessionTime - now;
         
         if (timeDiff > 0) {

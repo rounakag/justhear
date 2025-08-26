@@ -652,6 +652,17 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div className="flex space-x-2">
+                  {slot.isBooked && slot.meeting_link && (
+                    <button 
+                      className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 rounded-md transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(slot.meeting_link, '_blank');
+                      }}
+                    >
+                      Join Session
+                    </button>
+                  )}
                   <button 
                     className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors"
                     onClick={(e) => {

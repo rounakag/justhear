@@ -473,14 +473,14 @@ app.post('/api/bookings', async (req, res) => {
       user_id: userId,
       slot_id: slotId,
       status: 'confirmed',
-      meeting_link: meetingDetails.meetingLink,
-      meeting_id: meetingDetails.meetingId,
-      meeting_provider: meetingDetails.meetingProvider
+      meeting_link: slot.meeting_link, // Use existing meeting link from slot
+      meeting_id: slot.meeting_id,
+      meeting_provider: slot.meeting_provider
     };
 
     const booking = await databaseService.createBooking(bookingData);
 
-    // Update slot status
+    // Update slot status to booked
     await databaseService.updateSlotStatus(slotId, 'booked');
 
     // Send meeting details (in production, this would be email/SMS)

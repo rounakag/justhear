@@ -95,9 +95,13 @@ class DatabaseService {
       .from('time_slots')
       .select(`
         *,
-        listener:users!time_slots_listener_id_fkey(username)
+        listener:users!time_slots_listener_id_fkey(username),
+        booking:bookings!bookings_slot_id_fkey(
+          user_id,
+          status,
+          created_at
+        )
       `)
-      .eq('status', 'available')
       .gte('date', new Date().toISOString().split('T')[0])
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
