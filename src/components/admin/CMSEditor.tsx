@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button/button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import type { CMSContent, CMSSection, CMSEditorProps } from '@/types/cms.types';
+import type { CMSEditorProps } from '@/types/cms.types';
 import { CMS_SECTIONS } from '@/types/cms.types';
 
 export const CMSEditor: React.FC<CMSEditorProps> = ({ content, onUpdate, loading = false }) => {

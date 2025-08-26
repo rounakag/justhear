@@ -9,7 +9,7 @@ import { useCMS } from '@/hooks/useCMS';
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin, adminUser, logoutAdmin, loading } = useAdminAuth();
-  const { content, loading: cmsLoading, error: cmsError, updateContent } = useCMS();
+  const { content, loading: cmsLoading, updateContent } = useCMS();
   const [activeTab, setActiveTab] = useState<'slots' | 'cms'>('slots');
 
   // Redirect to admin login if not authenticated (but only after loading is complete)
