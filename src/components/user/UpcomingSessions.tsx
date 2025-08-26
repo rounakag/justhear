@@ -108,6 +108,41 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
     }).format(amount);
   };
 
+  const calculateDuration = (startTime: string, endTime: string) => {
+    try {
+      if (!startTime || !endTime) {
+        return '1 hour'; // Default fallback
+      }
+      
+      // Parse times (assuming HH:MM format)
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const [endHour, endMinute] = endTime.split(':').map(Number);
+      
+      let durationMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+      
+      // Handle overnight sessions
+      if (durationMinutes <= 0) {
+        durationMinutes += 24 * 60; // Add 24 hours
+      }
+      
+      const hours = Math.floor(durationMinutes / 60);
+      const minutes = durationMinutes % 60;
+      
+      if (hours === 1 && minutes === 0) {
+        return '1 hour';
+      } else if (hours > 0 && minutes > 0) {
+        return `${hours} hours ${minutes} minutes`;
+      } else if (hours > 0) {
+        return `${hours} hours`;
+      } else {
+        return `${minutes} minutes`;
+      }
+    } catch (error) {
+      console.error('Error calculating duration:', error);
+      return '1 hour'; // Default fallback
+    }
+  };
+
   if (sessions.length === 0) {
     return (
       <div className="text-center py-12">
@@ -153,7 +188,7 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
                        {formatDateTime(session.booking.date, session.booking.startTime)}
                      </p>
                                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                       <span>Duration: 1 hour</span>
+                       <span>Duration: {calculateDuration(session.booking.startTime, session.booking.endTime)}</span>
                        <span>Price: {formatCurrency(session.booking.price)}</span>
                        <span>Transaction: {session.booking.transactionId}</span>
                      </div>

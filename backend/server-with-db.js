@@ -411,7 +411,34 @@ app.post('/api/users/check-username', async (req, res) => {
 app.get('/api/bookings/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const bookings = await databaseService.getUserBookings(userId);
+    const rawBookings = await databaseService.getUserBookings(userId);
+    
+    // Transform the data to match frontend expectations
+    const bookings = rawBookings.map(booking => ({
+      id: booking.id,
+      slotId: booking.slot_id,
+      userId: booking.user_id,
+      listenerId: booking.slot?.listener_id || '',
+      listenerName: booking.slot?.listener?.username || 'Anonymous Listener',
+      listenerAvatar: booking.slot?.listener?.avatar,
+      date: booking.slot?.date || '',
+      startTime: booking.slot?.start_time || '',
+      endTime: booking.slot?.end_time || '',
+      status: booking.status,
+      price: booking.slot?.price || 0,
+      currency: 'USD',
+      timezone: 'UTC',
+      createdAt: booking.created_at,
+      updatedAt: booking.updated_at,
+      notes: booking.notes,
+      transactionId: booking.transaction_id || '',
+      meetingLink: booking.meeting_link,
+      meetingId: booking.meeting_id,
+      meetingProvider: booking.meeting_provider
+    }));
+    
+    console.log('🔍 DEBUG - Transformed bookings:', bookings);
+    
     res.json({
       bookings,
       total: bookings.length
