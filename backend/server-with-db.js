@@ -809,6 +809,55 @@ app.post('/api/auth/signup', async (req, res) => {
   }
 });
 
+// CMS Content Management API
+app.get('/api/cms/content', async (req, res) => {
+  try {
+    const content = await databaseService.getCMSContent();
+    res.json({
+      content,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching CMS content:', error);
+    res.status(500).json({ error: 'Failed to fetch CMS content' });
+  }
+});
+
+app.put('/api/cms/content/:section/:field', async (req, res) => {
+  try {
+    const { section, field } = req.params;
+    const { value } = req.body;
+    
+    if (!value) {
+      return res.status(400).json({ error: 'Value is required' });
+    }
+    
+    const updatedContent = await databaseService.updateCMSContent(section, field, value);
+    
+    res.json({
+      message: 'Content updated successfully',
+      content: updatedContent,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating CMS content:', error);
+    res.status(500).json({ error: 'Failed to update CMS content' });
+  }
+});
+
+app.post('/api/cms/initialize', async (req, res) => {
+  try {
+    await databaseService.initializeDefaultCMSContent();
+    res.json({
+      message: 'Default CMS content initialized successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error initializing CMS content:', error);
+    res.status(500).json({ error: 'Failed to initialize CMS content' });
+  }
+});
+
 // Serve test.html
 app.get('/', (req, res) => {
   res.send(`

@@ -391,6 +391,128 @@ class DatabaseService {
       };
     }
   }
+
+  // CMS Content Management
+  async getCMSContent() {
+    try {
+      const { data, error } = await supabase
+        .from('cms_content')
+        .select('*')
+        .order('section', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching CMS content:', error);
+        throw error;
+      }
+      
+      // Transform to section-based object
+      const contentBySection = {};
+      (data || []).forEach(item => {
+        if (!contentBySection[item.section]) {
+          contentBySection[item.section] = {};
+        }
+        contentBySection[item.section][item.field] = item.value;
+      });
+      
+      return contentBySection;
+    } catch (error) {
+      console.error('Exception in getCMSContent:', error);
+      return {};
+    }
+  }
+
+  async updateCMSContent(section, field, value) {
+    try {
+      // Check if content exists
+      const { data: existing, error: checkError } = await supabase
+        .from('cms_content')
+        .select('id')
+        .eq('section', section)
+        .eq('field', field)
+        .single();
+      
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw checkError;
+      }
+      
+      if (existing) {
+        // Update existing content
+        const { data, error } = await supabase
+          .from('cms_content')
+          .update({ value, updated_at: new Date().toISOString() })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new content
+        const { data, error } = await supabase
+          .from('cms_content')
+          .insert([{
+            section,
+            field,
+            value,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      }
+    } catch (error) {
+      console.error('Exception in updateCMSContent:', error);
+      throw error;
+    }
+  }
+
+  async initializeDefaultCMSContent() {
+    const defaultContent = [
+      // Hero Section
+      { section: 'hero', field: 'title1', value: 'Feeling upset?' },
+      { section: 'hero', field: 'title2', value: 'We\'re here to listen.' },
+      { section: 'hero', field: 'subtitle1', value: 'Talk anonymously with trained listeners who understand.' },
+      { section: 'hero', field: 'subtitle2', value: 'Not therapy — just you, truly heard.' },
+      { section: 'hero', field: 'ctaText', value: 'Book Session' },
+      { section: 'hero', field: 'secondaryCtaText', value: 'See How It Works' },
+      { section: 'hero', field: 'secondaryCtaHref', value: '#how' },
+      
+      // Testimonials Section
+      { section: 'testimonials', field: 'title', value: 'Real stories, real validation' },
+      { section: 'testimonials', field: 'subtitle', value: 'See how a simple conversation changed everything' },
+      
+      // Examples Section
+      { section: 'examples', field: 'title', value: 'Reach out to us, when u feel' },
+      
+      // Features Section
+      { section: 'features', field: 'title', value: 'How it works' },
+      
+      // Comparison Section
+      { section: 'comparison', field: 'title', value: 'We\'re not therapy — we\'re something different' },
+      { section: 'comparison', field: 'subtitle', value: 'Sometimes you don\'t need to be fixed or analyzed. You just need someone to say: Your feelings make complete sense.' },
+      
+      // Science Section
+      { section: 'science', field: 'title', value: 'Why validation works' },
+      
+      // Pricing Section
+      { section: 'pricing', field: 'title', value: 'Choose your plan' },
+      
+      // FAQ Section
+      { section: 'faq', field: 'title', value: 'Frequently Asked Questions' }
+    ];
+
+    try {
+      for (const content of defaultContent) {
+        await this.updateCMSContent(content.section, content.field, content.value);
+      }
+      console.log('✅ Default CMS content initialized');
+    } catch (error) {
+      console.error('❌ Error initializing default CMS content:', error);
+    }
+  }
 }
 
 module.exports = new DatabaseService();

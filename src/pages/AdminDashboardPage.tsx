@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SlotManager } from '@/components/admin/SlotManager';
+import { CMSEditor } from '@/components/admin/CMSEditor';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useCMS } from '@/hooks/useCMS';
 
 
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin, adminUser, logoutAdmin, loading } = useAdminAuth();
+  const { content, loading: cmsLoading, error: cmsError, updateContent } = useCMS();
+  const [activeTab, setActiveTab] = useState<'slots' | 'cms'>('slots');
 
   // Redirect to admin login if not authenticated (but only after loading is complete)
   useEffect(() => {
@@ -84,8 +88,42 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Admin Content */}
-      <SlotManager />
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 mb-8">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('slots')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'slots'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Slot Management
+          </button>
+          <button
+            onClick={() => setActiveTab('cms')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'cms'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Content Management
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'slots' ? (
+        <SlotManager />
+      ) : (
+        <CMSEditor
+          content={content}
+          onUpdate={updateContent}
+          loading={cmsLoading}
+        />
+      )}
     </div>
   );
 };
