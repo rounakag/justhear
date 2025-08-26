@@ -8,7 +8,7 @@ export interface UserBooking {
   date: string;
   startTime: string;
   endTime: string;
-  status: 'upcoming' | 'completed' | 'cancelled' | 'no-show';
+  status: 'upcoming' | 'confirmed' | 'completed' | 'cancelled' | 'no-show';
   price: number;
   currency: string;
   timezone: string;
