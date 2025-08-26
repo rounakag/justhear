@@ -18,6 +18,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  clearError: () => void;
   clearStorage: () => void;
 }
 
@@ -124,6 +125,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('adminEmail');
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const value: AuthContextType = {
     user,
     loading,
@@ -132,6 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp: signup,
     logout,
     clearStorage,
+    clearError,
     isAuthenticated: !!user,
     isLoading: loading,
     error,
