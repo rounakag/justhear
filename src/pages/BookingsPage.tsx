@@ -134,7 +134,7 @@ export const BookingsPage: React.FC = () => {
       });
 
       if (response.ok) {
-        const bookingData = await response.json();
+        await response.json(); // Consume the response
         alert(`✅ Booking confirmed!\n\nDate: ${dates.find(d => d.value === selectedDate)?.label}\nTime: ${selectedTime}\nAmount: ₹49\n\nYou will receive a confirmation call 5 minutes before your session.`);
         
         // Reset form and refresh slots
