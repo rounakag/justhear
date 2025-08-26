@@ -103,7 +103,9 @@ export function useUserDashboard(): UseUserDashboardReturn {
   }, [fetchData]);
 
   // Computed values
-  const upcomingSessions = sessions.filter(session => session.booking.status === 'upcoming');
+  const upcomingSessions = sessions.filter(session => 
+    session.booking.status === 'upcoming' || session.booking.status === 'confirmed'
+  );
   const completedSessions = sessions.filter(session => session.booking.status === 'completed');
   const sessionsNeedingReview = sessions.filter(session => session.canReview);
 

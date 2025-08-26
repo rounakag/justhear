@@ -204,7 +204,7 @@ class UserService {
       return {
         booking,
         canReview: booking.status === 'completed',
-        canCancel: booking.status === 'upcoming' && timeUntilSession !== undefined && timeUntilSession > 60,
+        canCancel: (booking.status === 'upcoming' || booking.status === 'confirmed') && timeUntilSession !== undefined && timeUntilSession > 60,
         timeUntilSession,
       };
     });
@@ -213,7 +213,9 @@ class UserService {
   // Utility Methods
   async getUpcomingSessions(): Promise<UserSession[]> {
     const sessions = await this.getUserSessions();
-    return sessions.filter(session => session.booking.status === 'upcoming');
+    return sessions.filter(session => 
+      session.booking.status === 'upcoming' || session.booking.status === 'confirmed'
+    );
   }
 
   async getCompletedSessions(): Promise<UserSession[]> {
