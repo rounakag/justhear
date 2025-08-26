@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, Suspense, ErrorBoundary } from 'react';
+import React, { useState, useCallback, useMemo, Suspense } from 'react';
 import { SlotEditor } from './SlotEditor';
 import { SlotCalendar } from './SlotCalendar';
 import { SlotFilters } from './SlotFilters';
@@ -57,7 +57,6 @@ export const SlotManager: React.FC = () => {
   const {
     slots,
     listeners,
-    schedules,
     stats,
     loading,
     error,
@@ -79,13 +78,11 @@ export const SlotManager: React.FC = () => {
   const viewModeButtons = useMemo(() => [
     {
       mode: 'calendar' as const,
-      label: '📅 Calendar',
-      icon: '📅'
+      label: '📅 Calendar'
     },
     {
       mode: 'list' as const,
-      label: '📋 List',
-      icon: '📋'
+      label: '📋 List'
     }
   ], []);
 
@@ -194,7 +191,8 @@ export const SlotManager: React.FC = () => {
       await refreshData();
     } catch (error) {
       console.error('❌ ERROR deleting all slots:', error);
-      alert(`❌ Failed to delete all slots: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`❌ Failed to delete all slots: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }
@@ -324,7 +322,7 @@ export const SlotManager: React.FC = () => {
         {/* View Toggle */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
-            {viewModeButtons.map(({ mode, label, icon }) => (
+            {viewModeButtons.map(({ mode, label }) => (
               <button
                 key={mode}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -463,10 +461,11 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
       alert('✅ Slot deleted successfully!');
       // Refresh the slots list
       window.location.reload();
-    } catch (error) {
-      console.error('❌ ERROR deleting slot:', error);
-      alert(`❌ Failed to delete slot: ${error.message}`);
-    }
+            } catch (error) {
+          console.error('❌ ERROR deleting slot:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+          alert(`❌ Failed to delete slot: ${errorMessage}`);
+        }
   }, []);
   
   const getListenerName = useCallback((listenerId?: string): string => {
