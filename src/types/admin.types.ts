@@ -16,6 +16,10 @@ export interface TimeSlot {
   timezone?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Meeting link properties
+  meeting_link?: string;
+  meeting_id?: string;
+  meeting_provider?: string;
 }
 
 export interface Listener {
