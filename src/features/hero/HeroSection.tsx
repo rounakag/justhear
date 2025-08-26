@@ -1,7 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/design-system/components';
 import { BubbleBackground } from '@/components/BubbleBackground';
-import { SchedulerModal } from '@/components/SchedulerModal';
 
 interface HeroSectionProps {
   title: string;
@@ -45,11 +45,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </span>
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <SchedulerModal>
+          <Link to="/bookings">
             <Button size="lg" className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3 text-white shadow-lg">
               🎧 {ctaText}
             </Button>
-          </SchedulerModal>
+          </Link>
           <a 
             href={secondaryCtaHref}
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-gray-50 border border-gray-200 transition-colors"

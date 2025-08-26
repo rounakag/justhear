@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/design-system/components';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { SchedulerModal } from '@/components/SchedulerModal';
 import { useAuth } from '@/hooks/useAuth.tsx';
 import type { NavLink, AppConfig } from '@/types';
 
@@ -18,12 +17,12 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
   return (
     <header className="fixed inset-x-0 top-0 bg-white/95 backdrop-blur border-b border-gray-200 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center py-3 px-3 md:px-6">
-        <a 
-          href="#top" 
+        <Link 
+          to="/" 
           className="font-bold text-lg md:text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
         >
           {config.app.name}
-        </a>
+        </Link>
         
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex gap-6 items-center">
@@ -36,24 +35,26 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
               {link.label}
             </a>
           ))}
-          <SchedulerModal />
+          <Link to="/bookings">
+            <Button variant="outline" size="sm">🎧 Book Session</Button>
+          </Link>
           
           {user ? (
             <div className="flex items-center gap-2">
-              <a
-                href="/dashboard"
+              <Link
+                to="/dashboard"
                 className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
               >
                 📊 Dashboard
-              </a>
+              </Link>
               {user.role === 'admin' && (
-                <a
-                  href="/admin"
+                <Link
+                  to="/admin"
                   className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
                   title="Admin Panel"
                 >
                   ⚙️ Admin
-                </a>
+                </Link>
               )}
               <span className="text-sm text-gray-600">👤 {user.username}</span>
               <Button variant="outline" size="sm" onClick={logout}>
@@ -61,9 +62,14 @@ export const Header: React.FC<HeaderProps> = ({ navLinks, config }) => {
               </Button>
             </div>
           ) : (
-            <AuthModal>
-              <Button variant="outline" size="sm">Login / Sign Up</Button>
-            </AuthModal>
+            <div className="flex items-center gap-2">
+              <Link to="/login">
+                <Button variant="outline" size="sm">Login</Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </div>
           )}
         </nav>
 

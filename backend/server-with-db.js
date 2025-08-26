@@ -388,6 +388,25 @@ app.delete('/api/slots', async (req, res) => {
   }
 });
 
+// Check username availability
+app.post('/api/users/check-username', async (req, res) => {
+  try {
+    const { username } = req.body;
+    
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+    
+    const existingUser = await databaseService.getUserByUsername(username);
+    const available = !existingUser;
+    
+    res.json({ available });
+  } catch (error) {
+    console.error('Error checking username availability:', error);
+    res.status(500).json({ error: 'Failed to check username availability' });
+  }
+});
+
 // Get user bookings
 app.get('/api/bookings/user/:userId', async (req, res) => {
   try {
