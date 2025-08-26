@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserDashboard } from '@/hooks/useUserDashboard';
 import { UserStats } from '@/components/user/UserStats';
 import { UpcomingSessions } from '@/components/user/UpcomingSessions';
@@ -19,11 +19,27 @@ export const UserDashboardPage: React.FC = () => {
     cancelBooking,
     createReview,
     updateReview,
+    refreshData,
   } = useUserDashboard();
 
   const [selectedSession, setSelectedSession] = useState<UserSession | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'history'>('upcoming');
+
+  // Listen for dashboard refresh events
+  useEffect(() => {
+    const handleRefresh = () => {
+      refreshData();
+    };
+
+    // Listen for custom refresh events
+    window.addEventListener('refresh-dashboard', handleRefresh);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('refresh-dashboard', handleRefresh);
+    };
+  }, [refreshData]);
 
   const handleReviewSession = (session: UserSession) => {
     setSelectedSession(session);
@@ -112,6 +128,12 @@ export const UserDashboardPage: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => refreshData()}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                🔄 Refresh
+              </button>
 
               <button
                 onClick={() => {

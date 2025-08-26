@@ -3,6 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button/button';
 
+// Global function to trigger dashboard refresh
+export const triggerDashboardRefresh = () => {
+  window.dispatchEvent(new CustomEvent('refresh-dashboard'));
+};
+
 interface TimeSlot {
   id: string;
   date: string;
@@ -142,6 +147,9 @@ export const BookingsPage: React.FC = () => {
         setSelectedTime(null);
         setTermsAccepted(false);
         await fetchAvailableSlots(); // Refresh available slots
+        
+        // Trigger dashboard refresh to show the new booking
+        triggerDashboardRefresh();
       } else {
         const errorData = await response.json();
         alert(`❌ Booking failed: ${errorData.error || 'Unknown error'}`);
