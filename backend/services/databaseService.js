@@ -513,6 +513,329 @@ class DatabaseService {
       console.error('❌ Error initializing default CMS content:', error);
     }
   }
+
+  // Multi-Entry CMS Methods
+  // Testimonials
+  async getTestimonials() {
+    try {
+      const { data, error } = await supabase
+        .from('cms_testimonials')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      return [];
+    }
+  }
+
+  async createTestimonial(testimonialData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_testimonials')
+        .insert([{
+          name: testimonialData.name,
+          text: testimonialData.text,
+          rating: testimonialData.rating,
+          avatar_url: testimonialData.avatar_url,
+          is_active: true,
+          sort_order: testimonialData.sort_order || 0
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating testimonial:', error);
+      throw error;
+    }
+  }
+
+  async updateTestimonial(id, testimonialData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_testimonials')
+        .update({
+          name: testimonialData.name,
+          text: testimonialData.text,
+          rating: testimonialData.rating,
+          avatar_url: testimonialData.avatar_url,
+          sort_order: testimonialData.sort_order,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating testimonial:', error);
+      throw error;
+    }
+  }
+
+  async deleteTestimonial(id) {
+    try {
+      const { error } = await supabase
+        .from('cms_testimonials')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      throw error;
+    }
+  }
+
+  // Features
+  async getFeatures() {
+    try {
+      const { data, error } = await supabase
+        .from('cms_features')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching features:', error);
+      return [];
+    }
+  }
+
+  async createFeature(featureData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_features')
+        .insert([{
+          title: featureData.title,
+          description: featureData.description,
+          icon: featureData.icon,
+          is_active: true,
+          sort_order: featureData.sort_order || 0
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating feature:', error);
+      throw error;
+    }
+  }
+
+  async updateFeature(id, featureData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_features')
+        .update({
+          title: featureData.title,
+          description: featureData.description,
+          icon: featureData.icon,
+          sort_order: featureData.sort_order,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating feature:', error);
+      throw error;
+    }
+  }
+
+  async deleteFeature(id) {
+    try {
+      const { error } = await supabase
+        .from('cms_features')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting feature:', error);
+      throw error;
+    }
+  }
+
+  // FAQ
+  async getFAQs() {
+    try {
+      const { data, error } = await supabase
+        .from('cms_faq')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching FAQs:', error);
+      return [];
+    }
+  }
+
+  async createFAQ(faqData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_faq')
+        .insert([{
+          question: faqData.question,
+          answer: faqData.answer,
+          category: faqData.category,
+          is_active: true,
+          sort_order: faqData.sort_order || 0
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating FAQ:', error);
+      throw error;
+    }
+  }
+
+  async updateFAQ(id, faqData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_faq')
+        .update({
+          question: faqData.question,
+          answer: faqData.answer,
+          category: faqData.category,
+          sort_order: faqData.sort_order,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating FAQ:', error);
+      throw error;
+    }
+  }
+
+  async deleteFAQ(id) {
+    try {
+      const { error } = await supabase
+        .from('cms_faq')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting FAQ:', error);
+      throw error;
+    }
+  }
+
+  // Pricing Plans
+  async getPricingPlans() {
+    try {
+      const { data, error } = await supabase
+        .from('cms_pricing_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching pricing plans:', error);
+      return [];
+    }
+  }
+
+  async createPricingPlan(pricingData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_pricing_plans')
+        .insert([{
+          name: pricingData.name,
+          price: pricingData.price,
+          currency: pricingData.currency || 'USD',
+          billing_period: pricingData.billing_period || 'month',
+          description: pricingData.description,
+          features: pricingData.features || [],
+          is_popular: pricingData.is_popular || false,
+          is_active: true,
+          sort_order: pricingData.sort_order || 0
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating pricing plan:', error);
+      throw error;
+    }
+  }
+
+  async updatePricingPlan(id, pricingData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_pricing_plans')
+        .update({
+          name: pricingData.name,
+          price: pricingData.price,
+          currency: pricingData.currency,
+          billing_period: pricingData.billing_period,
+          description: pricingData.description,
+          features: pricingData.features,
+          is_popular: pricingData.is_popular,
+          sort_order: pricingData.sort_order,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating pricing plan:', error);
+      throw error;
+    }
+  }
+
+  async deletePricingPlan(id) {
+    try {
+      const { error } = await supabase
+        .from('cms_pricing_plans')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting pricing plan:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new DatabaseService();

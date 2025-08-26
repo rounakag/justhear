@@ -2,15 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SlotManager } from '@/components/admin/SlotManager';
 import { CMSEditor } from '@/components/admin/CMSEditor';
+import { MultiEntryCMSEditor } from '@/components/admin/MultiEntryCMSEditor';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useCMS } from '@/hooks/useCMS';
+import { useMultiEntryCMS } from '@/hooks/useMultiEntryCMS';
 
 
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin, adminUser, logoutAdmin, loading } = useAdminAuth();
   const { content, loading: cmsLoading, updateContent } = useCMS();
-  const [activeTab, setActiveTab] = useState<'slots' | 'cms'>('slots');
+  const [activeTab, setActiveTab] = useState<'slots' | 'cms' | 'testimonials' | 'features' | 'faq' | 'pricing'>('slots');
+
+  // Multi-entry CMS hooks
+  const testimonials = useMultiEntryCMS('testimonials');
+  const features = useMultiEntryCMS('features');
+  const faqs = useMultiEntryCMS('faq');
+  const pricingPlans = useMultiEntryCMS('pricing');
 
   // Redirect to admin login if not authenticated (but only after loading is complete)
   useEffect(() => {
@@ -90,10 +98,10 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('slots')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'slots'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -103,7 +111,7 @@ export const AdminDashboardPage: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('cms')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'cms'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -111,19 +119,129 @@ export const AdminDashboardPage: React.FC = () => {
           >
             Content Management
           </button>
+          <button
+            onClick={() => setActiveTab('testimonials')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'testimonials'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Testimonials
+          </button>
+          <button
+            onClick={() => setActiveTab('features')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'features'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Features
+          </button>
+          <button
+            onClick={() => setActiveTab('faq')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'faq'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            FAQ
+          </button>
+          <button
+            onClick={() => setActiveTab('pricing')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'pricing'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Pricing Plans
+          </button>
         </nav>
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'slots' ? (
-        <SlotManager />
-      ) : (
-        <CMSEditor
-          content={content}
-          onUpdate={updateContent}
-          loading={cmsLoading}
-        />
-      )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {activeTab === 'slots' && <SlotManager />}
+        {activeTab === 'cms' && (
+          <CMSEditor
+            content={content}
+            onUpdate={updateContent}
+            loading={cmsLoading}
+          />
+        )}
+        {activeTab === 'testimonials' && (
+          <MultiEntryCMSEditor
+            title="Testimonials"
+            items={testimonials.items}
+            fields={[
+              { name: 'name', label: 'Name', type: 'text', required: true },
+              { name: 'text', label: 'Testimonial Text', type: 'textarea', required: true },
+              { name: 'rating', label: 'Rating', type: 'number', required: true },
+              { name: 'avatar_url', label: 'Avatar URL', type: 'text' },
+              { name: 'sort_order', label: 'Sort Order', type: 'number' }
+            ]}
+            onAdd={testimonials.addItem}
+            onUpdate={testimonials.updateItem}
+            onDelete={testimonials.deleteItem}
+            loading={testimonials.loading}
+          />
+        )}
+        {activeTab === 'features' && (
+          <MultiEntryCMSEditor
+            title="Features"
+            items={features.items}
+            fields={[
+              { name: 'title', label: 'Title', type: 'text', required: true },
+              { name: 'description', label: 'Description', type: 'textarea', required: true },
+              { name: 'icon', label: 'Icon', type: 'text' },
+              { name: 'sort_order', label: 'Sort Order', type: 'number' }
+            ]}
+            onAdd={features.addItem}
+            onUpdate={features.updateItem}
+            onDelete={features.deleteItem}
+            loading={features.loading}
+          />
+        )}
+        {activeTab === 'faq' && (
+          <MultiEntryCMSEditor
+            title="FAQ"
+            items={faqs.items}
+            fields={[
+              { name: 'question', label: 'Question', type: 'text', required: true },
+              { name: 'answer', label: 'Answer', type: 'textarea', required: true },
+              { name: 'category', label: 'Category', type: 'text' },
+              { name: 'sort_order', label: 'Sort Order', type: 'number' }
+            ]}
+            onAdd={faqs.addItem}
+            onUpdate={faqs.updateItem}
+            onDelete={faqs.deleteItem}
+            loading={faqs.loading}
+          />
+        )}
+        {activeTab === 'pricing' && (
+          <MultiEntryCMSEditor
+            title="Pricing Plans"
+            items={pricingPlans.items}
+            fields={[
+              { name: 'name', label: 'Plan Name', type: 'text', required: true },
+              { name: 'price', label: 'Price', type: 'number', required: true },
+              { name: 'currency', label: 'Currency', type: 'select', options: ['USD', 'EUR', 'GBP'], required: true },
+              { name: 'billing_period', label: 'Billing Period', type: 'select', options: ['month', 'year'], required: true },
+              { name: 'description', label: 'Description', type: 'textarea' },
+              { name: 'features', label: 'Features (one per line)', type: 'array' },
+              { name: 'is_popular', label: 'Popular Plan', type: 'checkbox' },
+              { name: 'sort_order', label: 'Sort Order', type: 'number' }
+            ]}
+            onAdd={pricingPlans.addItem}
+            onUpdate={pricingPlans.updateItem}
+            onDelete={pricingPlans.deleteItem}
+            loading={pricingPlans.loading}
+          />
+        )}
+      </div>
     </div>
   );
 };

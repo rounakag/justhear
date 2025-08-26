@@ -858,6 +858,247 @@ app.post('/api/cms/initialize', async (req, res) => {
   }
 });
 
+// Multi-Entry CMS API Endpoints
+// Testimonials
+app.get('/api/cms/testimonials', async (req, res) => {
+  try {
+    const testimonials = await databaseService.getTestimonials();
+    res.json({
+      testimonials,
+      total: testimonials.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    res.status(500).json({ error: 'Failed to fetch testimonials' });
+  }
+});
+
+app.post('/api/cms/testimonials', async (req, res) => {
+  try {
+    const testimonialData = req.body;
+    const testimonial = await databaseService.createTestimonial(testimonialData);
+    res.status(201).json({
+      message: 'Testimonial created successfully',
+      testimonial,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating testimonial:', error);
+    res.status(500).json({ error: 'Failed to create testimonial' });
+  }
+});
+
+app.put('/api/cms/testimonials/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const testimonialData = req.body;
+    const testimonial = await databaseService.updateTestimonial(id, testimonialData);
+    res.json({
+      message: 'Testimonial updated successfully',
+      testimonial,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating testimonial:', error);
+    res.status(500).json({ error: 'Failed to update testimonial' });
+  }
+});
+
+app.delete('/api/cms/testimonials/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deleteTestimonial(id);
+    res.json({
+      message: 'Testimonial deleted successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error deleting testimonial:', error);
+    res.status(500).json({ error: 'Failed to delete testimonial' });
+  }
+});
+
+// Features
+app.get('/api/cms/features', async (req, res) => {
+  try {
+    const features = await databaseService.getFeatures();
+    res.json({
+      features,
+      total: features.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching features:', error);
+    res.status(500).json({ error: 'Failed to fetch features' });
+  }
+});
+
+app.post('/api/cms/features', async (req, res) => {
+  try {
+    const featureData = req.body;
+    const feature = await databaseService.createFeature(featureData);
+    res.status(201).json({
+      message: 'Feature created successfully',
+      feature,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating feature:', error);
+    res.status(500).json({ error: 'Failed to create feature' });
+  }
+});
+
+app.put('/api/cms/features/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const featureData = req.body;
+    const feature = await databaseService.updateFeature(id, featureData);
+    res.json({
+      message: 'Feature updated successfully',
+      feature,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating feature:', error);
+    res.status(500).json({ error: 'Failed to update feature' });
+  }
+});
+
+app.delete('/api/cms/features/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deleteFeature(id);
+    res.json({
+      message: 'Feature deleted successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error deleting feature:', error);
+    res.status(500).json({ error: 'Failed to delete feature' });
+  }
+});
+
+// FAQ
+app.get('/api/cms/faq', async (req, res) => {
+  try {
+    const faqs = await databaseService.getFAQs();
+    res.json({
+      faqs,
+      total: faqs.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching FAQs:', error);
+    res.status(500).json({ error: 'Failed to fetch FAQs' });
+  }
+});
+
+app.post('/api/cms/faq', async (req, res) => {
+  try {
+    const faqData = req.body;
+    const faq = await databaseService.createFAQ(faqData);
+    res.status(201).json({
+      message: 'FAQ created successfully',
+      faq,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating FAQ:', error);
+    res.status(500).json({ error: 'Failed to create FAQ' });
+  }
+});
+
+app.put('/api/cms/faq/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const faqData = req.body;
+    const faq = await databaseService.updateFAQ(id, faqData);
+    res.json({
+      message: 'FAQ updated successfully',
+      faq,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating FAQ:', error);
+    res.status(500).json({ error: 'Failed to update FAQ' });
+  }
+});
+
+app.delete('/api/cms/faq/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deleteFAQ(id);
+    res.json({
+      message: 'FAQ deleted successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error deleting FAQ:', error);
+    res.status(500).json({ error: 'Failed to delete FAQ' });
+  }
+});
+
+// Pricing Plans
+app.get('/api/cms/pricing', async (req, res) => {
+  try {
+    const pricingPlans = await databaseService.getPricingPlans();
+    res.json({
+      pricingPlans,
+      total: pricingPlans.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching pricing plans:', error);
+    res.status(500).json({ error: 'Failed to fetch pricing plans' });
+  }
+});
+
+app.post('/api/cms/pricing', async (req, res) => {
+  try {
+    const pricingData = req.body;
+    const pricingPlan = await databaseService.createPricingPlan(pricingData);
+    res.status(201).json({
+      message: 'Pricing plan created successfully',
+      pricingPlan,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating pricing plan:', error);
+    res.status(500).json({ error: 'Failed to create pricing plan' });
+  }
+});
+
+app.put('/api/cms/pricing/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pricingData = req.body;
+    const pricingPlan = await databaseService.updatePricingPlan(id, pricingData);
+    res.json({
+      message: 'Pricing plan updated successfully',
+      pricingPlan,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating pricing plan:', error);
+    res.status(500).json({ error: 'Failed to update pricing plan' });
+  }
+});
+
+app.delete('/api/cms/pricing/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deletePricingPlan(id);
+    res.json({
+      message: 'Pricing plan deleted successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error deleting pricing plan:', error);
+    res.status(500).json({ error: 'Failed to delete pricing plan' });
+  }
+});
+
 // Serve test.html
 app.get('/', (req, res) => {
   res.send(`
