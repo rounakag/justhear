@@ -40,21 +40,10 @@ export default function App() {
                 <Header navLinks={NAV_LINKS} config={config} />
                 
                 {/* Hero Section */}
-                <HeroSection
-                  title="Feeling"
-                  subtitle="upset?"
-                  description="We're here to listen."
-                  ctaText="Book Session"
-                  secondaryCtaText="See How It Works"
-                  secondaryCtaHref="#how"
-                />
+                <HeroSection />
 
                 {/* Testimonials Section */}
-                <TestimonialsSection
-                  title="Real stories, real validation"
-                  subtitle="See how a simple conversation changed everything"
-                  testimonials={TESTIMONIALS}
-                />
+                <TestimonialsSection testimonials={TESTIMONIALS} />
 
                 {/* Examples Section */}
                 <ExamplesSection

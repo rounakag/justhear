@@ -1,11 +1,12 @@
 import React from 'react';
 import { Card } from '@/design-system/components';
 import { cn } from '@/lib/utils';
+import { useDynamicContent } from '@/hooks/useDynamicContent';
 import type { Testimonial } from '@/types';
 
 interface TestimonialsSectionProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   testimonials: Testimonial[];
 }
 
@@ -14,14 +15,19 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   subtitle,
   testimonials,
 }) => {
+  const { getContent } = useDynamicContent();
+
+  // Use CMS content with fallback to props
+  const testimonialsTitle = getContent('testimonials', 'title', title || 'Real stories, real validation');
+  const testimonialsSubtitle = getContent('testimonials', 'subtitle', subtitle || 'See how a simple conversation changed everything');
   return (
     <section id="testimonials" className="py-16 md:py-24 bg-gray-50">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-gray-800">
-          {title}
+          {testimonialsTitle}
         </h2>
         <p className="text-center text-gray-600 mb-8 text-base sm:text-lg">
-          {subtitle}
+          {testimonialsSubtitle}
         </p>
         <div className="flex md:grid md:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x md:snap-none pb-4 md:pb-0 scrollbar-hide">
           {testimonials.map((testimonial, index) => (
