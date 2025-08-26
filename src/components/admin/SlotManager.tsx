@@ -126,7 +126,7 @@ export const SlotManager: React.FC = () => {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleMarkAsDone = async (slotId: string) => {
+  const handleMarkAsDone = useCallback(async (slotId: string) => {
     try {
       const confirmed = confirm('Mark this slot as done? This will change the status from "booked" to "done".');
       if (!confirmed) return;
@@ -156,7 +156,59 @@ export const SlotManager: React.FC = () => {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       alert(`❌ Failed to mark slot as done: ${errorMessage}`);
     }
-  };
+  }, [refreshData]);
+
+  const handleDeleteSlot = useCallback(async (slotId: string) => {
+    const confirmed = await new Promise<boolean>((resolve) => {
+      const result = confirm(
+        '⚠️ CONFIRM DELETION\n\n' +
+        'Are you sure you want to delete this slot?\n' +
+        'This action cannot be undone.\n\n' +
+        'Click OK to delete or Cancel to abort.'
+      );
+      resolve(result);
+    });
+
+    if (!confirmed) return;
+
+    try {
+      console.log('🔍 DEBUG - Deleting slot:', slotId);
+      
+      // Use environment variable with fallback
+      const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
+      
+      const response = await fetch(`${apiUrl}/api/slots/${slotId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      console.log('🔍 DEBUG - Delete response status:', response.status);
+      
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.warn('Could not parse error response:', parseError);
+        }
+        throw new Error(`Failed to delete slot: ${errorMessage}`);
+      }
+
+      const result = await response.json();
+      console.log('🔍 DEBUG - Delete result:', result);
+      
+      alert('✅ Slot deleted successfully!');
+      await refreshData();
+    } catch (error) {
+      console.error('❌ ERROR deleting slot:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`❌ Failed to delete slot: ${errorMessage}`);
+    }
+  }, [refreshData]);
 
   const handleDeleteAllSlots = async () => {
     // Enhanced confirmation with better UX
@@ -413,6 +465,8 @@ export const SlotManager: React.FC = () => {
                     slots={filteredSlots}
                     onSlotClick={handleSlotClick}
                     listeners={listeners}
+                    onMarkAsDone={handleMarkAsDone}
+                    onDeleteSlot={handleDeleteSlot}
                   />
                 )}
               </>
@@ -442,63 +496,13 @@ interface SlotListProps {
   slots: TimeSlot[];
   listeners: any[];
   onSlotClick: (slot: TimeSlot) => void;
+  onMarkAsDone: (slotId: string) => void;
+  onDeleteSlot: (slotId: string) => void;
 }
 
-const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) => {
+const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMarkAsDone, onDeleteSlot }) => {
   
-  // Extracted delete function with better error handling
-  const handleDeleteSlot = useCallback(async (slotId: string) => {
-    const confirmed = await new Promise<boolean>((resolve) => {
-      const result = confirm(
-        '⚠️ CONFIRM DELETION\n\n' +
-        'Are you sure you want to delete this slot?\n' +
-        'This action cannot be undone.\n\n' +
-        'Click OK to delete or Cancel to abort.'
-      );
-      resolve(result);
-    });
 
-    if (!confirmed) return;
-
-    try {
-      console.log('🔍 DEBUG - Deleting slot:', slotId);
-      
-      // Use environment variable with fallback
-      const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
-      
-      const response = await fetch(`${apiUrl}/api/slots/${slotId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-
-      console.log('🔍 DEBUG - Delete response status:', response.status);
-      
-      if (!response.ok) {
-        let errorMessage = response.statusText;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          console.warn('Could not parse error response:', parseError);
-        }
-        throw new Error(`Failed to delete slot: ${errorMessage}`);
-      }
-
-      const result = await response.json();
-      console.log('🔍 DEBUG - Delete result:', result);
-      
-      alert('✅ Slot deleted successfully!');
-      // Refresh the slots list
-      window.location.reload();
-            } catch (error) {
-          console.error('❌ ERROR deleting slot:', error);
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-          alert(`❌ Failed to delete slot: ${errorMessage}`);
-        }
-  }, []);
   
   const getListenerName = useCallback((listenerId?: string): string => {
     if (!listenerId || listenerId.trim() === '') {
@@ -719,7 +723,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick }) =>
                     className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 rounded-md transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteSlot(slot.id);
+                      onDeleteSlot(slot.id);
                     }}
                   >
                     Delete
