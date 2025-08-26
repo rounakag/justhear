@@ -85,9 +85,9 @@ export const BookingsPage: React.FC = () => {
     }
   };
 
-  // Generate dates for next 7 days
+  // Generate dates for next 10 days and filter to only show dates with available slots
   const today = new Date();
-  const dates = Array.from({ length: 7 }, (_, i) => {
+  const allDates = Array.from({ length: 10 }, (_, i) => {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dateStr = date.toISOString().split("T")[0];
@@ -95,6 +95,14 @@ export const BookingsPage: React.FC = () => {
       label: date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
       value: dateStr,
     };
+  });
+
+  // Filter to only show dates that have available slots
+  const datesWithSlots = allDates.filter(date => {
+    const slotsForDate = availableSlots.filter(slot => 
+      slot.date === date.value && slot.status === 'available'
+    );
+    return slotsForDate.length > 0;
   });
 
   // Get available times for selected date
@@ -140,7 +148,7 @@ export const BookingsPage: React.FC = () => {
 
       if (response.ok) {
         await response.json(); // Consume the response
-        alert(`✅ Booking confirmed!\n\nDate: ${dates.find(d => d.value === selectedDate)?.label}\nTime: ${selectedTime}\nAmount: ₹49\n\nYou will receive a confirmation call 5 minutes before your session.`);
+        alert(`✅ Booking confirmed!\n\nDate: ${datesWithSlots.find(d => d.value === selectedDate)?.label}\nTime: ${selectedTime}\nAmount: ₹49\n\nYou will receive a confirmation call 5 minutes before your session.`);
         
         // Reset form and refresh slots
         setSelectedDate(null);
@@ -201,13 +209,32 @@ export const BookingsPage: React.FC = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading available slots...</p>
           </div>
+        ) : datesWithSlots.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="text-6xl mb-4">📅</div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">All Slots Booked</h3>
+            <p className="text-gray-600 mb-4">
+              We're currently fully booked for the next 10 days.
+            </p>
+            <p className="text-sm text-gray-500">
+              Please check again tomorrow. We update slots every day with new availability.
+            </p>
+            <div className="mt-6">
+              <button
+                onClick={fetchAvailableSlots}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Refresh Availability
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-xl p-8">
             {/* Date Selection */}
             <div className="mb-8">
               <h3 className="font-semibold mb-4 text-gray-800">Select Date</h3>
               <div className="grid grid-cols-7 gap-3">
-                {dates.map((date) => (
+                {datesWithSlots.map((date) => (
                   <button
                     key={date.value}
                     onClick={() => {
@@ -230,7 +257,7 @@ export const BookingsPage: React.FC = () => {
             {selectedDate && (
               <div className="mb-8">
                 <h3 className="font-semibold mb-4 text-gray-800">
-                  Select Time for {dates.find(d => d.value === selectedDate)?.label}
+                  Select Time for {datesWithSlots.find(d => d.value === selectedDate)?.label}
                 </h3>
                 {times.length > 0 ? (
                   <div className="grid grid-cols-3 gap-3">
