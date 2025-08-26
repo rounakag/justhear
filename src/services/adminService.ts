@@ -16,7 +16,7 @@ class AdminService {
   // TimeSlot Management
   async getTimeSlots(filters?: SlotFilters): Promise<TimeSlot[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/slots`);
+      const response = await fetch(`${this.baseUrl}/slots/admin-created`);
       if (!response.ok) {
         throw new Error('Failed to fetch time slots');
       }

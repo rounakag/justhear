@@ -506,11 +506,11 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
   
   const getListenerName = useCallback((listenerId?: string): string => {
     if (!listenerId || listenerId.trim() === '') {
-      return 'Unassigned';
+      return 'Admin'; // Default to Admin when no listener assigned
     }
     
     const listener = listeners.find(l => l.id === listenerId);
-    return listener?.name || listener?.username || 'Unknown';
+    return listener?.name || listener?.username || 'Admin';
   }, [listeners]);
 
   const formatTime = (time: string) => {

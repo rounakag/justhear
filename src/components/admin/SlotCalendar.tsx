@@ -17,9 +17,9 @@ export const SlotCalendar: React.FC<SlotCalendarProps> = ({
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
 
   const getListenerName = (listenerId?: string) => {
-    if (!listenerId) return 'Unassigned';
+    if (!listenerId) return 'Admin'; // Default to Admin when no listener assigned
     const listener = listeners.find(l => l.id === listenerId);
-    return listener?.name || 'Unknown';
+    return listener?.name || 'Admin';
   };
 
   const formatTime = (time: string) => {
@@ -114,7 +114,11 @@ export const SlotCalendar: React.FC<SlotCalendarProps> = ({
 
   const getSlotsForDate = (date: Date) => {
     const dateString = date.toISOString().split('T')[0];
-    return slots.filter(slot => slot.date === dateString);
+    console.log('🔍 DEBUG - Calendar looking for date:', dateString);
+    console.log('🔍 DEBUG - Available slots:', slots.map(s => ({ id: s.id, date: s.date })));
+    const filteredSlots = slots.filter(slot => slot.date === dateString);
+    console.log('🔍 DEBUG - Found slots for date:', filteredSlots.length);
+    return filteredSlots;
   };
 
   const getSlotStatusColor = (slot: TimeSlot) => {

@@ -324,24 +324,31 @@ app.post('/api/slots', async (req, res) => {
     
     // Generate Google Meet link for the slot
     try {
+      console.log('🔍 DEBUG - Generating Google Meet link for slot:', slot.id);
+      
       const meetingDetails = await meetingService.generateGoogleMeetLink({
         slot,
         userId: 'admin'
       });
       
-      await databaseService.updateSlotMeetingLink(slot.id, {
+      console.log('🔍 DEBUG - Generated meeting details:', meetingDetails);
+      
+      const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, {
         meeting_link: meetingDetails.meetingLink,
         meeting_id: meetingDetails.meetingId,
         meeting_provider: meetingDetails.meetingProvider
       });
       
+      console.log('🔍 DEBUG - Updated slot with meeting link:', updatedSlot);
+      
       res.status(201).json({
         message: 'Slot created successfully with meeting link',
-        slot
+        slot: updatedSlot
       });
     } catch (meetingError) {
+      console.error('🔍 DEBUG - Error generating meeting link:', meetingError);
       res.status(201).json({
-        message: 'Slot created successfully',
+        message: 'Slot created successfully (without meeting link)',
         slot
       });
     }
