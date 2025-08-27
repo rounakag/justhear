@@ -11,7 +11,7 @@ import { FeaturesSection } from '@/features/features/FeaturesSection';
 import { ComparisonSection } from '@/features/comparison/ComparisonSection';
 import { ScienceSection } from '@/features/science/ScienceSection';
 import { PricingSection } from '@/features/pricing/PricingSection';
-import { FAQSection } from '@/features/faq/FAQSection';
+import { FAQSectionCMS } from '@/features/faq/FAQSectionCMS';
 import { LoginPage } from '@/pages/LoginPage';
 import { SignupPage } from '@/pages/SignupPage';
 import { BookingsPage } from '@/pages/BookingsPage';
@@ -23,7 +23,6 @@ import {
   FEATURES,
   DIFFERENT,
   SCIENCE,
-  FAQ,
 } from '@/constants/data';
 
 export default function App() {
@@ -75,10 +74,7 @@ export default function App() {
                 />
 
                 {/* FAQ Section */}
-                <FAQSection
-                  title="Frequently Asked Questions"
-                  faqs={FAQ}
-                />
+                <FAQSectionCMS />
 
                 {/* Footer */}
                 <Footer config={config} />
