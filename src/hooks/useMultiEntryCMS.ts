@@ -15,6 +15,19 @@ interface UseMultiEntryCMSReturn {
   refreshItems: () => Promise<void>;
 }
 
+// Helper function to extract item from response based on endpoint
+function extractItemFromResponse(data: any, endpoint: string): any {
+  const responseMap: Record<string, string> = {
+    testimonials: 'testimonial',
+    features: 'feature',
+    faq: 'faq',
+    pricing: 'pricingPlan'
+  };
+  
+  const key = responseMap[endpoint] || endpoint.slice(0, -1);
+  return data[key] || data.item || data;
+}
+
 export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
   const [items, setItems] = useState<MultiEntryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +39,6 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       setError(null);
       
       const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`;
-      console.log(`🔍 DEBUG - Fetching ${endpoint} from:`, url);
       
       const response = await fetch(url);
       
@@ -35,10 +47,7 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       }
       
       const data = await response.json();
-      console.log(`🔍 DEBUG - ${endpoint} response:`, data);
-      
       const items = data[endpoint] || data.items || [];
-      console.log(`🔍 DEBUG - ${endpoint} items:`, items);
       
       setItems(items);
     } catch (err) {
@@ -54,8 +63,6 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       setError(null);
       
       const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`;
-      console.log(`🔍 DEBUG - Adding ${endpoint} item:`, item);
-      console.log(`🔍 DEBUG - POST URL:`, url);
       
       const response = await fetch(url, {
         method: 'POST',
@@ -65,41 +72,17 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
         body: JSON.stringify(item),
       });
       
-      console.log(`🔍 DEBUG - Response status:`, response.status);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`🔍 DEBUG - Response error:`, errorText);
         throw new Error(`Failed to add ${endpoint.slice(0, -1)}: ${response.statusText} - ${errorText}`);
       }
       
       const data = await response.json();
-      console.log(`🔍 DEBUG - Response data:`, data);
-      
-      // Handle different response formats from backend
-      let newItem;
-      if (endpoint === 'testimonials') {
-        newItem = data.testimonial;
-      } else if (endpoint === 'features') {
-        newItem = data.feature;
-      } else if (endpoint === 'faq') {
-        newItem = data.faq;
-      } else if (endpoint === 'pricing') {
-        newItem = data.pricingPlan;
-      } else {
-        newItem = data[endpoint.slice(0, -1)] || data.item;
-      }
-      
-      console.log(`🔍 DEBUG - New item to add:`, newItem);
+      const newItem = extractItemFromResponse(data, endpoint);
       
       if (newItem) {
-        setItems(prev => {
-          const updated = [...prev, newItem];
-          console.log(`🔍 DEBUG - Updated items:`, updated);
-          return updated;
-        });
+        setItems(prev => [...prev, newItem]);
       } else {
-        console.error(`🔍 DEBUG - No new item found in response:`, data);
         throw new Error('Failed to get new item from response');
       }
     } catch (err) {
@@ -126,8 +109,10 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       }
       
       const data = await response.json();
+      const updatedItem = extractItemFromResponse(data, endpoint);
+      
       setItems(prev => prev.map(item => 
-        item.id === id ? (data[endpoint.slice(0, -1)] || data.item) : item
+        item.id === id ? updatedItem : item
       ));
     } catch (err) {
       console.error(`Error updating ${endpoint.slice(0, -1)}:`, err);

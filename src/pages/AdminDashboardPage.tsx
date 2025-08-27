@@ -187,6 +187,7 @@ export const AdminDashboardPage: React.FC = () => {
             onUpdate={testimonials.updateItem}
             onDelete={testimonials.deleteItem}
             loading={testimonials.loading}
+            error={testimonials.error}
           />
         )}
         {activeTab === 'features' && (
@@ -203,6 +204,7 @@ export const AdminDashboardPage: React.FC = () => {
             onUpdate={features.updateItem}
             onDelete={features.deleteItem}
             loading={features.loading}
+            error={features.error}
           />
         )}
         {activeTab === 'faq' && (
@@ -219,6 +221,7 @@ export const AdminDashboardPage: React.FC = () => {
             onUpdate={faqs.updateItem}
             onDelete={faqs.deleteItem}
             loading={faqs.loading}
+            error={faqs.error}
           />
         )}
         {activeTab === 'pricing' && (
@@ -239,6 +242,7 @@ export const AdminDashboardPage: React.FC = () => {
             onUpdate={pricingPlans.updateItem}
             onDelete={pricingPlans.deleteItem}
             loading={pricingPlans.loading}
+            error={pricingPlans.error}
           />
         )}
       </div>

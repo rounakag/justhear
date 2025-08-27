@@ -22,6 +22,7 @@ interface MultiEntryCMSEditorProps {
   onUpdate: (id: string, item: MultiEntryItem) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   loading?: boolean;
+  error?: string | null;
 }
 
 export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
@@ -31,9 +32,9 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
   onAdd,
   onUpdate,
   onDelete,
-  loading = false
+  loading = false,
+  error = null
 }) => {
-  console.log(`🔍 DEBUG - MultiEntryCMSEditor for ${title}:`, { items, loading, fields });
   const [editingItem, setEditingItem] = useState<MultiEntryItem | null>(null);
   const [newItem, setNewItem] = useState<MultiEntryItem>({});
   const [isAdding, setIsAdding] = useState(false);
@@ -158,6 +159,12 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800 text-sm">{error}</p>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <Button
