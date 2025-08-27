@@ -1088,6 +1088,68 @@ app.delete('/api/cms/faq/:id', async (req, res) => {
   }
 });
 
+// Reach Out
+app.get('/api/cms/reachout', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG - Fetching reach out content from database');
+    const reachout = await databaseService.getReachOut();
+    console.log('🔍 DEBUG - Retrieved reach out content:', reachout);
+    res.json({
+      reachout,
+      total: reachout.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching reach out content:', error);
+    res.status(500).json({ error: 'Failed to fetch reach out content' });
+  }
+});
+
+app.post('/api/cms/reachout', async (req, res) => {
+  try {
+    const reachoutData = req.body;
+    const reachout = await databaseService.createReachOut(reachoutData);
+    res.status(201).json({
+      message: 'Reach out content created successfully',
+      reachout,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating reach out content:', error);
+    res.status(500).json({ error: 'Failed to create reach out content' });
+  }
+});
+
+app.put('/api/cms/reachout/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reachoutData = req.body;
+    const reachout = await databaseService.updateReachOut(id, reachoutData);
+    res.json({
+      message: 'Reach out content updated successfully',
+      reachout,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating reach out content:', error);
+    res.status(500).json({ error: 'Failed to update reach out content' });
+  }
+});
+
+app.delete('/api/cms/reachout/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deleteReachOut(id);
+    res.json({
+      message: 'Reach out content deleted successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error deleting reach out content:', error);
+    res.status(500).json({ error: 'Failed to delete reach out content' });
+  }
+});
+
 // Pricing Plans
 app.get('/api/cms/pricing', async (req, res) => {
   try {

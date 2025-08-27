@@ -848,6 +848,92 @@ class DatabaseService {
       throw error;
     }
   }
+
+  // Reach Out
+  async getReachOut() {
+    try {
+      const { data, error } = await supabase
+        .from('cms_reachout')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching reach out content:', error);
+      return [];
+    }
+  }
+
+  async createReachOut(reachoutData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_reachout')
+        .insert([{
+          title: reachoutData.title,
+          subtitle: reachoutData.subtitle,
+          description: reachoutData.description,
+          contact_email: reachoutData.contact_email,
+          contact_phone: reachoutData.contact_phone,
+          response_time: reachoutData.response_time,
+          availability: reachoutData.availability,
+          is_active: true,
+          sort_order: reachoutData.sort_order || 0
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating reach out content:', error);
+      throw error;
+    }
+  }
+
+  async updateReachOut(id, reachoutData) {
+    try {
+      const { data, error } = await supabase
+        .from('cms_reachout')
+        .update({
+          title: reachoutData.title,
+          subtitle: reachoutData.subtitle,
+          description: reachoutData.description,
+          contact_email: reachoutData.contact_email,
+          contact_phone: reachoutData.contact_phone,
+          response_time: reachoutData.response_time,
+          availability: reachoutData.availability,
+          sort_order: reachoutData.sort_order,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating reach out content:', error);
+      throw error;
+    }
+  }
+
+  async deleteReachOut(id) {
+    try {
+      const { error } = await supabase
+        .from('cms_reachout')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting reach out content:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new DatabaseService();

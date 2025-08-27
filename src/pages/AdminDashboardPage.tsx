@@ -12,13 +12,14 @@ export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin, adminUser, logoutAdmin, loading } = useAdminAuth();
   const { content, loading: cmsLoading, updateContent } = useCMS();
-  const [activeTab, setActiveTab] = useState<'slots' | 'cms' | 'testimonials' | 'features' | 'faq' | 'pricing'>('slots');
+  const [activeTab, setActiveTab] = useState<'slots' | 'cms' | 'testimonials' | 'features' | 'faq' | 'pricing' | 'reachout'>('slots');
 
   // Multi-entry CMS hooks
   const testimonials = useMultiEntryCMS('testimonials');
   const features = useMultiEntryCMS('features');
   const faqs = useMultiEntryCMS('faq');
   const pricingPlans = useMultiEntryCMS('pricing');
+  const reachOut = useMultiEntryCMS('reachout');
 
   // Redirect to admin login if not authenticated (but only after loading is complete)
   useEffect(() => {
@@ -159,6 +160,16 @@ export const AdminDashboardPage: React.FC = () => {
           >
             Pricing Plans
           </button>
+          <button
+            onClick={() => setActiveTab('reachout')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'reachout'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Reach Out
+          </button>
         </nav>
       </div>
 
@@ -243,6 +254,27 @@ export const AdminDashboardPage: React.FC = () => {
             onDelete={pricingPlans.deleteItem}
             loading={pricingPlans.loading}
             error={pricingPlans.error}
+          />
+        )}
+        {activeTab === 'reachout' && (
+          <MultiEntryCMSEditor
+            title="Reach Out"
+            items={reachOut.items}
+            fields={[
+              { name: 'title', label: 'Title', type: 'text', required: true },
+              { name: 'subtitle', label: 'Subtitle', type: 'text', required: true },
+              { name: 'description', label: 'Description', type: 'textarea', required: true },
+              { name: 'contact_email', label: 'Contact Email', type: 'email', required: true },
+              { name: 'contact_phone', label: 'Contact Phone', type: 'text' },
+              { name: 'response_time', label: 'Response Time', type: 'text' },
+              { name: 'availability', label: 'Availability', type: 'textarea' },
+              { name: 'sort_order', label: 'Sort Order', type: 'number' }
+            ]}
+            onAdd={reachOut.addItem}
+            onUpdate={reachOut.updateItem}
+            onDelete={reachOut.deleteItem}
+            loading={reachOut.loading}
+            error={reachOut.error}
           />
         )}
       </div>
