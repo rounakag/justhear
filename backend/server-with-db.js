@@ -1064,12 +1064,22 @@ app.put('/api/cms/faq/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const faqData = req.body;
+    
+    console.log('🔍 DEBUG - FAQ update endpoint called:', { id, faqData });
+    
     const faq = await databaseService.updateFAQ(id, faqData);
-    res.json({
+    
+    console.log('🔍 DEBUG - FAQ update result:', faq);
+    
+    const response = {
       message: 'FAQ updated successfully',
       faq,
       timestamp: new Date().toISOString()
-    });
+    };
+    
+    console.log('🔍 DEBUG - FAQ update response:', response);
+    
+    res.json(response);
   } catch (error) {
     console.error('Error updating FAQ:', error);
     res.status(500).json({ error: 'Failed to update FAQ' });

@@ -726,19 +726,32 @@ class DatabaseService {
 
   async updateFAQ(id, faqData) {
     try {
+      console.log('🔍 DEBUG - updateFAQ called with:', { id, faqData });
+      
+      const updateData = {
+        question: faqData.question,
+        answer: faqData.answer,
+        sort_order: faqData.sort_order,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('🔍 DEBUG - updateFAQ update data:', updateData);
+      
       const { data, error } = await supabase
         .from('cms_faq')
-        .update({
-          question: faqData.question,
-          answer: faqData.answer,
-          sort_order: faqData.sort_order,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
+      console.log('🔍 DEBUG - updateFAQ supabase response:', { data, error });
+      
+      if (error) {
+        console.error('🔍 DEBUG - updateFAQ supabase error:', error);
+        throw error;
+      }
+      
+      console.log('🔍 DEBUG - updateFAQ returning data:', data);
       return data;
     } catch (error) {
       console.error('Error updating FAQ:', error);

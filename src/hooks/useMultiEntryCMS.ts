@@ -121,7 +121,11 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       setError(null);
       console.log(`🔍 DEBUG - Updating ${endpoint} item:`, { id, item });
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}/${id}`, {
+      const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}/${id}`;
+      console.log(`🔍 DEBUG - Update URL:`, url);
+      console.log(`🔍 DEBUG - Update payload:`, JSON.stringify(item, null, 2));
+      
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -130,6 +134,7 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       });
       
       console.log(`🔍 DEBUG - Update response status:`, response.status);
+      console.log(`🔍 DEBUG - Update response headers:`, Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -143,18 +148,28 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       const updatedItem = extractItemFromResponse(data, endpoint);
       console.log(`🔍 DEBUG - Extracted updated item:`, updatedItem);
       
-      setItems(prev => prev.map(item => 
-        item.id === id ? updatedItem : item
-      ));
+      if (!updatedItem || !updatedItem.id) {
+        console.error(`🔍 DEBUG - Invalid updated item:`, updatedItem);
+        throw new Error('Invalid response from server - missing item data');
+      }
+      
+      setItems(prev => {
+        const newItems = prev.map(item => 
+          item.id === id ? updatedItem : item
+        );
+        console.log(`🔍 DEBUG - Updated items list:`, newItems);
+        return newItems;
+      });
       
       // Refresh items to ensure consistency
+      console.log(`🔍 DEBUG - Refreshing items after update...`);
       await fetchItems();
     } catch (err) {
       console.error(`Error updating ${endpoint.slice(0, -1)}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to update item');
       throw err;
     }
-  }, [endpoint]);
+  }, [endpoint, fetchItems]);
 
   const deleteItem = useCallback(async (id: string) => {
     try {
