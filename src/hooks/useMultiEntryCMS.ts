@@ -25,14 +25,22 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`);
+      const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`;
+      console.log(`🔍 DEBUG - Fetching ${endpoint} from:`, url);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      setItems(data[endpoint] || data.items || []);
+      console.log(`🔍 DEBUG - ${endpoint} response:`, data);
+      
+      const items = data[endpoint] || data.items || [];
+      console.log(`🔍 DEBUG - ${endpoint} items:`, items);
+      
+      setItems(items);
     } catch (err) {
       console.error(`Error fetching ${endpoint}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to fetch items');

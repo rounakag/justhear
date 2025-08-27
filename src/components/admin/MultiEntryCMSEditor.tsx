@@ -33,6 +33,7 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
   onDelete,
   loading = false
 }) => {
+  console.log(`🔍 DEBUG - MultiEntryCMSEditor for ${title}:`, { items, loading, fields });
   const [editingItem, setEditingItem] = useState<MultiEntryItem | null>(null);
   const [newItem, setNewItem] = useState<MultiEntryItem>({});
   const [isAdding, setIsAdding] = useState(false);
