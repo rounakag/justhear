@@ -80,49 +80,49 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               {/* Main Chat Bubble */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-white/70 rounded-3xl shadow-2xl border border-white/50 backdrop-blur-sm transform rotate-3 hover:rotate-0 transition-transform duration-500">
                 
-                {/* Soundwave Pattern */}
+                {/* Soundwave Pattern - More Professional */}
                 <div className="absolute top-8 left-8 right-8 flex items-end justify-center space-x-1">
-                  {[2, 4, 6, 8, 6, 4, 2, 3, 5, 7, 5, 3].map((height, i) => (
+                  {[3, 5, 7, 9, 7, 5, 3, 4, 6, 8, 6, 4].map((height, i) => (
                     <div
                       key={i}
-                      className="bg-gradient-to-t from-teal-400 to-cyan-400 rounded-full animate-pulse"
+                      className="bg-gradient-to-t from-blue-500 to-indigo-500 rounded-full animate-pulse"
                       style={{ 
-                        width: '3px', 
-                        height: `${height * 4}px`,
-                        animationDelay: `${i * 100}ms`
+                        width: '4px', 
+                        height: `${height * 3}px`,
+                        animationDelay: `${i * 150}ms`
                       }}
                     ></div>
                   ))}
                 </div>
 
-                {/* Two People Silhouettes */}
-                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center space-x-8">
+                {/* Professional Support Icons */}
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center space-x-12">
                   
-                  {/* Person 1 (Speaker) */}
+                  {/* Support Icon 1 - Listening */}
                   <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mb-2 flex items-center justify-center">
-                      <div className="w-6 h-6 bg-white rounded-full"></div>
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full mb-3 flex items-center justify-center shadow-lg">
+                      <div className="text-white text-2xl">👂</div>
                     </div>
-                    <div className="w-8 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                    <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
                   </div>
 
-                  {/* Person 2 (Listener) */}
+                  {/* Support Icon 2 - Understanding */}
                   <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full mb-2 flex items-center justify-center">
-                      <div className="w-6 h-6 bg-white rounded-full"></div>
+                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full mb-3 flex items-center justify-center shadow-lg">
+                      <div className="text-white text-2xl">💙</div>
                     </div>
-                    <div className="w-8 h-2 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"></div>
+                    <div className="w-12 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
                   </div>
                 </div>
 
-                {/* Floating Hearts */}
-                <div className="absolute top-4 right-4 text-pink-400 text-xl animate-bounce">💜</div>
-                <div className="absolute bottom-4 left-4 text-blue-400 text-xl animate-bounce delay-500">💙</div>
+                {/* Professional Decorative Elements */}
+                <div className="absolute top-4 right-4 text-blue-400 text-lg">✨</div>
+                <div className="absolute bottom-4 left-4 text-indigo-400 text-lg">🌟</div>
               </div>
 
-              {/* Decorative Elements */}
-              <div className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full animate-ping"></div>
-              <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-400 rounded-full animate-ping delay-1000"></div>
+              {/* Subtle Professional Decorative Elements */}
+              <div className="absolute -top-4 -right-4 w-6 h-6 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-full animate-ping opacity-60"></div>
+              <div className="absolute -bottom-4 -left-4 w-4 h-4 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full animate-ping delay-1000 opacity-60"></div>
             </div>
           </div>
         </div>
