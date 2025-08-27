@@ -28,7 +28,8 @@ function extractItemFromResponse(data: any, endpoint: string): any {
   const key = responseMap[endpoint] || endpoint.slice(0, -1);
   console.log(`🔍 DEBUG - extractItemFromResponse: endpoint=${endpoint}, key=${key}, data=`, data);
   
-  const result = data[key] || data.item || data;
+  // Try multiple possible keys
+  const result = data[key] || data[endpoint] || data.item || data;
   console.log(`🔍 DEBUG - extractItemFromResponse result:`, result);
   return result;
 }
@@ -57,7 +58,16 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       const data = await response.json();
       console.log(`🔍 DEBUG - Raw response data for ${endpoint}:`, data);
       
-      const items = data[endpoint] || data.items || [];
+      // Handle different response formats
+      let items = [];
+      if (data[endpoint]) {
+        items = data[endpoint];
+      } else if (data[endpoint + 's']) {
+        items = data[endpoint + 's']; // Handle plural form (faqs, testimonials, etc.)
+      } else if (data.items) {
+        items = data.items;
+      }
+      
       console.log(`🔍 DEBUG - Extracted items for ${endpoint}:`, items);
       
       setItems(items);
