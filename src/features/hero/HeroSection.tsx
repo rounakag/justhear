@@ -6,7 +6,6 @@ import { useDynamicContent } from '@/hooks/useDynamicContent';
 interface HeroSectionProps {
   title?: string;
   subtitle?: string;
-  description?: string;
   ctaText?: string;
   secondaryCtaText?: string;
   secondaryCtaHref?: string;
@@ -15,7 +14,6 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({
   title,
   subtitle,
-  description,
   ctaText,
   secondaryCtaText,
   secondaryCtaHref,
