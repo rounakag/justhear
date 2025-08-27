@@ -710,7 +710,6 @@ class DatabaseService {
         .insert([{
           question: faqData.question,
           answer: faqData.answer,
-          category: faqData.category,
           is_active: true,
           sort_order: faqData.sort_order || 0
         }])
@@ -732,7 +731,6 @@ class DatabaseService {
         .update({
           question: faqData.question,
           answer: faqData.answer,
-          category: faqData.category,
           sort_order: faqData.sort_order,
           updated_at: new Date().toISOString()
         })

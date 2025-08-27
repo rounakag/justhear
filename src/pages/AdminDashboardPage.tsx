@@ -225,7 +225,6 @@ export const AdminDashboardPage: React.FC = () => {
             fields={[
               { name: 'question', label: 'Question', type: 'text', required: true },
               { name: 'answer', label: 'Answer', type: 'textarea', required: true },
-              { name: 'category', label: 'Category', type: 'text' },
               { name: 'sort_order', label: 'Sort Order', type: 'number' }
             ]}
             onAdd={faqs.addItem}

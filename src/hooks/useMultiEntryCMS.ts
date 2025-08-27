@@ -21,7 +21,8 @@ function extractItemFromResponse(data: any, endpoint: string): any {
     testimonials: 'testimonial',
     features: 'feature',
     faq: 'faq',
-    pricing: 'pricingPlan'
+    pricing: 'pricingPlan',
+    reachout: 'reachout'
   };
   
   const key = responseMap[endpoint] || endpoint.slice(0, -1);
