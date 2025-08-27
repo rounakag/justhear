@@ -43,7 +43,7 @@ export default function App() {
                 <HeroSection />
 
                 {/* Testimonials Section */}
-                <TestimonialsSection testimonials={TESTIMONIALS} />
+                <TestimonialsSection />
 
                 {/* Examples Section */}
                 <ExamplesSection
