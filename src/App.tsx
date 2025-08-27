@@ -20,7 +20,6 @@ import { AdminDashboardPage } from '@/pages/AdminDashboardPage';
 import { config } from '@/config/environment';
 import {
   NAV_LINKS,
-  TESTIMONIALS,
   EXAMPLES,
   FEATURES,
   DIFFERENT,
