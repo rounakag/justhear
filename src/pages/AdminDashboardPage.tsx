@@ -191,7 +191,7 @@ export const AdminDashboardPage: React.FC = () => {
               { name: 'name', label: 'Name', type: 'text', required: true },
               { name: 'text', label: 'Testimonial Text', type: 'textarea', required: true },
               { name: 'rating', label: 'Rating', type: 'number', required: true },
-              { name: 'avatar_url', label: 'Avatar URL', type: 'text' },
+              { name: 'emoji', label: 'Emoji', type: 'text', required: true, placeholder: '😊' },
               { name: 'sort_order', label: 'Sort Order', type: 'number' }
             ]}
             onAdd={testimonials.addItem}

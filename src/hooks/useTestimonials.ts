@@ -5,7 +5,7 @@ interface Testimonial {
   name: string;
   text: string;
   rating: number;
-  avatar_url?: string;
+  emoji: string;
   sort_order: number;
 }
 

@@ -28,7 +28,7 @@ export interface TestimonialItem extends MultiEntryItem {
   name: string;
   text: string;
   rating: number;
-  avatar_url?: string;
+  emoji: string;
   sort_order?: number;
   is_active?: boolean;
   created_at?: string;

@@ -75,40 +75,64 @@ interface TestimonialCardProps {
     name: string;
     text: string;
     rating: number;
-    avatar_url?: string;
+    emoji: string;
     sort_order: number;
   };
 }
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial }) => {
   return (
-    <Card
-      variant="default"
-      className="min-w-[280px] max-w-[320px] shrink-0 snap-center transition-transform hover:-translate-y-1 p-6"
-    >
-      <div className="text-yellow-400 mb-3 text-lg">
-        {'⭐'.repeat(testimonial.rating)}
-      </div>
-      <blockquote className="italic mb-4 text-gray-700 leading-relaxed">
-        "{testimonial.text}"
-      </blockquote>
-      <div className="flex gap-3 items-center">
-        {testimonial.avatar_url ? (
-          <img 
-            src={testimonial.avatar_url} 
-            alt={testimonial.name}
-            className="rounded-full w-12 h-12 object-cover"
-          />
-        ) : (
-          <span className="rounded-full w-12 h-12 flex items-center justify-center bg-gray-100 text-xl">
-            {testimonial.name.charAt(0).toUpperCase()}
+    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 min-w-[280px] max-w-[320px] shrink-0 snap-center hover:-translate-y-2 p-6 border border-gray-100 relative overflow-hidden group">
+      {/* Gradient background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      
+      {/* Decorative elements */}
+      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
+      <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-yellow-100 to-orange-100 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
+      
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Rating stars with enhanced styling */}
+        <div className="flex items-center mb-4">
+          <div className="flex text-yellow-400 text-lg">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className={i < testimonial.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                ⭐
+              </span>
+            ))}
+          </div>
+          <span className="ml-2 text-sm text-gray-500 font-medium">
+            {testimonial.rating}/5
           </span>
-        )}
-        <div>
-          <strong className="block text-gray-800">{testimonial.name}</strong>
-          <small className="text-gray-500">Verified User</small>
+        </div>
+        
+        {/* Quote with enhanced typography */}
+        <blockquote className="italic mb-6 text-gray-700 leading-relaxed text-base relative">
+          <span className="absolute -top-2 -left-2 text-4xl text-blue-200 opacity-60">"</span>
+          {testimonial.text}
+          <span className="absolute -bottom-2 -right-2 text-4xl text-blue-200 opacity-60">"</span>
+        </blockquote>
+        
+        {/* User info with emoji avatar */}
+        <div className="flex gap-4 items-center">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-2xl shadow-md border-2 border-white">
+              {testimonial.emoji}
+            </div>
+            {/* Glow effect */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 opacity-20 blur-sm"></div>
+          </div>
+          <div className="flex-1">
+            <strong className="block text-gray-800 font-semibold text-sm">
+              {testimonial.name}
+            </strong>
+            <div className="flex items-center gap-1 mt-1">
+              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+              <small className="text-gray-500 text-xs font-medium">Verified User</small>
+            </div>
+          </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
