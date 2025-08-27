@@ -859,7 +859,14 @@ class DatabaseService {
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist, return empty array instead of throwing
+        if (error.message && error.message.includes('relation "cms_reachout" does not exist')) {
+          console.log('cms_reachout table does not exist yet, returning empty array');
+          return [];
+        }
+        throw error;
+      }
       return data || [];
     } catch (error) {
       console.error('Error fetching reach out content:', error);
@@ -880,7 +887,12 @@ class DatabaseService {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        if (error.message && error.message.includes('relation "cms_reachout" does not exist')) {
+          throw new Error('cms_reachout table does not exist. Please run the SQL migration first.');
+        }
+        throw error;
+      }
       return data;
     } catch (error) {
       console.error('Error creating reach out content:', error);
