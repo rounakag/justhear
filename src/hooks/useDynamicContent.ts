@@ -19,17 +19,35 @@ export function useDynamicContent(): UseDynamicContentReturn {
     
     try {
       const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
-      const response = await fetch(`${apiUrl}/api/cms/content`);
+      console.log('🔍 DEBUG - Fetching CMS content from:', `${apiUrl}/api/cms/content`);
+      
+      const response = await fetch(`${apiUrl}/api/cms/content`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+      });
+      
+      console.log('🔍 DEBUG - Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch dynamic content');
+        const errorText = await response.text();
+        console.error('🔍 DEBUG - Response error:', errorText);
+        throw new Error(`Failed to fetch dynamic content: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
+      console.log('🔍 DEBUG - CMS content received:', data);
       setContent(data.content || {});
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch dynamic content');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch dynamic content';
+      setError(errorMessage);
       console.error('Error fetching dynamic content:', err);
+      
+      // Set empty content on error to prevent crashes
+      setContent({});
     } finally {
       setLoading(false);
     }

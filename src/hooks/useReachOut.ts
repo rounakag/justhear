@@ -21,12 +21,19 @@ export function useReachOut() {
         setLoading(true);
         setError(null);
         
-        const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/reachout`;
-        console.log('🔍 DEBUG - Fetching from URL:', url);
-        
-        const response = await fetch(url);
-        console.log('🔍 DEBUG - Response status:', response.status);
-        console.log('🔍 DEBUG - Response ok:', response.ok);
+                       const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/reachout`;
+               console.log('🔍 DEBUG - Fetching from URL:', url);
+               
+               const response = await fetch(url, {
+                 method: 'GET',
+                 headers: {
+                   'Content-Type': 'application/json',
+                   'Accept': 'application/json',
+                 },
+                 mode: 'cors',
+               });
+               console.log('🔍 DEBUG - Response status:', response.status);
+               console.log('🔍 DEBUG - Response ok:', response.ok);
         
         if (!response.ok) {
           const errorText = await response.text();

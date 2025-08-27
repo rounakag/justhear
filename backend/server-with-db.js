@@ -83,10 +83,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rate limiting (basic implementation)
+// Rate limiting (relaxed for development)
 const requestCounts = new Map();
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const MAX_REQUESTS = 100; // 100 requests per 15 minutes
+const RATE_LIMIT_WINDOW = 1 * 60 * 1000; // 1 minute
+const MAX_REQUESTS = 1000; // 1000 requests per minute (much higher)
 
 app.use((req, res, next) => {
   const clientIP = req.ip || req.connection.remoteAddress;
@@ -104,6 +104,7 @@ app.use((req, res, next) => {
     }
     
     if (clientData.count > MAX_REQUESTS) {
+      console.log(`⚠️ Rate limit exceeded for IP: ${clientIP}, count: ${clientData.count}`);
       return res.status(429).json({
         error: 'Rate limit exceeded',
         message: 'Too many requests, please try again later',
@@ -117,10 +118,11 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'https://justhear.onrender.com'],
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'https://justhear.onrender.com', 'https://justhear-frontend.onrender.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }));
 
 app.use(express.json({ limit: '10mb' }));
