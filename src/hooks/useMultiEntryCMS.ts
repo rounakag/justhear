@@ -76,14 +76,32 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       const data = await response.json();
       console.log(`🔍 DEBUG - Response data:`, data);
       
-      const newItem = data[endpoint.slice(0, -1)] || data.item || data.testimonial || data.feature || data.faq || data.pricingPlan;
+      // Handle different response formats from backend
+      let newItem;
+      if (endpoint === 'testimonials') {
+        newItem = data.testimonial;
+      } else if (endpoint === 'features') {
+        newItem = data.feature;
+      } else if (endpoint === 'faq') {
+        newItem = data.faq;
+      } else if (endpoint === 'pricing') {
+        newItem = data.pricingPlan;
+      } else {
+        newItem = data[endpoint.slice(0, -1)] || data.item;
+      }
+      
       console.log(`🔍 DEBUG - New item to add:`, newItem);
       
-      setItems(prev => {
-        const updated = [...prev, newItem];
-        console.log(`🔍 DEBUG - Updated items:`, updated);
-        return updated;
-      });
+      if (newItem) {
+        setItems(prev => {
+          const updated = [...prev, newItem];
+          console.log(`🔍 DEBUG - Updated items:`, updated);
+          return updated;
+        });
+      } else {
+        console.error(`🔍 DEBUG - No new item found in response:`, data);
+        throw new Error('Failed to get new item from response');
+      }
     } catch (err) {
       console.error(`Error adding ${endpoint.slice(0, -1)}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to add item');
