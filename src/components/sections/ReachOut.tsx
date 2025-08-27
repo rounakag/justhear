@@ -65,34 +65,34 @@ export const ReachOut = ({}: ReachOutProps) => {
                              transition-all duration-500 ease-out"></div>
               
               {/* Stunning Card */}
-              <div className={`w-full max-w-xs bg-gradient-to-br ${gradient} 
+              <div className={`w-full max-w-sm bg-gradient-to-br ${gradient} 
                              backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl
                              text-center text-gray-700 select-none
                              hover:-translate-y-3 hover:scale-105 hover:shadow-2xl 
                              transition-all duration-500 ease-out
-                             border border-white/50 relative overflow-hidden
-                             group-hover:border-blue-200/50`}>
+                             border-2 border-white/60 relative overflow-hidden
+                             group-hover:border-blue-300/80`}>
                 
                 {/* Shimmer effect overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
                                -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
                 
                 {/* Card content */}
-                <div className="relative z-10 px-6 py-8">
+                <div className="relative z-10 px-8 py-10">
                   {/* Emoji with glow effect */}
-                  <div className="text-4xl mb-4 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <div className="text-5xl mb-5 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
                     {f.emoji}
                   </div>
                   
                   {/* Text with enhanced styling */}
-                  <span className="text-sm italic leading-relaxed font-medium text-gray-600 
+                  <span className="text-base italic leading-relaxed font-medium text-gray-600 
                                  group-hover:text-gray-800 transition-colors duration-300">
                     "{f.text}"
                   </span>
                 </div>
                 
-                {/* Subtle border glow */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+                {/* Sharp border glow */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/30 via-purple-400/30 to-pink-400/30 
                                opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
             </div>
@@ -122,12 +122,12 @@ export const ReachOut = ({}: ReachOutProps) => {
         
         return (
           <div key={i}
-               className={`snap-center flex-shrink-0 w-40 bg-gradient-to-br ${gradient} 
+               className={`snap-center flex-shrink-0 w-56 bg-gradient-to-br ${gradient} 
                           backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl
-                          px-4 py-6 text-center text-gray-700
+                          px-6 py-8 text-center text-gray-700
                           hover:-translate-y-2 hover:scale-105 hover:shadow-2xl 
                           transition-all duration-500 ease-out
-                          border border-white/50 relative overflow-hidden group`}>
+                          border-2 border-white/60 relative overflow-hidden group`}>
             
             {/* Shimmer effect for mobile */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
@@ -135,16 +135,16 @@ export const ReachOut = ({}: ReachOutProps) => {
             
             {/* Card content */}
             <div className="relative z-10">
-              <div className="text-3xl mb-3 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="text-4xl mb-4 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
                 {f.emoji}
               </div>
-              <span className="text-xs italic font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+              <span className="text-sm italic font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
                 "{f.text}"
               </span>
             </div>
             
-            {/* Subtle border glow for mobile */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+            {/* Sharp border glow for mobile */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/30 via-purple-400/30 to-pink-400/30 
                            opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
         );
