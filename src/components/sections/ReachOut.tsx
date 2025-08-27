@@ -40,22 +40,60 @@ export const ReachOut = ({}: ReachOutProps) => {
           const heights = [0, -20, 20, -40, 40, -10, 30, -30];
           const height = heights[i % heights.length] || 0;
           
+          // Different gradient colors for variety
+          const gradients = [
+            'from-blue-50 to-indigo-100',
+            'from-purple-50 to-pink-100', 
+            'from-emerald-50 to-teal-100',
+            'from-amber-50 to-orange-100',
+            'from-rose-50 to-red-100',
+            'from-violet-50 to-purple-100',
+            'from-cyan-50 to-blue-100',
+            'from-lime-50 to-green-100'
+          ];
+          const gradient = gradients[i % gradients.length];
+          
           return (
             <div
               key={i}
-              className="relative flex flex-col items-center"
+              className="relative flex flex-col items-center group"
               style={{ marginTop: `${height}px` }}
             >
-              {/* Thread */}
-              <div className="w-0.5 bg-gray-300 h-16 mb-2"></div>
+              {/* Animated Thread */}
+              <div className="w-0.5 bg-gradient-to-b from-gray-400 to-gray-300 h-16 mb-2 
+                             group-hover:bg-gradient-to-b group-hover:from-blue-400 group-hover:to-blue-300
+                             transition-all duration-500 ease-out"></div>
               
-              {/* Card */}
-              <div className="w-full max-w-xs bg-white rounded-xl shadow-lg
+              {/* Stunning Card */}
+              <div className={`w-full max-w-xs bg-gradient-to-br ${gradient} 
+                             backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl
                              text-center text-gray-700 select-none
-                             hover:-translate-y-2 hover:shadow-xl transition-all duration-300
-                             border border-gray-100 px-4 py-6">
-                <div className="text-3xl mb-3">{f.emoji}</div>
-                <span className="text-sm italic leading-relaxed">"{f.text}"</span>
+                             hover:-translate-y-3 hover:scale-105 hover:shadow-2xl 
+                             transition-all duration-500 ease-out
+                             border border-white/50 relative overflow-hidden
+                             group-hover:border-blue-200/50`}>
+                
+                {/* Shimmer effect overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                               -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+                
+                {/* Card content */}
+                <div className="relative z-10 px-6 py-8">
+                  {/* Emoji with glow effect */}
+                  <div className="text-4xl mb-4 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    {f.emoji}
+                  </div>
+                  
+                  {/* Text with enhanced styling */}
+                  <span className="text-sm italic leading-relaxed font-medium text-gray-600 
+                                 group-hover:text-gray-800 transition-colors duration-300">
+                    "{f.text}"
+                  </span>
+                </div>
+                
+                {/* Subtle border glow */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+                               opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
             </div>
           );
@@ -68,15 +106,49 @@ export const ReachOut = ({}: ReachOutProps) => {
   const mobile = (
     <div className="md:hidden flex gap-4 overflow-x-auto py-4 px-2
                     snap-x scrollbar-hide">
-      {data.map((f,i) => (
-        <div key={i}
-             className="snap-center flex-shrink-0 w-40 bg-white rounded-xl
-                        shadow px-4 py-6 text-center text-gray-700
-                        hover:-translate-y-1 transition">
-          <div className="text-2xl mb-2">{f.emoji}</div>
-          <span className="text-xs italic">“{f.text}”</span>
-        </div>
-      ))}
+      {data.map((f,i) => {
+        // Different gradient colors for mobile cards too
+        const gradients = [
+          'from-blue-50 to-indigo-100',
+          'from-purple-50 to-pink-100', 
+          'from-emerald-50 to-teal-100',
+          'from-amber-50 to-orange-100',
+          'from-rose-50 to-red-100',
+          'from-violet-50 to-purple-100',
+          'from-cyan-50 to-blue-100',
+          'from-lime-50 to-green-100'
+        ];
+        const gradient = gradients[i % gradients.length];
+        
+        return (
+          <div key={i}
+               className={`snap-center flex-shrink-0 w-40 bg-gradient-to-br ${gradient} 
+                          backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl
+                          px-4 py-6 text-center text-gray-700
+                          hover:-translate-y-2 hover:scale-105 hover:shadow-2xl 
+                          transition-all duration-500 ease-out
+                          border border-white/50 relative overflow-hidden group`}>
+            
+            {/* Shimmer effect for mobile */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                           -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+            
+            {/* Card content */}
+            <div className="relative z-10">
+              <div className="text-3xl mb-3 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                {f.emoji}
+              </div>
+              <span className="text-xs italic font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                "{f.text}"
+              </span>
+            </div>
+            
+            {/* Subtle border glow for mobile */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+                           opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          </div>
+        );
+      })}
     </div>
   );
 
