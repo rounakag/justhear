@@ -26,7 +26,11 @@ function extractItemFromResponse(data: any, endpoint: string): any {
   };
   
   const key = responseMap[endpoint] || endpoint.slice(0, -1);
-  return data[key] || data.item || data;
+  console.log(`🔍 DEBUG - extractItemFromResponse: endpoint=${endpoint}, key=${key}, data=`, data);
+  
+  const result = data[key] || data.item || data;
+  console.log(`🔍 DEBUG - extractItemFromResponse result:`, result);
+  return result;
 }
 
 export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
@@ -40,6 +44,7 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       setError(null);
       
       const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`;
+      console.log(`🔍 DEBUG - Fetching ${endpoint} from:`, url);
       
       const response = await fetch(url);
       
@@ -50,7 +55,10 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       }
       
       const data = await response.json();
+      console.log(`🔍 DEBUG - Raw response data for ${endpoint}:`, data);
+      
       const items = data[endpoint] || data.items || [];
+      console.log(`🔍 DEBUG - Extracted items for ${endpoint}:`, items);
       
       setItems(items);
     } catch (err) {
@@ -94,6 +102,8 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       if (newItem) {
         // Replace optimistic item with real item
         setItems(prev => prev.map(item => item.id === tempId ? newItem : item));
+        // Refresh items to ensure consistency
+        await fetchItems();
       } else {
         // Rollback optimistic update on error
         setItems(prev => prev.filter(item => item.id !== tempId));
@@ -136,6 +146,9 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       setItems(prev => prev.map(item => 
         item.id === id ? updatedItem : item
       ));
+      
+      // Refresh items to ensure consistency
+      await fetchItems();
     } catch (err) {
       console.error(`Error updating ${endpoint.slice(0, -1)}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to update item');
@@ -162,12 +175,15 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
         }
         throw new Error(`Failed to delete ${endpoint.slice(0, -1)}: ${response.statusText}`);
       }
+      
+      // Refresh items after successful delete
+      await fetchItems();
     } catch (err) {
       console.error(`Error deleting ${endpoint.slice(0, -1)}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to delete item');
       throw err;
     }
-  }, [endpoint, items]);
+  }, [endpoint, items, fetchItems]);
 
   const refreshItems = useCallback(async () => {
     await fetchItems();
