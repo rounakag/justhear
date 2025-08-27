@@ -34,9 +34,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     >
       {/* Floating shapes for ambiance */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
-        <div className="absolute top-60 right-15 w-15 h-15 bg-white/10 rounded-full animate-float delay-1000"></div>
-        <div className="absolute bottom-20 left-20 w-10 h-10 bg-white/10 rounded-full animate-float delay-2000"></div>
+        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-bounce"></div>
+        <div className="absolute top-60 right-15 w-15 h-15 bg-white/10 rounded-full animate-bounce delay-1000"></div>
+        <div className="absolute bottom-20 left-20 w-10 h-10 bg-white/10 rounded-full animate-bounce delay-2000"></div>
       </div>
 
       <div className="mx-auto px-5 lg:px-8 max-w-7xl relative z-10 pt-24">
@@ -129,19 +129,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) rotate(180deg);
-          }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-      `}</style>
+
     </section>
   );
 };
