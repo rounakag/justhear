@@ -37,14 +37,14 @@ export const ReachOut = ({}: ReachOutProps) => {
       {/* Service-focused grid layout */}
       <div className="grid grid-cols-3 gap-8 px-8">
         {data.map((f, i) => {
-          // Service-oriented gradient colors
+          // Subtle gradient colors
           const gradients = [
-            'from-blue-50 via-blue-100 to-indigo-50',
-            'from-purple-50 via-purple-100 to-violet-50', 
-            'from-emerald-50 via-emerald-100 to-teal-50',
-            'from-amber-50 via-amber-100 to-orange-50',
-            'from-rose-50 via-rose-100 to-pink-50',
-            'from-violet-50 via-violet-100 to-purple-50'
+            'from-blue-50 to-blue-100/50',
+            'from-purple-50 to-purple-100/50', 
+            'from-emerald-50 to-emerald-100/50',
+            'from-amber-50 to-amber-100/50',
+            'from-rose-50 to-rose-100/50',
+            'from-violet-50 to-violet-100/50'
           ];
           const gradient = gradients[i % gradients.length];
           
@@ -62,11 +62,11 @@ export const ReachOut = ({}: ReachOutProps) => {
                              border border-white/80 relative overflow-hidden
                              group-hover:border-blue-200/60`}>
                 
-                {/* Subtle background pattern */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute top-4 right-4 w-16 h-16 bg-blue-400 rounded-full"></div>
-                  <div className="absolute bottom-4 left-4 w-12 h-12 bg-purple-400 rounded-full"></div>
-                </div>
+                              {/* Very subtle background pattern */}
+              <div className="absolute inset-0 opacity-3">
+                <div className="absolute top-4 right-4 w-12 h-12 bg-blue-300 rounded-full"></div>
+                <div className="absolute bottom-4 left-4 w-8 h-8 bg-purple-300 rounded-full"></div>
+              </div>
                 
                 {/* Card content */}
                 <div className="relative z-10 px-6 py-8">
@@ -77,27 +77,14 @@ export const ReachOut = ({}: ReachOutProps) => {
                   
                   {/* Service-focused text */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      We're Here When
-                    </h3>
                     <p className="text-sm leading-relaxed text-gray-600 font-medium">
                       {f.text}
                     </p>
                   </div>
-                  
-                  {/* Subtle CTA indicator */}
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="inline-flex items-center text-xs text-blue-600 font-medium">
-                      <span>Book a session</span>
-                      <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
                 </div>
                 
-                {/* Subtle border glow on hover */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+                {/* Very subtle border glow on hover */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-300/10 via-purple-300/10 to-pink-300/10 
                                opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
             </div>
@@ -112,14 +99,14 @@ export const ReachOut = ({}: ReachOutProps) => {
     <div className="md:hidden flex gap-6 overflow-x-auto py-6 px-4
                     snap-x scrollbar-hide">
       {data.map((f,i) => {
-        // Service-oriented gradient colors for mobile
+        // Subtle gradient colors for mobile
         const gradients = [
-          'from-blue-50 via-blue-100 to-indigo-50',
-          'from-purple-50 via-purple-100 to-violet-50', 
-          'from-emerald-50 via-emerald-100 to-teal-50',
-          'from-amber-50 via-amber-100 to-orange-50',
-          'from-rose-50 via-rose-100 to-pink-50',
-          'from-violet-50 via-violet-100 to-purple-50'
+          'from-blue-50 to-blue-100/50',
+          'from-purple-50 to-purple-100/50', 
+          'from-emerald-50 to-emerald-100/50',
+          'from-amber-50 to-amber-100/50',
+          'from-rose-50 to-rose-100/50',
+          'from-violet-50 to-violet-100/50'
         ];
         const gradient = gradients[i % gradients.length];
         
@@ -132,10 +119,10 @@ export const ReachOut = ({}: ReachOutProps) => {
                           transition-all duration-300 ease-out
                           border border-white/80 relative overflow-hidden group`}>
             
-            {/* Subtle background pattern for mobile */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-3 right-3 w-12 h-12 bg-blue-400 rounded-full"></div>
-              <div className="absolute bottom-3 left-3 w-8 h-8 bg-purple-400 rounded-full"></div>
+            {/* Very subtle background pattern for mobile */}
+            <div className="absolute inset-0 opacity-3">
+              <div className="absolute top-3 right-3 w-8 h-8 bg-blue-300 rounded-full"></div>
+              <div className="absolute bottom-3 left-3 w-6 h-6 bg-purple-300 rounded-full"></div>
             </div>
             
             {/* Card content */}
@@ -146,27 +133,14 @@ export const ReachOut = ({}: ReachOutProps) => {
               
               {/* Service-focused text for mobile */}
               <div className="space-y-2">
-                <h3 className="text-base font-semibold text-gray-800 mb-2">
-                  We're Here When
-                </h3>
                 <p className="text-sm leading-relaxed text-gray-600 font-medium">
                   {f.text}
                 </p>
               </div>
-              
-              {/* Subtle CTA indicator for mobile */}
-              <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="inline-flex items-center text-xs text-blue-600 font-medium">
-                  <span>Book a session</span>
-                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
             </div>
             
-            {/* Subtle border glow for mobile */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+            {/* Very subtle border glow for mobile */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-300/10 via-purple-300/10 to-pink-300/10 
                            opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         );

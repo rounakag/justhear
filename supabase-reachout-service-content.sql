@@ -1,4 +1,4 @@
--- Update reachout content to be more service-focused
+-- Update reachout content with better, more natural scenarios
 -- Clear value propositions that directly connect to the listening service
 
 -- Clear existing content
@@ -18,7 +18,7 @@ INSERT INTO cms_reachout (
     ('🤗', 'You want anonymous support', 5, true),
     ('🤔', 'You need a safe space to talk', 6, true);
 
--- Update the section title in cms_content
+-- Update the section title in cms_content to be more natural
 UPDATE cms_content 
-SET value = 'We\'re Here When You Need Someone to Listen'
+SET value = 'When You Need Someone to Listen'
 WHERE section = 'examples' AND field = 'title';
