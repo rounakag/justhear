@@ -27,7 +27,7 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({
         
         {/* Desktop: Geometric layout */}
         <div className="hidden sm:flex justify-center">
-          <ReachOut feelings={examples} />
+          <ReachOut />
         </div>
       </div>
     </section>
