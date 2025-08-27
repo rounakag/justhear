@@ -70,6 +70,9 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       } else if (data[endpoint + 's']) {
         items = data[endpoint + 's']; // Handle plural form (faqs, testimonials, etc.)
         console.log(`🔍 DEBUG - Using data[${endpoint + 's'}]`);
+        console.log(`🔍 DEBUG - data[${endpoint + 's'] type:`, typeof data[endpoint + 's']);
+        console.log(`🔍 DEBUG - data[${endpoint + 's'] length:`, Array.isArray(data[endpoint + 's']) ? data[endpoint + 's'].length : 'not an array');
+        console.log(`🔍 DEBUG - data[${endpoint + 's'] content:`, data[endpoint + 's']);
       } else if (data.items) {
         items = data.items;
         console.log(`🔍 DEBUG - Using data.items`);
@@ -78,6 +81,8 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       }
       
       console.log(`🔍 DEBUG - Extracted items for ${endpoint}:`, items);
+      console.log(`🔍 DEBUG - Final items type:`, typeof items);
+      console.log(`🔍 DEBUG - Final items length:`, Array.isArray(items) ? items.length : 'not an array');
       
       setItems(items);
     } catch (err) {
