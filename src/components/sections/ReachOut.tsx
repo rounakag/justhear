@@ -1,9 +1,11 @@
 
-import { Example } from "@/constants/data";
+import { useReachOut } from "@/hooks/useReachOut";
+import { useDynamicContent } from "@/hooks/useDynamicContent";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface ReachOutProps {
   /* Pass a custom list if you need more/other boxes */
-  feelings?: Example[];
+  feelings?: any[];
 }
 
 /**
@@ -12,8 +14,19 @@ interface ReachOutProps {
  * • Centre badge stays in the middle.
  */
 export const ReachOut = ({ feelings }: ReachOutProps) => {
-  /* Default six feelings */
-  const data: Example[] = feelings ?? [
+  const { items, loading, error } = useReachOut();
+  const { getContent } = useDynamicContent();
+  
+  // Get central card text from CMS
+  const centralCardText = getContent('examples', 'central_card_text') || 'You Need Validation';
+  
+  // Use CMS data or fallback to hardcoded data
+  const data = feelings ?? items.map(item => ({
+    id: item.id,
+    emoji: item.emoji,
+    text: item.title,
+    category: "emotion"
+  })) ?? [
     { id: "1", emoji:"😔", text:"Nobody is mine… it's my fault.", category: "loneliness" },
     { id: "2", emoji:"🤔", text:"Am I really that wrong about everything?", category: "doubt" },
     { id: "3", emoji:"🤗", text:"I wish someone could hug me until my soul melts.", category: "comfort" },
@@ -30,7 +43,9 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
         <div className="w-28 h-28 rounded-full bg-purple-600 text-white
                         flex items-center justify-center text-center
                         text-sm font-semibold px-2">
-          You<br/>Need<br/>Validation
+          {centralCardText.split(' ').map((word, i) => (
+            <span key={i}>{word}<br/></span>
+          ))}
         </div>
       </div>
 
@@ -73,6 +88,21 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
       ))}
     </div>
   );
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    console.error('ReachOut component error:', error);
+    // Fallback to hardcoded data on error
+  }
 
   return (
     <>
