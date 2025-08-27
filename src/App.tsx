@@ -20,7 +20,6 @@ import { AdminDashboardPage } from '@/pages/AdminDashboardPage';
 import { config } from '@/config/environment';
 import {
   NAV_LINKS,
-  EXAMPLES,
   FEATURES,
   DIFFERENT,
   SCIENCE,
@@ -44,11 +43,10 @@ export default function App() {
                 {/* Testimonials Section */}
                 <TestimonialsSection />
 
-                {/* Examples Section */}
-                <ExamplesSection
-                  title="Reach out to us, when u feel"
-                  examples={EXAMPLES}
-                />
+                        {/* Examples Section */}
+        <ExamplesSection
+          title="Reach out to us, when u feel"
+        />
 
                 {/* Features Section */}
                 <FeaturesSection
