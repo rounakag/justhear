@@ -4,7 +4,7 @@ import { SlotCalendar } from './SlotCalendar';
 import { SlotFilters } from './SlotFilters';
 import { AdminStats } from './AdminStats';
 import { useAdminSlots } from '@/hooks/useAdminSlots';
-import type { TimeSlot } from '@/types/admin.types';
+import type { TimeSlot, Listener } from '@/types/admin.types';
 
 // Custom Error Boundary Component
 class SlotManagerErrorBoundary extends React.Component<

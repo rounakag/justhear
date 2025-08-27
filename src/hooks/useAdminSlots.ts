@@ -27,7 +27,10 @@ interface UseAdminSlotsReturn extends UseAdminSlotsState {
   deleteSlot: (id: string) => Promise<void>;
   createBulkSlots: (data: BulkSlotCreation) => Promise<void>;
   
-
+  // Listener operations
+  createListener: (data: Partial<Listener>) => Promise<void>;
+  updateListener: (id: string, data: Partial<Listener>) => Promise<void>;
+  deleteListener: (id: string) => Promise<void>;
   
   // Schedule operations
   createSchedule: (data: Partial<RecurringSchedule>) => Promise<void>;

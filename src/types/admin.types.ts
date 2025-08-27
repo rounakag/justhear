@@ -23,7 +23,9 @@ export interface TimeSlot {
 export interface Listener {
   id: string;
   name: string;
+  username?: string;
   email: string;
+  role?: string;
   avatar?: string;
   bio?: string;
   specialties: string[];
