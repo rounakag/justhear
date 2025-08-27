@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card } from '@/design-system/components';
 import { useDynamicContent } from '@/hooks/useDynamicContent';
 import { useTestimonials } from '@/hooks/useTestimonials';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
