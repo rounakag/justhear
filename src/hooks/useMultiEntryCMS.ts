@@ -60,12 +60,21 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       
       // Handle different response formats
       let items = [];
+      console.log(`🔍 DEBUG - Checking data[${endpoint}]:`, data[endpoint]);
+      console.log(`🔍 DEBUG - Checking data[${endpoint + 's'}]:`, data[endpoint + 's']);
+      console.log(`🔍 DEBUG - Checking data.items:`, data.items);
+      
       if (data[endpoint]) {
         items = data[endpoint];
+        console.log(`🔍 DEBUG - Using data[${endpoint}]`);
       } else if (data[endpoint + 's']) {
         items = data[endpoint + 's']; // Handle plural form (faqs, testimonials, etc.)
+        console.log(`🔍 DEBUG - Using data[${endpoint + 's'}]`);
       } else if (data.items) {
         items = data.items;
+        console.log(`🔍 DEBUG - Using data.items`);
+      } else {
+        console.log(`🔍 DEBUG - No matching key found, using empty array`);
       }
       
       console.log(`🔍 DEBUG - Extracted items for ${endpoint}:`, items);
