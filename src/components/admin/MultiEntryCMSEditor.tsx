@@ -38,13 +38,12 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
   const [editingItem, setEditingItem] = useState<MultiEntryItem | null>(null);
   const [newItem, setNewItem] = useState<MultiEntryItem>({});
   const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleAdd = async () => {
-    console.log('🔍 DEBUG - handleAdd called with newItem:', newItem);
-    
     // Validate required fields
     const errors: Record<string, string> = {};
     fields.forEach(field => {
@@ -53,8 +52,6 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
       }
     });
     
-    console.log('🔍 DEBUG - Validation errors:', errors);
-    
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
@@ -62,7 +59,6 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
     
     // Check if we have at least some data to add
     const hasData = fields.some(field => newItem[field.name] && newItem[field.name].toString().trim() !== '');
-    console.log('🔍 DEBUG - Has data:', hasData);
     
     if (!hasData) {
       setValidationErrors({ general: 'Please fill in at least one field' });
@@ -70,17 +66,16 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
     }
     
     setValidationErrors({});
-    setIsAdding(true);
-    console.log('🔍 DEBUG - Calling onAdd with:', newItem);
+    setIsSaving(true);
     
     try {
       await onAdd(newItem);
-      console.log('🔍 DEBUG - onAdd successful');
       setNewItem({});
       setIsAdding(false);
+      setIsSaving(false);
     } catch (error) {
       console.error('Error adding item:', error);
-      setIsAdding(false);
+      setIsSaving(false);
     }
   };
 
@@ -178,7 +173,8 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
     }
   };
 
-  if (loading) {
+  // Show loading spinner only for initial data fetch
+  if (loading && items.length === 0) {
     return (
       <div className="flex justify-center items-center py-8">
         <LoadingSpinner size="lg" />
@@ -198,10 +194,10 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <Button
           onClick={() => setIsAdding(true)}
-          disabled={isAdding}
+          disabled={loading}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
-          {isAdding ? <LoadingSpinner size="sm" /> : 'Add New'}
+          {loading ? <LoadingSpinner size="sm" /> : 'Add New'}
         </Button>
       </div>
 
@@ -233,10 +229,10 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
           <div className="flex gap-2 mt-4">
             <Button
               onClick={handleAdd}
-              disabled={isAdding}
+              disabled={isSaving}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
-              {isAdding ? <LoadingSpinner size="sm" /> : 'Save'}
+              {isSaving ? <LoadingSpinner size="sm" /> : 'Save'}
             </Button>
             <Button
               onClick={() => {
