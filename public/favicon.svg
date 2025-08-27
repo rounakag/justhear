@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#4F46E5" stroke="#3730A3" stroke-width="2"/>
+  
+  <!-- Ear shape -->
+  <path d="M12 8 C12 6, 14 4, 16 4 C18 4, 20 6, 20 8 C20 10, 18 12, 16 12 C14 12, 12 10, 12 8 Z" fill="white"/>
+  
+  <!-- Inner ear -->
+  <path d="M14 8 C14 7, 15 6, 16 6 C17 6, 18 7, 18 8 C18 9, 17 10, 16 10 C15 10, 14 9, 14 8 Z" fill="#4F46E5"/>
+  
+  <!-- Heart symbol -->
+  <path d="M16 18 C16 18, 14 16, 12 16 C10 16, 8 18, 8 20 C8 22, 10 24, 12 24 C14 24, 16 22, 16 20 C16 22, 18 24, 20 24 C22 24, 24 22, 24 20 C24 18, 22 16, 20 16 C18 16, 16 18, 16 18 Z" fill="#EF4444"/>
+  
+  <!-- Sound waves -->
+  <path d="M24 12 Q26 12, 26 14 Q26 16, 24 16" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M26 10 Q28 10, 28 12 Q28 14, 26 14" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
