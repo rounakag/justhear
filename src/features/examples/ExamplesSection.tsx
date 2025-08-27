@@ -1,6 +1,5 @@
 import React from 'react';
 import { ReachOut } from '@/components/sections/ReachOut';
-import type { Example } from '@/types';
 
 interface ExamplesSectionProps {
   title: string;
