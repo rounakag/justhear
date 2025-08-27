@@ -12,6 +12,7 @@ import type {
 
 interface UseAdminSlotsState {
   slots: TimeSlot[];
+  listeners: Listener[];
   schedules: RecurringSchedule[];
   stats: AdminStats | null;
   loading: boolean;
@@ -42,6 +43,7 @@ interface UseAdminSlotsReturn extends UseAdminSlotsState {
 export function useAdminSlots(): UseAdminSlotsReturn {
   const [state, setState] = useState<UseAdminSlotsState>({
     slots: [],
+    listeners: [],
     schedules: [],
     stats: null,
     loading: false,
@@ -67,8 +69,9 @@ export function useAdminSlots(): UseAdminSlotsReturn {
       // Add a small delay to prevent shakiness during authentication
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      const [slots, schedules, stats] = await Promise.all([
+      const [slots, listeners, schedules, stats] = await Promise.all([
         adminService.getTimeSlots(state.filters),
+        adminService.getListeners(),
         adminService.getRecurringSchedules(),
         adminService.getAdminStats(),
       ]);
@@ -76,6 +79,7 @@ export function useAdminSlots(): UseAdminSlotsReturn {
       setState(prev => ({
         ...prev,
         slots,
+        listeners,
         schedules,
         stats,
         loading: false,

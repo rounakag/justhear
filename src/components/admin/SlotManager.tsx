@@ -56,6 +56,7 @@ class SlotManagerErrorBoundary extends React.Component<
 export const SlotManager: React.FC = () => {
   const {
     slots,
+    listeners,
     stats,
     loading,
     error,
@@ -94,6 +95,11 @@ export const SlotManager: React.FC = () => {
     if (!hasFilters) return slots;
 
     return slots.filter(slot => {
+      // Listener filter
+      if (filters.listenerId && slot.listenerId !== filters.listenerId) {
+        return false;
+      }
+      
       // Availability filter
       if (filters.isAvailable !== undefined && slot.isAvailable !== filters.isAvailable) {
         return false;
@@ -457,6 +463,7 @@ export const SlotManager: React.FC = () => {
                 ) : (
                   <SlotList
                     slots={filteredSlots}
+                    listeners={listeners}
                     onSlotClick={handleSlotClick}
                     onMarkAsDone={handleMarkAsDone}
                     onDeleteSlot={handleDeleteSlot}
@@ -471,6 +478,7 @@ export const SlotManager: React.FC = () => {
         {showSlotEditor && (
           <SlotEditor
             slot={selectedSlot}
+            listeners={listeners}
             onClose={handleCloseSlotEditor}
             onSave={refreshData}
           />
@@ -486,15 +494,25 @@ export const SlotManager: React.FC = () => {
 // Slot List Component for list view
 interface SlotListProps {
   slots: TimeSlot[];
+  listeners: Listener[];
   onSlotClick: (slot: TimeSlot) => void;
   onMarkAsDone: (slotId: string) => void;
   onDeleteSlot: (slotId: string) => void;
 }
 
-const SlotList: React.FC<SlotListProps> = ({ slots, onSlotClick, onMarkAsDone, onDeleteSlot }) => {
+const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMarkAsDone, onDeleteSlot }) => {
   
 
   
+  const getListenerName = useCallback((listenerId?: string): string => {
+    if (!listenerId || listenerId.trim() === '') {
+      return 'Unassigned';
+    }
+    
+    const listener = listeners.find(l => l.id === listenerId);
+    return listener?.name || listener?.username || 'Unknown Listener';
+  }, [listeners]);
+
   const getAssignedStatus = useCallback((slot: TimeSlot): string => {
     return slot.status === 'booked' ? 'Yes' : 'No';
   }, []);
@@ -620,6 +638,9 @@ const SlotList: React.FC<SlotListProps> = ({ slots, onSlotClick, onMarkAsDone, o
               Date & Time
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Listener
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Meeting Link
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -651,6 +672,11 @@ const SlotList: React.FC<SlotListProps> = ({ slots, onSlotClick, onMarkAsDone, o
                 </div>
                 <div className="text-sm text-gray-500">
                   {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-900">
+                  {getListenerName(slot.listenerId)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

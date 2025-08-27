@@ -9,6 +9,9 @@ export interface TimeSlot {
   isAvailable?: boolean;
   isBooked?: boolean;
   status: 'created' | 'booked' | 'completed';
+  listenerId: string; // Mandatory listener assignment
+  listenerName?: string; // For display purposes
+  listenerEmail?: string; // For display purposes
   createdAt?: string;
   updatedAt?: string;
   // Meeting link properties
@@ -70,6 +73,7 @@ export interface SlotFilters {
     start: string;
     end: string;
   };
+  listenerId?: string; // Filter by specific listener
   isAvailable?: boolean;
   isBooked?: boolean;
   dayOfWeek?: number;
@@ -82,6 +86,7 @@ export interface BulkSlotCreation {
   startTime: string;
   endTime: string;
   duration: number;
+  listenerId: string; // Mandatory listener assignment
 }
 
 export interface SlotEditorData {
@@ -89,6 +94,7 @@ export interface SlotEditorData {
   date: string;
   startTime: string;
   endTime: string;
+  listenerId: string; // Mandatory listener assignment
   isAvailable: boolean;
 }
 

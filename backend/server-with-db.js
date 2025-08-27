@@ -290,9 +290,9 @@ app.post('/api/slots', async (req, res) => {
     console.log('Received slot data:', slotData);
     
     // Validate required fields
-    if (!slotData.date || !slotData.startTime || !slotData.endTime) {
+    if (!slotData.date || !slotData.startTime || !slotData.endTime || !slotData.listenerId) {
       return res.status(400).json({ 
-        error: 'Missing required fields: date, startTime, endTime' 
+        error: 'Missing required fields: date, startTime, endTime, listenerId' 
       });
     }
     
@@ -302,6 +302,7 @@ app.post('/api/slots', async (req, res) => {
       start_time: slotData.startTime,
       end_time: slotData.endTime,
       status: 'created',
+      listener_id: slotData.listenerId,
       duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
     };
     

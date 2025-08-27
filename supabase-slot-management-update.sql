@@ -1,5 +1,6 @@
--- Update time_slots table structure for new slot management system
--- Remove listener and price fields, add status field, ensure meeting link fields
+-- Update time_slots table structure for scalable slot management system
+-- Keep listener_id as mandatory field, add status field, ensure meeting link fields
+-- Add constraints to prevent slot overlaps for individual listeners
 
 -- First, let's check if the table exists and see its current structure
 -- Then we'll make the necessary changes
@@ -32,7 +33,19 @@ BEGIN
     END IF;
 END $$;
 
--- 3. Update existing slots to have proper status
+-- 3. Ensure listener_id column exists and is NOT NULL
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'time_slots' AND column_name = 'listener_id') THEN
+        ALTER TABLE time_slots ADD COLUMN listener_id UUID NOT NULL;
+    ELSE
+        -- Make existing listener_id NOT NULL if it's nullable
+        ALTER TABLE time_slots ALTER COLUMN listener_id SET NOT NULL;
+    END IF;
+END $$;
+
+-- 4. Update existing slots to have proper status
 UPDATE time_slots 
 SET status = CASE 
     WHEN EXISTS (SELECT 1 FROM bookings WHERE bookings.slot_id = time_slots.id) THEN 'booked'
@@ -40,77 +53,108 @@ SET status = CASE
 END
 WHERE status IS NULL;
 
--- 4. Remove listener_id column (if it exists and we want to remove it)
--- Note: This will fail if there are foreign key constraints
--- We'll need to handle this carefully
-
--- First, check if there are any foreign key constraints on listener_id
-DO $$
-DECLARE
-    constraint_name text;
-BEGIN
-    SELECT conname INTO constraint_name
-    FROM pg_constraint
-    WHERE conrelid = 'time_slots'::regclass 
-    AND contype = 'f' 
-    AND array_position(conkey, (SELECT attnum FROM pg_attribute WHERE attrelid = 'time_slots'::regclass AND attname = 'listener_id')) IS NOT NULL;
-    
-    IF constraint_name IS NOT NULL THEN
-        -- Drop the foreign key constraint
-        EXECUTE 'ALTER TABLE time_slots DROP CONSTRAINT ' || constraint_name;
-    END IF;
-END $$;
-
--- Now remove the listener_id column
-DO $$ 
-BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name = 'time_slots' AND column_name = 'listener_id') THEN
-        ALTER TABLE time_slots DROP COLUMN listener_id;
-    END IF;
-END $$;
-
--- 5. Remove price column (if it exists and we want to remove it)
-DO $$ 
-BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name = 'time_slots' AND column_name = 'price') THEN
-        ALTER TABLE time_slots DROP COLUMN price;
-    END IF;
-END $$;
-
--- 6. Add constraints for status field
+-- 5. Add constraints for status field
 ALTER TABLE time_slots 
 ADD CONSTRAINT time_slots_status_check 
 CHECK (status IN ('created', 'booked', 'completed'));
 
--- 7. Create index on status for better performance
+-- 6. Create index on status for better performance
 CREATE INDEX IF NOT EXISTS idx_time_slots_status ON time_slots(status);
 
--- 8. Create index on date and status for filtering
+-- 7. Create index on date and status for filtering
 CREATE INDEX IF NOT EXISTS idx_time_slots_date_status ON time_slots(date, status);
 
--- 9. Update RLS policies if needed
--- Drop existing policies that might reference removed columns
+-- 8. Create index on listener_id for filtering
+CREATE INDEX IF NOT EXISTS idx_time_slots_listener_id ON time_slots(listener_id);
+
+-- 9. Create index on date, listener_id, and time for overlap prevention
+CREATE INDEX IF NOT EXISTS idx_time_slots_listener_date_time ON time_slots(listener_id, date, start_time, end_time);
+
+-- 10. Add foreign key constraint for listener_id if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'time_slots_listener_id_fkey' 
+        AND table_name = 'time_slots'
+    ) THEN
+        ALTER TABLE time_slots 
+        ADD CONSTRAINT time_slots_listener_id_fkey 
+        FOREIGN KEY (listener_id) REFERENCES users(id) ON DELETE CASCADE;
+    END IF;
+END $$;
+
+-- 11. Create function to check for slot overlaps
+CREATE OR REPLACE FUNCTION check_slot_overlap()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if there are any overlapping slots for the same listener on the same date
+    IF EXISTS (
+        SELECT 1 FROM time_slots 
+        WHERE listener_id = NEW.listener_id 
+        AND date = NEW.date 
+        AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000')
+        AND (
+            (start_time < NEW.end_time AND end_time > NEW.start_time)
+            OR (NEW.start_time < end_time AND NEW.end_time > start_time)
+        )
+    ) THEN
+        RAISE EXCEPTION 'Slot overlaps with existing slot for this listener on the same date';
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 12. Create trigger to prevent slot overlaps
+DROP TRIGGER IF EXISTS trigger_check_slot_overlap ON time_slots;
+CREATE TRIGGER trigger_check_slot_overlap
+    BEFORE INSERT OR UPDATE ON time_slots
+    FOR EACH ROW
+    EXECUTE FUNCTION check_slot_overlap();
+
+-- 13. Update RLS policies for listener-based access
+-- Drop existing policies
 DROP POLICY IF EXISTS "Enable read access for all users" ON time_slots;
 DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON time_slots;
 DROP POLICY IF EXISTS "Enable update for authenticated users only" ON time_slots;
 DROP POLICY IF EXISTS "Enable delete for authenticated users only" ON time_slots;
 
--- Create new policies
+-- Create new policies with listener-based access
+-- Admins can see all slots, listeners can only see their own slots
 CREATE POLICY "Enable read access for all users" ON time_slots
-    FOR SELECT USING (true);
+    FOR SELECT USING (
+        auth.role() = 'authenticated' AND (
+            -- Admin can see all slots (you'll need to set up admin role)
+            EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
+            OR 
+            -- Listener can see their own slots
+            listener_id = auth.uid()
+        )
+    );
 
-CREATE POLICY "Enable insert for authenticated users only" ON time_slots
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- Only admins can create slots
+CREATE POLICY "Enable insert for admin users only" ON time_slots
+    FOR INSERT WITH CHECK (
+        auth.role() = 'authenticated' AND 
+        EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
+    );
 
-CREATE POLICY "Enable update for authenticated users only" ON time_slots
-    FOR UPDATE USING (auth.role() = 'authenticated');
+-- Only admins can update slots
+CREATE POLICY "Enable update for admin users only" ON time_slots
+    FOR UPDATE USING (
+        auth.role() = 'authenticated' AND 
+        EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
+    );
 
-CREATE POLICY "Enable delete for authenticated users only" ON time_slots
-    FOR DELETE USING (auth.role() = 'authenticated');
+-- Only admins can delete slots
+CREATE POLICY "Enable delete for admin users only" ON time_slots
+    FOR DELETE USING (
+        auth.role() = 'authenticated' AND 
+        EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
+    );
 
--- 10. Add trigger to auto-update status when booking is created
+-- 14. Add trigger to auto-update status when booking is created
 CREATE OR REPLACE FUNCTION update_slot_status_on_booking()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -132,7 +176,7 @@ CREATE TRIGGER trigger_update_slot_status_on_booking
     FOR EACH ROW
     EXECUTE FUNCTION update_slot_status_on_booking();
 
--- 11. Add trigger to auto-update status when booking is deleted
+-- 15. Add trigger to auto-update status when booking is deleted
 CREATE OR REPLACE FUNCTION update_slot_status_on_booking_delete()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -154,7 +198,44 @@ CREATE TRIGGER trigger_update_slot_status_on_booking_delete
     FOR EACH ROW
     EXECUTE FUNCTION update_slot_status_on_booking_delete();
 
--- 12. Verify the changes
+-- 16. Create a view for admin to see all slots with listener information
+CREATE OR REPLACE VIEW admin_slots_view AS
+SELECT 
+    ts.id,
+    ts.date,
+    ts.start_time,
+    ts.end_time,
+    ts.status,
+    ts.meeting_link,
+    ts.meeting_id,
+    ts.meeting_provider,
+    ts.created_at,
+    ts.updated_at,
+    u.username as listener_name,
+    u.email as listener_email,
+    u.role as listener_role
+FROM time_slots ts
+JOIN users u ON ts.listener_id = u.id
+ORDER BY ts.date DESC, ts.start_time ASC;
+
+-- 17. Create a view for listeners to see only their slots
+CREATE OR REPLACE VIEW listener_slots_view AS
+SELECT 
+    ts.id,
+    ts.date,
+    ts.start_time,
+    ts.end_time,
+    ts.status,
+    ts.meeting_link,
+    ts.meeting_id,
+    ts.meeting_provider,
+    ts.created_at,
+    ts.updated_at
+FROM time_slots ts
+WHERE ts.listener_id = auth.uid()
+ORDER BY ts.date DESC, ts.start_time ASC;
+
+-- 18. Verify the changes
 SELECT 
     column_name, 
     data_type, 
@@ -164,15 +245,17 @@ FROM information_schema.columns
 WHERE table_name = 'time_slots' 
 ORDER BY ordinal_position;
 
--- 13. Show current data sample
+-- 19. Show current data sample with listener information
 SELECT 
-    id,
-    date,
-    start_time,
-    end_time,
-    status,
-    meeting_link,
-    created_at
-FROM time_slots 
-ORDER BY created_at DESC 
+    ts.id,
+    ts.date,
+    ts.start_time,
+    ts.end_time,
+    ts.status,
+    ts.meeting_link,
+    u.username as listener_name,
+    ts.created_at
+FROM time_slots ts
+LEFT JOIN users u ON ts.listener_id = u.id
+ORDER BY ts.created_at DESC 
 LIMIT 5;

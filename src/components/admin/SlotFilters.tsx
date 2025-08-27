@@ -3,12 +3,14 @@ import type { SlotFilters as SlotFiltersType, Listener } from '@/types/admin.typ
 
 interface SlotFiltersProps {
   filters: SlotFiltersType;
+  listeners: Listener[];
   onFiltersChange: (filters: Partial<SlotFiltersType>) => void;
   className?: string;
 }
 
 export const SlotFilters: React.FC<SlotFiltersProps> = ({
   filters,
+  listeners,
   onFiltersChange,
   className = '',
 }) => {
@@ -31,6 +33,7 @@ export const SlotFilters: React.FC<SlotFiltersProps> = ({
   const clearFilters = () => {
     onFiltersChange({
       dateRange: undefined,
+      listenerId: undefined,
       isAvailable: undefined,
       isBooked: undefined,
       dayOfWeek: undefined,
@@ -133,7 +136,24 @@ export const SlotFilters: React.FC<SlotFiltersProps> = ({
             </div>
           </div>
 
-
+          {/* Listener Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Listener
+            </label>
+            <select
+              value={filters.listenerId || ''}
+              onChange={(e) => handleFilterChange('listenerId', e.target.value || undefined)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Listeners</option>
+              {listeners.map((listener) => (
+                <option key={listener.id} value={listener.id}>
+                  {listener.name || listener.username}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Day of Week Filter */}
           <div>
@@ -183,6 +203,11 @@ export const SlotFilters: React.FC<SlotFiltersProps> = ({
             {filters.dateRange?.end && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
                 To: {new Date(filters.dateRange.end).toLocaleDateString()}
+              </span>
+            )}
+            {filters.listenerId && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                Listener: {listeners.find(l => l.id === filters.listenerId)?.name || listeners.find(l => l.id === filters.listenerId)?.username}
               </span>
             )}
 
