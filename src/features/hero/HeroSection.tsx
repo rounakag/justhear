@@ -4,28 +4,18 @@ import { Button } from '@/design-system/components';
 import { useDynamicContent } from '@/hooks/useDynamicContent';
 
 interface HeroSectionProps {
-  title?: string;
-  subtitle?: string;
-  ctaText?: string;
-  secondaryCtaText?: string;
-  secondaryCtaHref?: string;
+  /* No props needed - uses CMS data only */
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({
-  title,
-  subtitle,
-  ctaText,
-  secondaryCtaText,
-  secondaryCtaHref,
-}) => {
+export const HeroSection: React.FC<HeroSectionProps> = () => {
   const { getContent } = useDynamicContent();
 
-  // Use CMS content with fallback to the exact copy from reference
-  const heroTitle = getContent('hero', 'title', title || 'Sometimes, you just need to be heard.');
-  const heroSubtitle = getContent('hero', 'subtitle', subtitle || 'Talk about your feelings—anger, loneliness, or sadness—in a safe, non-judgmental space.');
-  const heroCtaText = getContent('hero', 'ctaText', ctaText || 'Book Session');
-  const heroSecondaryCtaText = getContent('hero', 'secondaryCtaText', secondaryCtaText || 'See how it works');
-  const heroSecondaryCtaHref = getContent('hero', 'secondaryCtaHref', secondaryCtaHref || '#how');
+  // Use CMS content only - no hardcoded fallbacks
+  const heroTitle = getContent('hero', 'title', '');
+  const heroSubtitle = getContent('hero', 'subtitle', '');
+  const heroCtaText = getContent('hero', 'ctaText', '');
+  const heroSecondaryCtaText = getContent('hero', 'secondaryCtaText', '');
+  const heroSecondaryCtaHref = getContent('hero', 'secondaryCtaHref', '');
 
   return (
     <section

@@ -132,13 +132,11 @@ export const CMS_SECTIONS: CMSSection[] = [
   {
     section: 'hero',
     fields: [
-      { name: 'title1', label: 'Title 1', type: 'text', required: true },
-      { name: 'title2', label: 'Title 2', type: 'text', required: true },
-      { name: 'subtitle1', label: 'Subtitle 1', type: 'textarea', required: true },
-      { name: 'subtitle2', label: 'Subtitle 2', type: 'textarea', required: true },
+      { name: 'title', label: 'Title', type: 'text', required: true },
+      { name: 'subtitle', label: 'Subtitle', type: 'textarea', required: true },
       { name: 'ctaText', label: 'CTA Button Text', type: 'text', required: true },
-      { name: 'secondaryCtaText', label: 'Secondary CTA Text', type: 'text' },
-      { name: 'secondaryCtaHref', label: 'Secondary CTA Link', type: 'url' }
+      { name: 'secondaryCtaText', label: 'Secondary CTA Text', type: 'text', required: true },
+      { name: 'secondaryCtaHref', label: 'Secondary CTA Link', type: 'url', required: true }
     ]
   },
   {
