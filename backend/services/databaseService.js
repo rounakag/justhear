@@ -873,12 +873,9 @@ class DatabaseService {
         .from('cms_reachout')
         .insert([{
           title: reachoutData.title,
-          subtitle: reachoutData.subtitle,
-          description: reachoutData.description,
-          contact_email: reachoutData.contact_email,
-          contact_phone: reachoutData.contact_phone,
-          response_time: reachoutData.response_time,
-          availability: reachoutData.availability,
+          central_card_text: reachoutData.central_card_text,
+          emoji: reachoutData.emoji,
+          emotional_statement: reachoutData.emotional_statement,
           is_active: true,
           sort_order: reachoutData.sort_order || 0
         }])
@@ -899,12 +896,9 @@ class DatabaseService {
         .from('cms_reachout')
         .update({
           title: reachoutData.title,
-          subtitle: reachoutData.subtitle,
-          description: reachoutData.description,
-          contact_email: reachoutData.contact_email,
-          contact_phone: reachoutData.contact_phone,
-          response_time: reachoutData.response_time,
-          availability: reachoutData.availability,
+          central_card_text: reachoutData.central_card_text,
+          emoji: reachoutData.emoji,
+          emotional_statement: reachoutData.emotional_statement,
           sort_order: reachoutData.sort_order,
           updated_at: new Date().toISOString()
         })
