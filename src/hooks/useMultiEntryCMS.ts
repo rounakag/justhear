@@ -69,10 +69,11 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
         console.log(`🔍 DEBUG - Using data[${endpoint}]`);
       } else if (data[endpoint + 's']) {
         items = data[endpoint + 's']; // Handle plural form (faqs, testimonials, etc.)
-        console.log(`🔍 DEBUG - Using data[${endpoint + 's'}]`);
-        console.log(`🔍 DEBUG - data[${endpoint + 's'] type:`, typeof data[endpoint + 's']);
-        console.log(`🔍 DEBUG - data[${endpoint + 's'] length:`, Array.isArray(data[endpoint + 's']) ? data[endpoint + 's'].length : 'not an array');
-        console.log(`🔍 DEBUG - data[${endpoint + 's'] content:`, data[endpoint + 's']);
+        const pluralKey = endpoint + 's';
+        console.log(`🔍 DEBUG - Using data[${pluralKey}]`);
+        console.log(`🔍 DEBUG - data[${pluralKey}] type:`, typeof data[pluralKey]);
+        console.log(`🔍 DEBUG - data[${pluralKey}] length:`, Array.isArray(data[pluralKey]) ? data[pluralKey].length : 'not an array');
+        console.log(`🔍 DEBUG - data[${pluralKey}] content:`, data[pluralKey]);
       } else if (data.items) {
         items = data.items;
         console.log(`🔍 DEBUG - Using data.items`);
