@@ -148,13 +148,13 @@ export const CMS_SECTIONS: CMSSection[] = [
       { name: 'subtitle', label: 'Section Subtitle', type: 'textarea', required: true }
     ]
   },
-  {
-    section: 'examples',
-    fields: [
-      { name: 'title', label: 'Section Title', type: 'text', required: true },
-      { name: 'central_card_text', label: 'Central Card Text', type: 'text', required: true }
-    ]
-  },
+          {
+          section: 'examples',
+          fields: [
+            { name: 'title', label: 'Reach Out Section Title', type: 'text', required: true },
+            { name: 'central_card_text', label: 'Central Card Text', type: 'text', required: true }
+          ]
+        },
   {
     section: 'features',
     fields: [

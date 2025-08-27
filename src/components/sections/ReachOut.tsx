@@ -52,21 +52,28 @@ export const ReachOut = ({}: ReachOutProps) => {
       {/* orbiting cards */}
       {data.map((f, i) => {
         const angle = (360 / data.length) * i;          // deg
-        const r     = 160;                               // radius
+        const r     = 140;                               // radius (reduced to prevent overlap)
         const rad   = angle * Math.PI / 180;             // deg→rad
-        const x     = 210 + r * Math.cos(rad) - 70;      // 70 = half card-width
-        const y     = 210 + r * Math.sin(rad) - 60;      // 60 = half card-height
+        const cardWidth = 144;                           // w-36 = 144px
+        const cardHeight = 120;                          // estimated card height
+        const x     = 210 + r * Math.cos(rad) - (cardWidth / 2);  // center the card
+        const y     = 210 + r * Math.sin(rad) - (cardHeight / 2); // center the card
 
         return (
           <div
             key={i}
-            className="absolute w-36 px-3 py-4 bg-white rounded-xl shadow
+            className="absolute w-36 px-3 py-4 bg-white rounded-xl shadow-lg
                        text-center text-gray-700 select-none
-                       hover:-translate-y-1 transition"
-            style={{ top:y, left:x }}
+                       hover:-translate-y-1 hover:shadow-xl transition-all duration-200
+                       border border-gray-100"
+            style={{ 
+              top: y, 
+              left: x,
+              zIndex: 10
+            }}
           >
             <div className="text-2xl mb-1">{f.emoji}</div>
-            <span className="text-xs italic">“{f.text}”</span>
+            <span className="text-xs italic leading-tight">"{f.text}"</span>
           </div>
         );
       })}
