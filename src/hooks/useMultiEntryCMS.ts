@@ -53,7 +53,11 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
     try {
       setError(null);
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`, {
+      const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`;
+      console.log(`🔍 DEBUG - Adding ${endpoint} item:`, item);
+      console.log(`🔍 DEBUG - POST URL:`, url);
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,12 +65,25 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
         body: JSON.stringify(item),
       });
       
+      console.log(`🔍 DEBUG - Response status:`, response.status);
+      
       if (!response.ok) {
-        throw new Error(`Failed to add ${endpoint.slice(0, -1)}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`🔍 DEBUG - Response error:`, errorText);
+        throw new Error(`Failed to add ${endpoint.slice(0, -1)}: ${response.statusText} - ${errorText}`);
       }
       
       const data = await response.json();
-      setItems(prev => [...prev, data[endpoint.slice(0, -1)] || data.item]);
+      console.log(`🔍 DEBUG - Response data:`, data);
+      
+      const newItem = data[endpoint.slice(0, -1)] || data.item || data.testimonial || data.feature || data.faq || data.pricingPlan;
+      console.log(`🔍 DEBUG - New item to add:`, newItem);
+      
+      setItems(prev => {
+        const updated = [...prev, newItem];
+        console.log(`🔍 DEBUG - Updated items:`, updated);
+        return updated;
+      });
     } catch (err) {
       console.error(`Error adding ${endpoint.slice(0, -1)}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to add item');
