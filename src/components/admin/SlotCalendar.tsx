@@ -113,7 +113,12 @@ export const SlotCalendar: React.FC<SlotCalendarProps> = ({
   };
 
   const getSlotsForDate = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0];
+    // Fix timezone issue by using local date formatting
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    
     console.log('🔍 DEBUG - Calendar looking for date:', dateString);
     console.log('🔍 DEBUG - Available slots:', slots.map(s => ({ id: s.id, date: s.date })));
     const filteredSlots = slots.filter(slot => slot.date === dateString);

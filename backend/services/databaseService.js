@@ -75,35 +75,72 @@ class DatabaseService {
   }
 
   async getAvailableSlots() {
-    const { data, error } = await supabase
-      .from('time_slots')
-      .select('*')
-      .eq('status', 'created')
-      .gte('date', new Date().toISOString().split('T')[0])
-      .order('date', { ascending: true })
-      .order('start_time', { ascending: true });
+    // Get today's date in YYYY-MM-DD format without timezone issues
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
     
-    if (error) throw error;
-    return data;
-  }
-
-  async getAdminCreatedSlots() {
+    console.log('🔍 DEBUG - Getting available slots from date:', todayString);
+    
     const { data, error } = await supabase
       .from('time_slots')
       .select(`
         *,
+        listener:users!time_slots_listener_id_fkey(
+          id,
+          username,
+          name,
+          email
+        )
+      `)
+      .eq('status', 'created')
+      .not('listener_id', 'is', null) // Only show slots with assigned listeners
+      .gte('date', todayString)
+      .order('date', { ascending: true })
+      .order('start_time', { ascending: true });
+    
+    if (error) {
+      console.error('❌ ERROR getting available slots:', error);
+      throw error;
+    }
+    
+    console.log('🔍 DEBUG - Found available slots:', data?.length || 0);
+    return data || [];
+  }
+
+  async getAdminCreatedSlots() {
+    // Get today's date in YYYY-MM-DD format without timezone issues
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+    
+    console.log('🔍 DEBUG - Getting admin slots from date:', todayString);
+    
+    const { data, error } = await supabase
+      .from('time_slots')
+      .select(`
+        *,
+        listener:users!time_slots_listener_id_fkey(
+          id,
+          username,
+          name,
+          email
+        ),
         booking:bookings!bookings_slot_id_fkey(
           user_id,
           status,
           created_at
         )
       `)
-      .gte('date', new Date().toISOString().split('T')[0])
+      .gte('date', todayString)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
     
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error('❌ ERROR getting admin slots:', error);
+      throw error;
+    }
+    
+    console.log('🔍 DEBUG - Found admin slots:', data?.length || 0);
+    return data || [];
   }
 
   async getRecurringSchedules() {
