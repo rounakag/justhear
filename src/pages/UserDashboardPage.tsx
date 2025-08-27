@@ -137,8 +137,8 @@ export const UserDashboardPage: React.FC = () => {
 
               <button
                 onClick={() => {
-                  // Use navigate to maintain session
-                  window.history.back();
+                  // Navigate to home page
+                  window.location.href = '/';
                 }}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
               >
