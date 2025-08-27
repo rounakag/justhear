@@ -20,7 +20,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const { getContent } = useDynamicContent();
 
-  // Use CMS content with fallback to the exact copy from screenshots
+  // Use CMS content with fallback to the exact copy from reference
   const heroTitle = getContent('hero', 'title', title || 'Sometimes, you just need to be heard.');
   const heroSubtitle = getContent('hero', 'subtitle', subtitle || 'Talk about your feelings—anger, loneliness, or sadness—in a safe, non-judgmental space.');
   const heroCtaText = getContent('hero', 'ctaText', ctaText || 'Book Session');
@@ -30,25 +30,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section
       id="top"
-      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-100 to-purple-300 text-white relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white relative overflow-hidden"
     >
-      {/* Subtle background elements */}
+      {/* Floating shapes for ambiance */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-purple-200/20 rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-200/20 rounded-full blur-xl"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-purple-200/20 rounded-full blur-xl"></div>
+        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
+        <div className="absolute top-60 right-15 w-15 h-15 bg-white/10 rounded-full animate-float delay-1000"></div>
+        <div className="absolute bottom-20 left-20 w-10 h-10 bg-white/10 rounded-full animate-float delay-2000"></div>
       </div>
 
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="mx-auto px-5 lg:px-8 max-w-7xl relative z-10 pt-24">
+        <div className="grid lg:grid-cols-2 gap-15 items-center">
           
           {/* Left Side - Text Content */}
           <div className="text-center lg:text-left order-2 lg:order-1">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white tracking-tight">
               {heroTitle}
             </h1>
             
-            <p className="text-lg sm:text-xl mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed text-white/90">
+            <p className="text-lg sm:text-xl lg:text-2xl mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed text-white/90 font-normal">
               {heroSubtitle}
             </p>
             
@@ -56,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Link to="/bookings">
                 <Button 
                   size="lg" 
-                  className="rounded-full bg-white text-purple-600 hover:bg-gray-50 px-8 py-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold"
+                  className="rounded-full bg-white text-[#5b47db] hover:bg-gray-50 px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-lg font-semibold min-w-[180px]"
                 >
                   {heroCtaText}
                 </Button>
@@ -64,69 +64,84 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               
               <a 
                 href={heroSecondaryCtaHref}
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-full text-white bg-transparent border-2 border-white hover:bg-white/10 transition-all duration-300"
+                className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-full text-white bg-transparent border-2 border-white/70 hover:bg-white/10 hover:border-white hover:-translate-y-1 transition-all duration-300 min-w-[180px]"
               >
                 {heroSecondaryCtaText}
               </a>
             </div>
           </div>
 
-          {/* Right Side - Friendly Figures Illustration */}
+          {/* Right Side - SVG Illustration */}
           <div className="relative flex justify-center lg:justify-end order-1 lg:order-2">
-            <div className="relative w-80 h-80 lg:w-96 lg:h-96">
+            <svg className="w-full max-w-[400px] h-auto filter drop-shadow-2xl" viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Background circle */}
+              <circle cx="200" cy="160" r="140" fill="rgba(255, 255, 255, 0.1)" opacity="0.6"/>
               
-              {/* Outer glow circles */}
-              <div className="absolute inset-0 rounded-full bg-purple-200/20 blur-2xl"></div>
-              <div className="absolute inset-4 rounded-full bg-purple-200/30 blur-xl"></div>
-              
-              {/* Main illustration container */}
-              <div className="relative z-10 flex items-center justify-center h-full">
-                
-                {/* Figure 1 (Left) - Yellow with blue clothes */}
-                <div className="relative mr-8">
-                  {/* Head */}
-                  <div className="w-16 h-16 bg-yellow-400 rounded-full mb-2 relative">
-                    {/* Hair */}
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-12 h-6 bg-amber-700 rounded-full"></div>
-                  </div>
-                  {/* Body */}
-                  <div className="w-12 h-16 bg-blue-300 rounded-full mx-auto"></div>
-                  
-                  {/* Speech bubble */}
-                  <div className="absolute -top-4 -right-16 bg-white rounded-2xl px-3 py-2 shadow-lg">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300"></div>
-                    </div>
-                    {/* Speech bubble tail */}
-                    <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-r-4 border-r-white border-b-4 border-b-transparent"></div>
-                  </div>
-                </div>
+              {/* Person 1 (Sharing) */}
+              <g transform="translate(120, 80)">
+                {/* Head */}
+                <circle cx="30" cy="30" r="25" fill="#FFD93D"/>
+                {/* Hair */}
+                <path d="M10 25 C15 15, 45 15, 50 25 C50 20, 45 10, 35 10 C25 5, 15 5, 5 10 C-5 15, 0 25, 10 25" fill="#8B4513"/>
+                {/* Body */}
+                <ellipse cx="30" cy="80" rx="20" ry="30" fill="#87CEEB"/>
+                {/* Arms */}
+                <ellipse cx="10" cy="65" rx="8" ry="20" fill="#FFD93D" transform="rotate(-20 10 65)"/>
+                <ellipse cx="50" cy="65" rx="8" ry="20" fill="#FFD93D" transform="rotate(30 50 65)"/>
+                {/* Speech bubble */}
+                <ellipse cx="70" cy="40" rx="25" ry="18" fill="rgba(255, 255, 255, 0.9)"/>
+                <path d="M50 45 L45 55 L55 50 Z" fill="rgba(255, 255, 255, 0.9)"/>
+                {/* Dots in speech bubble */}
+                <circle cx="63" cy="35" r="2" fill="#667eea"/>
+                <circle cx="70" cy="35" r="2" fill="#667eea"/>
+                <circle cx="77" cy="35" r="2" fill="#667eea"/>
+                <circle cx="65" cy="45" r="1.5" fill="#667eea"/>
+                <circle cx="75" cy="45" r="1.5" fill="#667eea"/>
+              </g>
 
-                {/* Figure 2 (Right) - Pink with green clothes */}
-                <div className="relative ml-8">
-                  {/* Head */}
-                  <div className="w-16 h-16 bg-pink-300 rounded-full mb-2 relative">
-                    {/* Hair */}
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-12 h-6 bg-purple-600 rounded-full"></div>
-                  </div>
-                  {/* Body */}
-                  <div className="w-12 h-16 bg-green-300 rounded-full mx-auto"></div>
-                  
-                  {/* Hearts */}
-                  <div className="absolute -top-2 -right-4">
-                    <div className="text-pink-400 text-2xl animate-bounce">💖</div>
-                  </div>
-                  <div className="absolute top-4 -right-6">
-                    <div className="text-pink-300 text-lg animate-bounce delay-500">💕</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              {/* Person 2 (Listening) */}
+              <g transform="translate(220, 90)">
+                {/* Head */}
+                <circle cx="30" cy="30" r="25" fill="#FFB6C1"/>
+                {/* Hair */}
+                <path d="M8 22 C12 12, 48 12, 52 22 C52 18, 47 8, 37 8 C27 3, 23 3, 13 8 C3 13, 8 22, 8 22" fill="#4B0082"/>
+                {/* Body */}
+                <ellipse cx="30" cy="80" rx="18" ry="28" fill="#98FB98"/>
+                {/* Arms (relaxed, listening position) */}
+                <ellipse cx="15" cy="70" rx="7" ry="18" fill="#FFB6C1" transform="rotate(-10 15 70)"/>
+                <ellipse cx="45" cy="70" rx="7" ry="18" fill="#FFB6C1" transform="rotate(10 45 70)"/>
+                {/* Heart (showing empathy) */}
+                <path d="M70 35 C70 30, 75 25, 80 30 C85 25, 90 30, 90 35 C90 45, 80 55, 80 55 C80 55, 70 45, 70 35 Z" fill="#FF69B4" opacity="0.7"/>
+                {/* Small hearts floating */}
+                <circle cx="85" cy="20" r="3" fill="#FF69B4" opacity="0.5"/>
+                <circle cx="95" cy="30" r="2" fill="#FF69B4" opacity="0.4"/>
+              </g>
+
+              {/* Connecting line (empathy) */}
+              <path d="M170 140 Q200 120 220 140" stroke="rgba(255, 255, 255, 0.4)" strokeWidth="3" fill="none" strokeDasharray="5,5">
+                <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite"/>
+              </path>
+
+              {/* Ground */}
+              <ellipse cx="200" cy="280" rx="160" ry="15" fill="rgba(255, 255, 255, 0.1)"/>
+            </svg>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+          }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 };
