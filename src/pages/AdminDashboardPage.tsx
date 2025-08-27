@@ -258,13 +258,11 @@ export const AdminDashboardPage: React.FC = () => {
         )}
         {activeTab === 'reachout' && (
           <MultiEntryCMSEditor
-            title="Reach Out"
+            title="Reach Out Section"
             items={reachOut.items}
             fields={[
-              { name: 'title', label: 'Title', type: 'text', required: true },
-              { name: 'central_card_text', label: 'Central Card Text', type: 'text', required: true },
               { name: 'emoji', label: 'Emoji', type: 'text', required: true },
-              { name: 'emotional_statement', label: 'Emotional Statement', type: 'textarea', required: true },
+              { name: 'title', label: 'Title', type: 'text', required: true },
               { name: 'sort_order', label: 'Sort Order', type: 'number' }
             ]}
             onAdd={reachOut.addItem}

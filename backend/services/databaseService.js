@@ -872,10 +872,8 @@ class DatabaseService {
       const { data, error } = await supabase
         .from('cms_reachout')
         .insert([{
-          title: reachoutData.title,
-          central_card_text: reachoutData.central_card_text,
           emoji: reachoutData.emoji,
-          emotional_statement: reachoutData.emotional_statement,
+          title: reachoutData.title,
           is_active: true,
           sort_order: reachoutData.sort_order || 0
         }])
@@ -895,10 +893,8 @@ class DatabaseService {
       const { data, error } = await supabase
         .from('cms_reachout')
         .update({
-          title: reachoutData.title,
-          central_card_text: reachoutData.central_card_text,
           emoji: reachoutData.emoji,
-          emotional_statement: reachoutData.emotional_statement,
+          title: reachoutData.title,
           sort_order: reachoutData.sort_order,
           updated_at: new Date().toISOString()
         })

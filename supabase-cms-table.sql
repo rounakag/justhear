@@ -37,6 +37,7 @@ INSERT INTO cms_content (section, field, value) VALUES
 
 -- Examples Section
 ('examples', 'title', 'Reach out to us, when u feel'),
+('examples', 'central_card_text', 'You Need Validation'),
 
 -- Features Section
 ('features', 'title', 'How it works'),
