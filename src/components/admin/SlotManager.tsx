@@ -479,6 +479,7 @@ export const SlotManager: React.FC = () => {
           <SlotEditor
             slot={selectedSlot}
             listeners={listeners}
+            slots={slots}
             onClose={handleCloseSlotEditor}
             onSave={refreshData}
           />

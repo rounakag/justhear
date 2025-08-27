@@ -342,6 +342,25 @@ app.post('/api/slots', async (req, res) => {
     }
   } catch (error) {
     console.error('Error creating slot:', error);
+    
+    // Handle specific overlap error with user-friendly message
+    if (error.message && error.message.includes('Slot overlaps with existing slot')) {
+      return res.status(400).json({ 
+        error: 'Slot overlaps with existing slot for this listener on the same date. Please choose a different time or date.',
+        type: 'overlap_error',
+        details: 'The selected time conflicts with an existing slot for the same listener. Each listener can only have one slot at a time.'
+      });
+    }
+    
+    // Handle other database constraint errors
+    if (error.code === 'P0001' || error.message.includes('violates check constraint')) {
+      return res.status(400).json({ 
+        error: 'Invalid slot data. Please check the time and date values.',
+        type: 'validation_error',
+        details: error.message
+      });
+    }
+    
     res.status(500).json({ 
       error: `Failed to create slot: ${error.message}`,
       details: error.details || error.hint || error.code
