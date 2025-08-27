@@ -296,27 +296,12 @@ app.post('/api/slots', async (req, res) => {
       });
     }
     
-    // Get default price from CMS pricing plans
-    let defaultPrice = 50; // fallback
-    try {
-      const pricingPlans = await databaseService.getPricingPlans();
-      if (pricingPlans && pricingPlans.length > 0) {
-        // Use the first active pricing plan as default
-        const defaultPlan = pricingPlans.find(plan => plan.is_active) || pricingPlans[0];
-        defaultPrice = defaultPlan.price || 50;
-      }
-    } catch (error) {
-      console.log('Could not fetch pricing plans, using default price:', defaultPrice);
-    }
-
     // Transform data to match database schema
     const transformedData = {
       date: slotData.date,
       start_time: slotData.startTime,
       end_time: slotData.endTime,
-      price: slotData.price || defaultPrice,
-      status: 'available',
-      listener_id: slotData.listenerId && slotData.listenerId.trim() !== '' ? slotData.listenerId : null,
+      status: 'created',
       duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
     };
     
@@ -394,8 +379,8 @@ app.delete('/api/slots/:id', async (req, res) => {
   }
 });
 
-// Mark slot as done
-app.put('/api/slots/:id/done', async (req, res) => {
+// Mark slot as completed
+app.put('/api/slots/:id/completed', async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -403,17 +388,70 @@ app.put('/api/slots/:id/done', async (req, res) => {
       return res.status(400).json({ error: 'Invalid slot ID' });
     }
     
-    console.log('🔍 DEBUG - Marking slot as done:', id);
+    console.log('🔍 DEBUG - Marking slot as completed:', id);
     
     const updatedSlot = await databaseService.markSlotAsDone(id);
     
     res.json({ 
-      message: 'Slot marked as done successfully', 
+      message: 'Slot marked as completed successfully', 
       slot: updatedSlot 
     });
   } catch (error) {
-    console.error('Error marking slot as done:', error);
-    res.status(500).json({ error: 'Failed to mark slot as done' });
+    console.error('Error marking slot as completed:', error);
+    res.status(500).json({ error: 'Failed to mark slot as completed' });
+  }
+});
+
+// Auto-complete past slots (cron job endpoint)
+app.post('/api/slots/auto-complete', async (req, res) => {
+  try {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().split(' ')[0];
+    
+    // Get all booked slots that are in the past
+    const { data: pastSlots, error } = await supabase
+      .from('time_slots')
+      .select('*')
+      .eq('status', 'booked')
+      .or(`date.lt.${currentDate},and(date.eq.${currentDate},end_time.lt.${currentTime})`)
+      .order('date', { ascending: true })
+      .order('end_time', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching past slots:', error);
+      return res.status(500).json({ error: 'Failed to fetch past slots' });
+    }
+    
+    if (!pastSlots || pastSlots.length === 0) {
+      return res.json({
+        message: 'No past slots to complete',
+        completedCount: 0
+      });
+    }
+    
+    // Update all past slots to completed status
+    const { data: updatedSlots, error: updateError } = await supabase
+      .from('time_slots')
+      .update({ status: 'completed' })
+      .in('id', pastSlots.map(slot => slot.id))
+      .select();
+    
+    if (updateError) {
+      console.error('Error updating past slots:', updateError);
+      return res.status(500).json({ error: 'Failed to update past slots' });
+    }
+    
+    console.log(`Auto-completed ${updatedSlots.length} past slots`);
+    
+    res.json({
+      message: 'Past slots auto-completed successfully',
+      completedCount: updatedSlots.length,
+      slots: updatedSlots
+    });
+  } catch (error) {
+    console.error('Error in auto-complete slots:', error);
+    res.status(500).json({ error: 'Failed to auto-complete slots' });
   }
 });
 

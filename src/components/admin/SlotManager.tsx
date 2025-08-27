@@ -56,7 +56,6 @@ class SlotManagerErrorBoundary extends React.Component<
 export const SlotManager: React.FC = () => {
   const {
     slots,
-    listeners,
     stats,
     loading,
     error,
@@ -95,11 +94,6 @@ export const SlotManager: React.FC = () => {
     if (!hasFilters) return slots;
 
     return slots.filter(slot => {
-      // Listener filter
-      if (filters.listenerId && slot.listenerId !== filters.listenerId) {
-        return false;
-      }
-      
       // Availability filter
       if (filters.isAvailable !== undefined && slot.isAvailable !== filters.isAvailable) {
         return false;
@@ -128,12 +122,12 @@ export const SlotManager: React.FC = () => {
 
   const handleMarkAsDone = useCallback(async (slotId: string) => {
     try {
-      const confirmed = confirm('Mark this slot as done? This will change the status from "booked" to "done".');
+      const confirmed = confirm('Mark this slot as completed? This will change the status from "booked" to "completed".');
       if (!confirmed) return;
 
       const apiUrl = process.env.VITE_API_BASE_URL || 'https://justhear-backend.onrender.com';
       
-      const response = await fetch(`${apiUrl}/api/slots/${slotId}/done`, {
+      const response = await fetch(`${apiUrl}/api/slots/${slotId}/completed`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +137,7 @@ export const SlotManager: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to mark slot as done');
+        throw new Error(errorData.error || 'Failed to mark slot as completed');
       }
 
       const result = await response.json();
@@ -464,7 +458,6 @@ export const SlotManager: React.FC = () => {
                   <SlotList
                     slots={filteredSlots}
                     onSlotClick={handleSlotClick}
-                    listeners={listeners}
                     onMarkAsDone={handleMarkAsDone}
                     onDeleteSlot={handleDeleteSlot}
                   />
@@ -478,7 +471,6 @@ export const SlotManager: React.FC = () => {
         {showSlotEditor && (
           <SlotEditor
             slot={selectedSlot}
-            listeners={listeners}
             onClose={handleCloseSlotEditor}
             onSave={refreshData}
           />
@@ -494,24 +486,18 @@ export const SlotManager: React.FC = () => {
 // Slot List Component for list view
 interface SlotListProps {
   slots: TimeSlot[];
-  listeners: any[];
   onSlotClick: (slot: TimeSlot) => void;
   onMarkAsDone: (slotId: string) => void;
   onDeleteSlot: (slotId: string) => void;
 }
 
-const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMarkAsDone, onDeleteSlot }) => {
+const SlotList: React.FC<SlotListProps> = ({ slots, onSlotClick, onMarkAsDone, onDeleteSlot }) => {
   
 
   
-  const getListenerName = useCallback((listenerId?: string): string => {
-    if (!listenerId || listenerId.trim() === '') {
-      return 'Admin'; // Default to Admin when no listener assigned
-    }
-    
-    const listener = listeners.find(l => l.id === listenerId);
-    return listener?.name || listener?.username || 'Admin';
-  }, [listeners]);
+  const getAssignedStatus = useCallback((slot: TimeSlot): string => {
+    return slot.status === 'booked' ? 'Yes' : 'No';
+  }, []);
 
   const formatTime = (time: string) => {
     try {
@@ -634,13 +620,13 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
               Date & Time
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Listener
+              Meeting Link
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Assigned
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Price
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -669,26 +655,40 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {getListenerName(slot.listenerId)}
+                  {slot.meeting_link ? (
+                    <a 
+                      href={slot.meeting_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Join Meeting
+                    </a>
+                  ) : (
+                    <span className="text-gray-500">No link</span>
+                  )}
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-900">
+                  {getAssignedStatus(slot)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  slot.isBooked
+                  slot.status === 'completed'
+                    ? 'bg-gray-100 text-gray-800'
+                    : slot.status === 'booked'
                     ? 'bg-red-100 text-red-800'
-                    : slot.isAvailable
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
+                    : 'bg-green-100 text-green-800'
                 }`}>
-                  {slot.isBooked ? 'Booked' : slot.isAvailable ? 'Available' : 'Unavailable'}
+                  {slot.status === 'completed' ? 'Completed' : slot.status === 'booked' ? 'Booked' : 'Created'}
                 </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${slot.price}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div className="flex space-x-2">
-                  {slot.isBooked && slot.meeting_link && (
+                  {slot.status === 'booked' && slot.meeting_link && (
                     <button 
                       className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 rounded-md transition-colors"
                       onClick={(e) => {
@@ -696,10 +696,10 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
                         window.open(slot.meeting_link, '_blank');
                       }}
                     >
-                      Join Session
+                      Join
                     </button>
                   )}
-                  {slot.isBooked && (
+                  {slot.status === 'booked' && (
                     <button 
                       className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 rounded-md transition-colors"
                       onClick={(e) => {
@@ -707,7 +707,7 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
                         onMarkAsDone(slot.id);
                       }}
                     >
-                      Mark Done
+                      Complete
                     </button>
                   )}
                   <button 

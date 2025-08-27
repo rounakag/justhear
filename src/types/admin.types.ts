@@ -8,12 +8,7 @@ export interface TimeSlot {
   dayOfWeek?: number; // 0-6 (Sunday-Saturday)
   isAvailable?: boolean;
   isBooked?: boolean;
-  listenerId?: string;
-  listenerName?: string;
-  listenerAvatar?: string;
-  price: number;
-  currency?: string;
-  timezone?: string;
+  status: 'created' | 'booked' | 'completed';
   createdAt?: string;
   updatedAt?: string;
   // Meeting link properties
@@ -75,7 +70,6 @@ export interface SlotFilters {
     start: string;
     end: string;
   };
-  listenerId?: string;
   isAvailable?: boolean;
   isBooked?: boolean;
   dayOfWeek?: number;
@@ -88,8 +82,6 @@ export interface BulkSlotCreation {
   startTime: string;
   endTime: string;
   duration: number;
-  listenerId?: string;
-  price: number;
 }
 
 export interface SlotEditorData {
@@ -97,8 +89,6 @@ export interface SlotEditorData {
   date: string;
   startTime: string;
   endTime: string;
-  listenerId?: string;
-  price: number;
   isAvailable: boolean;
 }
 

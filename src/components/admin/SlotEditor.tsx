@@ -20,14 +20,12 @@ function formatTimeForInput(timeString: string): string {
 
 interface SlotEditorProps {
   slot?: TimeSlot | null;
-  listeners: Listener[];
   onClose: () => void;
   onSave: () => void;
 }
 
 export const SlotEditor: React.FC<SlotEditorProps> = ({
   slot,
-  listeners,
   onClose,
   onSave,
 }) => {
@@ -36,8 +34,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
     date: '',
     startTime: '',
     endTime: '',
-    listenerId: '',
-    price: 0,
     isAvailable: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -48,8 +44,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         date: slot.date,
         startTime: formatTimeForInput(slot.start_time || slot.startTime || ''),
         endTime: formatTimeForInput(slot.end_time || slot.endTime || ''),
-        listenerId: slot.listenerId || '',
-        price: slot.price,
         isAvailable: slot.isAvailable || true,
       });
     } else {
@@ -59,8 +53,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         date: now.toISOString().split('T')[0],
         startTime: '09:00',
         endTime: '10:00',
-        listenerId: '',
-        price: 50,
         isAvailable: true,
       });
     }
@@ -205,48 +197,7 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
             </div>
           </div>
 
-          {/* Listener Assignment */}
-          <div>
-            <label htmlFor="listenerId" className="block text-sm font-medium text-gray-700 mb-1">
-              Assign Listener
-            </label>
-            <select
-              id="listenerId"
-              value={formData.listenerId}
-              onChange={(e) => handleInputChange('listenerId', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select a listener (optional)</option>
-              {listeners.map((listener) => (
-                <option key={listener.id} value={listener.id}>
-                  {listener.name} - ${listener.hourlyRate}/hr
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-gray-500 mt-1">
-              {formData.listenerId ? '✅ Listener assigned - slot will be visible to users' : '⚠️ No listener assigned - slot will still be visible but marked as "Unassigned"'}
-            </p>
-          </div>
 
-          {/* Price */}
-          <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price ($) (Optional)
-            </label>
-            <input
-              type="number"
-              id="price"
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Default: $50"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Leave empty to use default price of $50
-            </p>
-          </div>
 
           {/* Availability */}
           <div className="flex items-center">

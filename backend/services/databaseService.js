@@ -77,11 +77,8 @@ class DatabaseService {
   async getAvailableSlots() {
     const { data, error } = await supabase
       .from('time_slots')
-      .select(`
-        *,
-        listener:users!time_slots_listener_id_fkey(username)
-      `)
-      .eq('status', 'available')
+      .select('*')
+      .eq('status', 'created')
       .gte('date', new Date().toISOString().split('T')[0])
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
@@ -95,7 +92,6 @@ class DatabaseService {
       .from('time_slots')
       .select(`
         *,
-        listener:users!time_slots_listener_id_fkey(username),
         booking:bookings!bookings_slot_id_fkey(
           user_id,
           status,
@@ -147,7 +143,19 @@ class DatabaseService {
   async markSlotAsDone(slotId) {
     const { data, error } = await supabase
       .from('time_slots')
-      .update({ status: 'done' })
+      .update({ status: 'completed' })
+      .eq('id', slotId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateSlotStatus(slotId, status) {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .update({ status })
       .eq('id', slotId)
       .select()
       .single();
