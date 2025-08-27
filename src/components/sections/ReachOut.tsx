@@ -7,9 +7,10 @@ interface ReachOutProps {
 }
 
 /**
- * Hanging cards desktop layout + horizontal-scroll mobile layout.
- * • Cards hang from threads at different heights for visual interest.
- * • Grid layout adapts to number of cards.
+ * Service-focused cards that directly connect to listening service.
+ * • Clear value propositions for each scenario.
+ * • Professional yet empathetic design with better visual hierarchy.
+ * • Encourages users to book sessions when they need support.
  */
 export const ReachOut = ({}: ReachOutProps) => {
   const { items, loading, error } = useReachOut();
@@ -32,68 +33,72 @@ export const ReachOut = ({}: ReachOutProps) => {
 
   /* -----  DESKTOP (≥md)  ----- */
   const desktop = (
-    <div className="relative w-full max-w-6xl mx-auto hidden md:block">
-      {/* Hanging cards with threads */}
+    <div className="relative w-full max-w-7xl mx-auto hidden md:block">
+      {/* Service-focused grid layout */}
       <div className="grid grid-cols-3 gap-8 px-8">
         {data.map((f, i) => {
-          // Create different heights for visual interest
-          const heights = [0, -20, 20, -40, 40, -10, 30, -30];
-          const height = heights[i % heights.length] || 0;
-          
-          // Different gradient colors for variety
+          // Service-oriented gradient colors
           const gradients = [
-            'from-blue-50 to-indigo-100',
-            'from-purple-50 to-pink-100', 
-            'from-emerald-50 to-teal-100',
-            'from-amber-50 to-orange-100',
-            'from-rose-50 to-red-100',
-            'from-violet-50 to-purple-100',
-            'from-cyan-50 to-blue-100',
-            'from-lime-50 to-green-100'
+            'from-blue-50 via-blue-100 to-indigo-50',
+            'from-purple-50 via-purple-100 to-violet-50', 
+            'from-emerald-50 via-emerald-100 to-teal-50',
+            'from-amber-50 via-amber-100 to-orange-50',
+            'from-rose-50 via-rose-100 to-pink-50',
+            'from-violet-50 via-violet-100 to-purple-50'
           ];
           const gradient = gradients[i % gradients.length];
           
           return (
             <div
               key={i}
-              className="relative flex flex-col items-center group"
-              style={{ marginTop: `${height}px` }}
+              className="relative group"
             >
-              {/* Animated Thread */}
-              <div className="w-0.5 bg-gradient-to-b from-gray-400 to-gray-300 h-16 mb-2 
-                             group-hover:bg-gradient-to-b group-hover:from-blue-400 group-hover:to-blue-300
-                             transition-all duration-500 ease-out"></div>
-              
-              {/* Stunning Card */}
-              <div className={`w-full max-w-sm bg-gradient-to-br ${gradient} 
-                             backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl
+              {/* Service-focused Card */}
+              <div className={`w-full bg-gradient-to-br ${gradient} 
+                             backdrop-blur-sm bg-white/90 rounded-3xl shadow-lg
                              text-center text-gray-700 select-none
-                             hover:-translate-y-3 hover:scale-105 hover:shadow-2xl 
-                             transition-all duration-500 ease-out
-                             border-2 border-white/60 relative overflow-hidden
-                             group-hover:border-blue-300/80`}>
+                             hover:-translate-y-2 hover:scale-102 hover:shadow-xl 
+                             transition-all duration-300 ease-out
+                             border border-white/80 relative overflow-hidden
+                             group-hover:border-blue-200/60`}>
                 
-                {/* Shimmer effect overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
-                               -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+                {/* Subtle background pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute top-4 right-4 w-16 h-16 bg-blue-400 rounded-full"></div>
+                  <div className="absolute bottom-4 left-4 w-12 h-12 bg-purple-400 rounded-full"></div>
+                </div>
                 
                 {/* Card content */}
-                <div className="relative z-10 px-8 py-10">
-                  {/* Emoji with glow effect */}
-                  <div className="text-5xl mb-5 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <div className="relative z-10 px-6 py-8">
+                  {/* Emoji with enhanced styling */}
+                  <div className="text-6xl mb-4 drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
                     {f.emoji}
                   </div>
                   
-                  {/* Text with enhanced styling */}
-                  <span className="text-base italic leading-relaxed font-medium text-gray-600 
-                                 group-hover:text-gray-800 transition-colors duration-300">
-                    "{f.text}"
-                  </span>
+                  {/* Service-focused text */}
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      We're Here When
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-600 font-medium">
+                      {f.text}
+                    </p>
+                  </div>
+                  
+                  {/* Subtle CTA indicator */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="inline-flex items-center text-xs text-blue-600 font-medium">
+                      <span>Book a session</span>
+                      <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* Sharp border glow */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/30 via-purple-400/30 to-pink-400/30 
-                               opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                {/* Subtle border glow on hover */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+                               opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
             </div>
           );
@@ -104,48 +109,65 @@ export const ReachOut = ({}: ReachOutProps) => {
 
   /* -----  MOBILE (<md)  ----- */
   const mobile = (
-    <div className="md:hidden flex gap-4 overflow-x-auto py-4 px-2
+    <div className="md:hidden flex gap-6 overflow-x-auto py-6 px-4
                     snap-x scrollbar-hide">
       {data.map((f,i) => {
-        // Different gradient colors for mobile cards too
+        // Service-oriented gradient colors for mobile
         const gradients = [
-          'from-blue-50 to-indigo-100',
-          'from-purple-50 to-pink-100', 
-          'from-emerald-50 to-teal-100',
-          'from-amber-50 to-orange-100',
-          'from-rose-50 to-red-100',
-          'from-violet-50 to-purple-100',
-          'from-cyan-50 to-blue-100',
-          'from-lime-50 to-green-100'
+          'from-blue-50 via-blue-100 to-indigo-50',
+          'from-purple-50 via-purple-100 to-violet-50', 
+          'from-emerald-50 via-emerald-100 to-teal-50',
+          'from-amber-50 via-amber-100 to-orange-50',
+          'from-rose-50 via-rose-100 to-pink-50',
+          'from-violet-50 via-violet-100 to-purple-50'
         ];
         const gradient = gradients[i % gradients.length];
         
         return (
           <div key={i}
-               className={`snap-center flex-shrink-0 w-56 bg-gradient-to-br ${gradient} 
-                          backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl
+               className={`snap-center flex-shrink-0 w-64 bg-gradient-to-br ${gradient} 
+                          backdrop-blur-sm bg-white/90 rounded-3xl shadow-lg
                           px-6 py-8 text-center text-gray-700
-                          hover:-translate-y-2 hover:scale-105 hover:shadow-2xl 
-                          transition-all duration-500 ease-out
-                          border-2 border-white/60 relative overflow-hidden group`}>
+                          hover:-translate-y-2 hover:scale-102 hover:shadow-xl 
+                          transition-all duration-300 ease-out
+                          border border-white/80 relative overflow-hidden group`}>
             
-            {/* Shimmer effect for mobile */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
-                           -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+            {/* Subtle background pattern for mobile */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-3 right-3 w-12 h-12 bg-blue-400 rounded-full"></div>
+              <div className="absolute bottom-3 left-3 w-8 h-8 bg-purple-400 rounded-full"></div>
+            </div>
             
             {/* Card content */}
             <div className="relative z-10">
-              <div className="text-4xl mb-4 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="text-5xl mb-4 drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
                 {f.emoji}
               </div>
-              <span className="text-sm italic font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
-                "{f.text}"
-              </span>
+              
+              {/* Service-focused text for mobile */}
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-gray-800 mb-2">
+                  We're Here When
+                </h3>
+                <p className="text-sm leading-relaxed text-gray-600 font-medium">
+                  {f.text}
+                </p>
+              </div>
+              
+              {/* Subtle CTA indicator for mobile */}
+              <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="inline-flex items-center text-xs text-blue-600 font-medium">
+                  <span>Book a session</span>
+                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
             </div>
             
-            {/* Sharp border glow for mobile */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/30 via-purple-400/30 to-pink-400/30 
-                           opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            {/* Subtle border glow for mobile */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 
+                           opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         );
       })}
