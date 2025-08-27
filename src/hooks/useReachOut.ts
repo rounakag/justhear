@@ -32,13 +32,17 @@ export function useReachOut() {
         }
         
         const data = await response.json();
+        console.log('🔍 DEBUG - Raw API response:', data);
+        
         const reachoutItems = data.reachout || data.items || [];
+        console.log('🔍 DEBUG - Extracted items:', reachoutItems);
         
         // Sort by sort_order
         const sortedItems = reachoutItems.sort((a: ReachOutItem, b: ReachOutItem) => 
           (a.sort_order || 0) - (b.sort_order || 0)
         );
         
+        console.log('🔍 DEBUG - Sorted items:', sortedItems);
         setItems(sortedItems);
       } catch (err) {
         console.error('Error fetching reachout:', err);

@@ -108,6 +108,7 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
   const updateItem = useCallback(async (id: string, item: MultiEntryItem) => {
     try {
       setError(null);
+      console.log(`🔍 DEBUG - Updating ${endpoint} item:`, { id, item });
       
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}/${id}`, {
         method: 'PUT',
@@ -117,6 +118,8 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
         body: JSON.stringify(item),
       });
       
+      console.log(`🔍 DEBUG - Update response status:`, response.status);
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Backend error: ${response.status} - ${errorText}`);
@@ -124,7 +127,10 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       }
       
       const data = await response.json();
+      console.log(`🔍 DEBUG - Update response data:`, data);
+      
       const updatedItem = extractItemFromResponse(data, endpoint);
+      console.log(`🔍 DEBUG - Extracted updated item:`, updatedItem);
       
       setItems(prev => prev.map(item => 
         item.id === id ? updatedItem : item
