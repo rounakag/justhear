@@ -43,7 +43,7 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleAdd = async () => {
-    if (!newItem || Object.keys(newItem).length === 0) return;
+    console.log('🔍 DEBUG - handleAdd called with newItem:', newItem);
     
     // Validate required fields
     const errors: Record<string, string> = {};
@@ -53,19 +53,33 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
       }
     });
     
+    console.log('🔍 DEBUG - Validation errors:', errors);
+    
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
     
+    // Check if we have at least some data to add
+    const hasData = fields.some(field => newItem[field.name] && newItem[field.name].toString().trim() !== '');
+    console.log('🔍 DEBUG - Has data:', hasData);
+    
+    if (!hasData) {
+      setValidationErrors({ general: 'Please fill in at least one field' });
+      return;
+    }
+    
     setValidationErrors({});
     setIsAdding(true);
+    console.log('🔍 DEBUG - Calling onAdd with:', newItem);
+    
     try {
       await onAdd(newItem);
+      console.log('🔍 DEBUG - onAdd successful');
       setNewItem({});
+      setIsAdding(false);
     } catch (error) {
       console.error('Error adding item:', error);
-    } finally {
       setIsAdding(false);
     }
   };
@@ -195,6 +209,11 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
       {isAdding && (
         <div className="bg-gray-50 p-4 rounded-lg border">
           <h4 className="font-medium text-gray-900 mb-3">Add New {title.slice(0, -1)}</h4>
+          {validationErrors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800 text-sm">{validationErrors.general}</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div key={field.name}>
