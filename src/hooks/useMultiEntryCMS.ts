@@ -43,7 +43,9 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`Backend fetch error: ${response.status} - ${errorText}`);
+        throw new Error(`Failed to fetch ${endpoint}: ${response.statusText} - ${errorText}`);
       }
       
       const data = await response.json();
@@ -79,6 +81,7 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(`Backend error: ${response.status} - ${errorText}`);
         // Rollback optimistic update on error
         setItems(prev => prev.filter(item => item.id !== tempId));
         throw new Error(`Failed to add ${endpoint.slice(0, -1)}: ${response.statusText} - ${errorText}`);
@@ -115,7 +118,9 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to update ${endpoint.slice(0, -1)}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`Backend error: ${response.status} - ${errorText}`);
+        throw new Error(`Failed to update ${endpoint.slice(0, -1)}: ${response.statusText} - ${errorText}`);
       }
       
       const data = await response.json();
