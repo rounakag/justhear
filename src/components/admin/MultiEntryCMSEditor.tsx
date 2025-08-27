@@ -40,10 +40,25 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleAdd = async () => {
     if (!newItem || Object.keys(newItem).length === 0) return;
     
+    // Validate required fields
+    const errors: Record<string, string> = {};
+    fields.forEach(field => {
+      if (field.required && (!newItem[field.name] || (typeof newItem[field.name] === 'string' && newItem[field.name].trim() === ''))) {
+        errors[field.name] = `${field.label} is required`;
+      }
+    });
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
     setIsAdding(true);
     try {
       await onAdd(newItem);
@@ -189,6 +204,9 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
                 </label>
                 {renderField(field, newItem[field.name], (value) => 
                   setNewItem(prev => ({ ...prev, [field.name]: value }))
+                )}
+                {validationErrors[field.name] && (
+                  <p className="text-red-600 text-sm mt-1">{validationErrors[field.name]}</p>
                 )}
               </div>
             ))}

@@ -62,6 +62,11 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
     try {
       setError(null);
       
+      // Optimistic update - add item immediately with temporary ID
+      const tempId = `temp-${Date.now()}`;
+      const optimisticItem = { ...item, id: tempId };
+      setItems(prev => [...prev, optimisticItem]);
+      
       const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}`;
       
       const response = await fetch(url, {
@@ -74,6 +79,8 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       
       if (!response.ok) {
         const errorText = await response.text();
+        // Rollback optimistic update on error
+        setItems(prev => prev.filter(item => item.id !== tempId));
         throw new Error(`Failed to add ${endpoint.slice(0, -1)}: ${response.statusText} - ${errorText}`);
       }
       
@@ -81,8 +88,11 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
       const newItem = extractItemFromResponse(data, endpoint);
       
       if (newItem) {
-        setItems(prev => [...prev, newItem]);
+        // Replace optimistic item with real item
+        setItems(prev => prev.map(item => item.id === tempId ? newItem : item));
       } else {
+        // Rollback optimistic update on error
+        setItems(prev => prev.filter(item => item.id !== tempId));
         throw new Error('Failed to get new item from response');
       }
     } catch (err) {
@@ -125,21 +135,27 @@ export function useMultiEntryCMS(endpoint: string): UseMultiEntryCMSReturn {
     try {
       setError(null);
       
+      // Optimistic update - remove item immediately
+      const itemToDelete = items.find(item => item.id === id);
+      setItems(prev => prev.filter(item => item.id !== id));
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/${endpoint}/${id}`, {
         method: 'DELETE',
       });
       
       if (!response.ok) {
+        // Rollback optimistic update on error
+        if (itemToDelete) {
+          setItems(prev => [...prev, itemToDelete]);
+        }
         throw new Error(`Failed to delete ${endpoint.slice(0, -1)}: ${response.statusText}`);
       }
-      
-      setItems(prev => prev.filter(item => item.id !== id));
     } catch (err) {
       console.error(`Error deleting ${endpoint.slice(0, -1)}:`, err);
       setError(err instanceof Error ? err.message : 'Failed to delete item');
       throw err;
     }
-  }, [endpoint]);
+  }, [endpoint, items]);
 
   const refreshItems = useCallback(async () => {
     await fetchItems();
