@@ -1,29 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <!-- Background circle with gradient -->
+  <!-- Professional gradient background -->
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
     </linearGradient>
   </defs>
   
-  <!-- Main background circle -->
-  <circle cx="16" cy="16" r="15" fill="url(#bgGradient)" stroke="#3730A3" stroke-width="1"/>
+  <!-- Clean background circle -->
+  <circle cx="16" cy="16" r="16" fill="url(#bgGradient)"/>
   
-  <!-- Ear shape - simplified and more elegant -->
-  <path d="M10 10 C10 8, 12 6, 16 6 C20 6, 22 8, 22 10 C22 12, 20 14, 16 14 C12 14, 10 12, 10 10 Z" fill="white" opacity="0.95"/>
-  
-  <!-- Inner ear detail -->
-  <path d="M12 10 C12 9, 13 8, 16 8 C19 8, 20 9, 20 10 C20 11, 19 12, 16 12 C13 12, 12 11, 12 10 Z" fill="#4F46E5"/>
-  
-  <!-- Heart symbol - positioned below ear -->
-  <path d="M16 20 C16 20, 14 18, 12 18 C10 18, 8 20, 8 22 C8 24, 10 26, 12 26 C14 26, 16 24, 16 22 C16 24, 18 26, 20 26 C22 26, 24 24, 24 22 C24 20, 22 18, 20 18 C18 18, 16 20, 16 20 Z" fill="#EF4444"/>
-  
-  <!-- Sound waves - more subtle and elegant -->
-  <path d="M24 10 Q26 10, 26 12 Q26 14, 24 14" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
-  <path d="M26 8 Q28 8, 28 10 Q28 12, 26 12" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
-  
-  <!-- Small decorative dots -->
-  <circle cx="6" cy="8" r="1" fill="white" opacity="0.7"/>
-  <circle cx="26" cy="6" r="1" fill="white" opacity="0.7"/>
+  <!-- Professional "J" letter -->
+  <text x="16" y="22" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">J</text>
 </svg>
