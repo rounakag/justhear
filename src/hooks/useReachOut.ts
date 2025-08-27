@@ -22,8 +22,11 @@ export function useReachOut() {
         setError(null);
         
         const url = `${import.meta.env.VITE_API_URL || 'https://justhear-backend.onrender.com'}/api/cms/reachout`;
+        console.log('🔍 DEBUG - Fetching from URL:', url);
         
         const response = await fetch(url);
+        console.log('🔍 DEBUG - Response status:', response.status);
+        console.log('🔍 DEBUG - Response ok:', response.ok);
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -34,7 +37,19 @@ export function useReachOut() {
         const data = await response.json();
         console.log('🔍 DEBUG - Raw API response:', data);
         
-        const reachoutItems = data.reachout || data.items || [];
+        // Try different possible response formats
+        let reachoutItems = [];
+        if (data.reachout) {
+          reachoutItems = data.reachout;
+        } else if (data.items) {
+          reachoutItems = data.items;
+        } else if (Array.isArray(data)) {
+          reachoutItems = data;
+        } else {
+          console.error('🔍 DEBUG - Unexpected API response format:', data);
+          reachoutItems = [];
+        }
+        
         console.log('🔍 DEBUG - Extracted items:', reachoutItems);
         
         // Sort by sort_order

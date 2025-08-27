@@ -294,11 +294,11 @@ export const MultiEntryCMSEditor: React.FC<MultiEntryCMSEditorProps> = ({
                         <span className="text-sm font-medium text-gray-500">{field.label}:</span>
                         <div className="text-sm text-gray-900">
                           {field.type === 'checkbox' ? (
-                            item[field.name] ? 'Yes' : 'No'
+                            item?.[field.name] ? 'Yes' : 'No'
                           ) : field.type === 'array' ? (
-                            Array.isArray(item[field.name]) ? item[field.name].join(', ') : item[field.name]
+                            Array.isArray(item?.[field.name]) ? item[field.name].join(', ') : item?.[field.name]
                           ) : (
-                            item[field.name] || '-'
+                            item?.[field.name] || '-'
                           )}
                         </div>
                       </div>

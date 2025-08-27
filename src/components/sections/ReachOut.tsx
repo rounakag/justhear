@@ -23,21 +23,32 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
   // Debug logging
   console.log('🔍 DEBUG - useReachOut items:', items);
   console.log('🔍 DEBUG - items length:', items.length);
+  console.log('🔍 DEBUG - items type:', typeof items);
   
   // Use CMS data or fallback to hardcoded data
-  const data = feelings ?? (items.length > 0 ? items.map(item => ({
-    id: item.id,
-    emoji: item.emoji,
-    text: item.title,
-    category: "emotion"
-  })) : [
-    { id: "1", emoji:"😔", text:"Nobody is mine… it's my fault.", category: "loneliness" },
-    { id: "2", emoji:"🤔", text:"Am I really that wrong about everything?", category: "doubt" },
-    { id: "3", emoji:"🤗", text:"I wish someone could hug me until my soul melts.", category: "comfort" },
-    { id: "4", emoji:"😢", text:"Life took something that stole my smile.", category: "sadness" },
-    { id: "5", emoji:"😞", text:"I no longer want to prove I'm right.", category: "resignation" },
-    { id: "6", emoji:"😤", text:"Nobody apologized; they blamed me for reacting.", category: "frustration" },
-  ]);
+  let data;
+  if (feelings) {
+    data = feelings;
+    console.log('🔍 DEBUG - Using provided feelings data');
+  } else if (items && items.length > 0) {
+    data = items.map(item => ({
+      id: item.id,
+      emoji: item.emoji,
+      text: item.title,
+      category: "emotion"
+    }));
+    console.log('🔍 DEBUG - Using CMS data:', data);
+  } else {
+    data = [
+      { id: "1", emoji:"😔", text:"Nobody is mine… it's my fault.", category: "loneliness" },
+      { id: "2", emoji:"🤔", text:"Am I really that wrong about everything?", category: "doubt" },
+      { id: "3", emoji:"🤗", text:"I wish someone could hug me until my soul melts.", category: "comfort" },
+      { id: "4", emoji:"😢", text:"Life took something that stole my smile.", category: "sadness" },
+      { id: "5", emoji:"😞", text:"I no longer want to prove I'm right.", category: "resignation" },
+      { id: "6", emoji:"😤", text:"Nobody apologized; they blamed me for reacting.", category: "frustration" },
+    ];
+    console.log('🔍 DEBUG - Using fallback hardcoded data');
+  }
 
   /* -----  DESKTOP (≥md)  ----- */
   const desktop = (
