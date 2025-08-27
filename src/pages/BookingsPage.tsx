@@ -185,7 +185,7 @@ export const BookingsPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="font-bold text-lg md:text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              JustHear
+              justhear.me
             </Link>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">Welcome, {user.username}</span>
