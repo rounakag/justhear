@@ -4,8 +4,7 @@ import { useDynamicContent } from "@/hooks/useDynamicContent";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface ReachOutProps {
-  /* Pass a custom list if you need more/other boxes */
-  feelings?: any[];
+  /* No props needed - uses CMS data only */
 }
 
 /**
@@ -13,7 +12,7 @@ interface ReachOutProps {
  * • Any number of feelings is automatically spaced around a circle.
  * • Centre badge stays in the middle.
  */
-export const ReachOut = ({ feelings }: ReachOutProps) => {
+export const ReachOut = ({}: ReachOutProps) => {
   const { items, loading, error } = useReachOut();
   const { getContent } = useDynamicContent();
   
@@ -25,30 +24,16 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
   console.log('🔍 DEBUG - items length:', items.length);
   console.log('🔍 DEBUG - items type:', typeof items);
   
-  // Use CMS data or fallback to hardcoded data
-  let data;
-  if (items && items.length > 0) {
-    data = items.map(item => ({
-      id: item.id,
-      emoji: item.emoji,
-      text: item.title,
-      category: "emotion"
-    }));
-    console.log('🔍 DEBUG - Using CMS data:', data);
-  } else if (feelings) {
-    data = feelings;
-    console.log('🔍 DEBUG - Using provided feelings data');
-  } else {
-    data = [
-      { id: "1", emoji:"😔", text:"Nobody is mine… it's my fault.", category: "loneliness" },
-      { id: "2", emoji:"🤔", text:"Am I really that wrong about everything?", category: "doubt" },
-      { id: "3", emoji:"🤗", text:"I wish someone could hug me until my soul melts.", category: "comfort" },
-      { id: "4", emoji:"😢", text:"Life took something that stole my smile.", category: "sadness" },
-      { id: "5", emoji:"😞", text:"I no longer want to prove I'm right.", category: "resignation" },
-      { id: "6", emoji:"😤", text:"Nobody apologized; they blamed me for reacting.", category: "frustration" },
-    ];
-    console.log('🔍 DEBUG - Using fallback hardcoded data');
-  }
+  // Use ONLY CMS data - no fallbacks
+  const data = items && items.length > 0 ? items.map(item => ({
+    id: item.id,
+    emoji: item.emoji,
+    text: item.title,
+    category: "emotion"
+  })) : [];
+  
+  console.log('🔍 DEBUG - Final data array:', data);
+  console.log('🔍 DEBUG - Data length:', data.length);
 
   /* -----  DESKTOP (≥md)  ----- */
   const desktop = (
@@ -116,7 +101,20 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
   // Show error state
   if (error) {
     console.error('ReachOut component error:', error);
-    // Fallback to hardcoded data on error
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Error loading content. Please try again later.
+      </div>
+    );
+  }
+
+  // Show message when no data
+  if (!loading && data.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No content available. Please add content through the admin panel.
+      </div>
+    );
   }
 
   return (
