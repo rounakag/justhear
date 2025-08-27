@@ -23,7 +23,7 @@ export function Testimonials() {
         
         {/* Enhanced container with improved spacing */}
         <div className="relative">
-          <div className="flex md:grid md:grid-cols-4 gap-6 md:gap-8 overflow-x-auto scrollbar-hide snap-x md:snap-none pb-8 md:pb-0 px-2">
+          <div className="flex md:grid md:grid-cols-4 gap-8 md:gap-10 overflow-x-auto scrollbar-hide snap-x md:snap-none pb-8 md:pb-0 px-4 md:px-6">
             {TESTIMONIALS.map((t, i) => (
               <div
                 key={i}
