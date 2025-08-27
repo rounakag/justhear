@@ -151,8 +151,7 @@ export const CMS_SECTIONS: CMSSection[] = [
           {
           section: 'examples',
           fields: [
-            { name: 'title', label: 'Reach Out Section Title', type: 'text', required: true },
-            { name: 'central_card_text', label: 'Central Card Text', type: 'text', required: true }
+            { name: 'title', label: 'Reach Out Section Title', type: 'text', required: true }
           ]
         },
   {
