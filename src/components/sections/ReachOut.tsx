@@ -27,10 +27,7 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
   
   // Use CMS data or fallback to hardcoded data
   let data;
-  if (feelings) {
-    data = feelings;
-    console.log('🔍 DEBUG - Using provided feelings data');
-  } else if (items && items.length > 0) {
+  if (items && items.length > 0) {
     data = items.map(item => ({
       id: item.id,
       emoji: item.emoji,
@@ -38,6 +35,9 @@ export const ReachOut = ({ feelings }: ReachOutProps) => {
       category: "emotion"
     }));
     console.log('🔍 DEBUG - Using CMS data:', data);
+  } else if (feelings) {
+    data = feelings;
+    console.log('🔍 DEBUG - Using provided feelings data');
   } else {
     data = [
       { id: "1", emoji:"😔", text:"Nobody is mine… it's my fault.", category: "loneliness" },
