@@ -37,14 +37,14 @@ export const ReachOut = ({}: ReachOutProps) => {
       {/* Service-focused grid layout */}
       <div className="grid grid-cols-3 gap-8 px-8">
         {data.map((f, i) => {
-          // Subtle gradient colors
+          // Very light gradient colors
           const gradients = [
-            'from-blue-50 to-blue-100/50',
-            'from-purple-50 to-purple-100/50', 
-            'from-emerald-50 to-emerald-100/50',
-            'from-amber-50 to-amber-100/50',
-            'from-rose-50 to-rose-100/50',
-            'from-violet-50 to-violet-100/50'
+            'from-blue-50 to-blue-50/80',
+            'from-purple-50 to-purple-50/80', 
+            'from-emerald-50 to-emerald-50/80',
+            'from-amber-50 to-amber-50/80',
+            'from-rose-50 to-rose-50/80',
+            'from-violet-50 to-violet-50/80'
           ];
           const gradient = gradients[i % gradients.length];
           
@@ -62,22 +62,18 @@ export const ReachOut = ({}: ReachOutProps) => {
                              border border-white/80 relative overflow-hidden
                              group-hover:border-blue-200/60`}>
                 
-                              {/* Very subtle background pattern */}
-              <div className="absolute inset-0 opacity-3">
-                <div className="absolute top-4 right-4 w-12 h-12 bg-blue-300 rounded-full"></div>
-                <div className="absolute bottom-4 left-4 w-8 h-8 bg-purple-300 rounded-full"></div>
-              </div>
+                              {/* Removed corner bubbles for cleaner design */}
                 
                 {/* Card content */}
                 <div className="relative z-10 px-6 py-8">
-                  {/* Emoji with enhanced styling */}
-                  <div className="text-6xl mb-4 drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
+                  {/* Smaller emoji */}
+                  <div className="text-4xl mb-4 drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
                     {f.emoji}
                   </div>
                   
-                  {/* Service-focused text */}
+                  {/* Larger content text */}
                   <div className="space-y-2">
-                    <p className="text-sm leading-relaxed text-gray-600 font-medium">
+                    <p className="text-base leading-relaxed text-gray-700 font-medium">
                       {f.text}
                     </p>
                   </div>
@@ -99,14 +95,14 @@ export const ReachOut = ({}: ReachOutProps) => {
     <div className="md:hidden flex gap-6 overflow-x-auto py-6 px-4
                     snap-x scrollbar-hide">
       {data.map((f,i) => {
-        // Subtle gradient colors for mobile
+        // Very light gradient colors for mobile
         const gradients = [
-          'from-blue-50 to-blue-100/50',
-          'from-purple-50 to-purple-100/50', 
-          'from-emerald-50 to-emerald-100/50',
-          'from-amber-50 to-amber-100/50',
-          'from-rose-50 to-rose-100/50',
-          'from-violet-50 to-violet-100/50'
+          'from-blue-50 to-blue-50/80',
+          'from-purple-50 to-purple-50/80', 
+          'from-emerald-50 to-emerald-50/80',
+          'from-amber-50 to-amber-50/80',
+          'from-rose-50 to-rose-50/80',
+          'from-violet-50 to-violet-50/80'
         ];
         const gradient = gradients[i % gradients.length];
         
@@ -119,21 +115,17 @@ export const ReachOut = ({}: ReachOutProps) => {
                           transition-all duration-300 ease-out
                           border border-white/80 relative overflow-hidden group`}>
             
-            {/* Very subtle background pattern for mobile */}
-            <div className="absolute inset-0 opacity-3">
-              <div className="absolute top-3 right-3 w-8 h-8 bg-blue-300 rounded-full"></div>
-              <div className="absolute bottom-3 left-3 w-6 h-6 bg-purple-300 rounded-full"></div>
-            </div>
+            {/* Removed corner bubbles for cleaner mobile design */}
             
             {/* Card content */}
             <div className="relative z-10">
-              <div className="text-5xl mb-4 drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
+              <div className="text-4xl mb-4 drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
                 {f.emoji}
               </div>
               
-              {/* Service-focused text for mobile */}
+              {/* Larger content text for mobile */}
               <div className="space-y-2">
-                <p className="text-sm leading-relaxed text-gray-600 font-medium">
+                <p className="text-base leading-relaxed text-gray-700 font-medium">
                   {f.text}
                 </p>
               </div>
