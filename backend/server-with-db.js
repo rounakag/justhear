@@ -482,29 +482,13 @@ app.post('/api/slots', validateSlotData, async (req, res, next) => {
       };
       console.log('🔍 DEBUG - Using provided meeting link:', meetingLinkData);
     } else {
-      // Generate demo meeting link
-      try {
-        const meetingDetails = await meetingService.generateGoogleMeetLink({
-          slot,
-          userId: 'admin'
-        });
-        
-        meetingLinkData = {
-          meeting_link: meetingDetails.meetingLink,
-          meeting_id: meetingDetails.meetingId,
-          meeting_provider: meetingDetails.meetingProvider
-        };
-        console.log('🔍 DEBUG - Generated demo meeting link:', meetingLinkData);
-      } catch (meetingError) {
-        console.warn('Meeting link generation failed:', meetingError);
-        // Create a fallback demo link
-        meetingLinkData = {
-          meeting_link: `https://demo.justhear.com/meeting/demo-${slot.id}`,
-          meeting_id: `demo-${slot.id.substring(0, 8)}`,
-          meeting_provider: 'justhear_demo'
-        };
-        console.log('🔍 DEBUG - Using fallback demo meeting link:', meetingLinkData);
-      }
+      // Create a simple demo link without using meeting service
+      meetingLinkData = {
+        meeting_link: `https://demo.justhear.com/meeting/demo-${slot.id}`,
+        meeting_id: `demo-${slot.id.substring(0, 8)}`,
+        meeting_provider: 'justhear_demo'
+      };
+      console.log('🔍 DEBUG - Created simple demo meeting link:', meetingLinkData);
     }
     
     // Update slot with meeting link data
