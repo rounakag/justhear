@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/design-system/components';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
@@ -42,10 +42,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Admin Login</DialogTitle>
-        </DialogHeader>
+              <DialogContent className="sm:max-w-md" aria-describedby="admin-login-description">
+          <DialogHeader>
+            <DialogTitle>Admin Login</DialogTitle>
+            <DialogDescription id="admin-login-description">
+              Enter your admin credentials to access the admin dashboard.
+            </DialogDescription>
+          </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

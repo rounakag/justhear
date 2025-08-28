@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button/button';
 
 interface TermsAndConditionsProps {
@@ -17,11 +17,14 @@ export function TermsAndConditions({
 }: TermsAndConditionsProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" aria-describedby="terms-description">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-800">
             {title}
           </DialogTitle>
+          <DialogDescription id="terms-description">
+            Please read and accept our terms and conditions before proceeding.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 text-sm text-gray-700 leading-relaxed">

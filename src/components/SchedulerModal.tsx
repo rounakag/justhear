@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button/button";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth.tsx";
 import { TermsAndConditions } from "./TermsAndConditions";
 // Removed unused import: apiService
@@ -157,9 +157,12 @@ export function SchedulerModal({ triggerClassName, children, onOpen }: Scheduler
       </DialogTrigger>
       
       {user && (
-        <DialogContent className="max-w-lg w-full p-0 max-h-[90vh] overflow-y-auto">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl py-6 px-7 flex flex-col items-center">
-            <DialogTitle className="text-xl font-bold">🎧 Book Your Session</DialogTitle>
+        <DialogContent className="max-w-lg w-full p-0 max-h-[90vh] overflow-y-auto" aria-describedby="scheduler-description">
+                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl py-6 px-7 flex flex-col items-center">
+              <DialogTitle className="text-xl font-bold">🎧 Book Your Session</DialogTitle>
+              <DialogDescription id="scheduler-description" className="text-blue-100 mt-2">
+                Choose a time slot that works best for you to connect with a listener.
+              </DialogDescription>
             <p className="text-blue-100">Choose your preferred date and time</p>
           </div>
           

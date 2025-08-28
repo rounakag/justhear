@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 import { useAdminSlots } from '@/hooks/useAdminSlots';
 import type { BulkSlotCreation, Listener, RecurringSchedule } from '@/types/admin.types';
@@ -165,9 +165,12 @@ export const BulkSlotCreator: React.FC<BulkSlotCreatorProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby="bulk-slot-description">
         <DialogHeader>
           <DialogTitle>Bulk Create Time Slots</DialogTitle>
+          <DialogDescription id="bulk-slot-description">
+            Create multiple time slots at once by specifying date range, days of the week, and time slots.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
