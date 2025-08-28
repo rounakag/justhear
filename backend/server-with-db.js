@@ -438,10 +438,26 @@ app.post('/api/slots', validateSlotData, async (req, res, next) => {
     const slotData = req.body;
     console.log('🔍 DEBUG - Received slot data:', slotData);
     
+    // Get system user ID for overlap checking
+    let systemUserId = '55f0d229-16eb-48db-8bfe-e817a7dee807'; // Default fallback
+    try {
+      const { data: systemUser, error: systemError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', 'system')
+        .single();
+      
+      if (!systemError && systemUser) {
+        systemUserId = systemUser.id;
+      }
+    } catch (error) {
+      console.log('🔍 DEBUG - Using fallback system user ID');
+    }
+    
     // Check for overlapping slots
     const existingSlots = await databaseService.getSlotsByDateAndListener(
       slotData.date,
-      slotData.listenerId || 'system'
+      slotData.listenerId || systemUserId
     );
     
     const hasOverlap = existingSlots.some(slot => {

@@ -57,21 +57,26 @@ class DatabaseService {
 
   // Time Slots Management
   async createTimeSlot(slotData) {
-    console.log('Database service creating slot with data:', slotData);
+    console.log('🔍 DEBUG - Database service creating slot with data:', slotData);
     
-    const { data, error } = await supabase
-      .from('time_slots')
-      .insert([slotData])
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Supabase error creating slot:', error);
-      throw new Error(`Database error: ${error.message} (${error.code})`);
+    try {
+      const { data, error } = await supabase
+        .from('time_slots')
+        .insert([slotData])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('🔍 DEBUG - Supabase error creating slot:', error);
+        throw new Error(`Database error: ${error.message} (${error.code})`);
+      }
+      
+      console.log('🔍 DEBUG - Slot created successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('🔍 DEBUG - Exception in createTimeSlot:', error);
+      throw error;
     }
-    
-    console.log('Slot created successfully:', data);
-    return data;
   }
 
   async getAvailableSlots(page = 1, limit = 50) {
@@ -1123,6 +1128,8 @@ class DatabaseService {
 
   async getSlotsByDateAndListener(date, listenerId) {
     try {
+      console.log('🔍 DEBUG - Getting slots for date:', date, 'listenerId:', listenerId);
+      
       const { data, error } = await supabase
         .from('time_slots')
         .select('*')
@@ -1130,7 +1137,12 @@ class DatabaseService {
         .eq('listener_id', listenerId)
         .order('start_time', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('🔍 DEBUG - Database error in getSlotsByDateAndListener:', error);
+        throw error;
+      }
+      
+      console.log('🔍 DEBUG - Found slots:', data?.length || 0);
       return data || [];
     } catch (error) {
       console.error('Error getting slots by date and listener:', error);
