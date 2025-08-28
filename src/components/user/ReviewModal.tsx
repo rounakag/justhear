@@ -69,26 +69,44 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ session, onSubmit, onC
   };
 
   const renderStars = (currentRating: number, interactive = true) => {
+    const getRatingText = (rating: number) => {
+      switch (rating) {
+        case 1: return 'Poor';
+        case 2: return 'Fair';
+        case 3: return 'Good';
+        case 4: return 'Very Good';
+        case 5: return 'Excellent';
+        default: return 'Rate your experience';
+      }
+    };
+
     return (
-      <div className="flex items-center space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            disabled={!interactive}
-            onClick={() => interactive && setRating(star)}
-            className={`w-8 h-8 ${
-              star <= currentRating ? 'text-yellow-400' : 'text-gray-300'
-            } ${interactive ? 'hover:text-yellow-300 transition-colors' : ''}`}
-          >
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          </button>
-        ))}
-        <span className="text-sm text-gray-600 ml-2">
-          {rating} out of 5 stars
-        </span>
+      <div className="space-y-3">
+        <div className="flex items-center space-x-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              disabled={!interactive}
+              onClick={() => interactive && setRating(star)}
+              className={`w-10 h-10 ${
+                star <= currentRating ? 'text-yellow-400' : 'text-gray-300'
+              } ${interactive ? 'hover:text-yellow-300 hover:scale-110 transition-all duration-200' : ''}`}
+            >
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </button>
+          ))}
+        </div>
+        <div className="text-center">
+          <span className="text-lg font-semibold text-gray-800">
+            {getRatingText(currentRating)}
+          </span>
+          <span className="text-sm text-gray-600 ml-2">
+            ({currentRating} out of 5 stars)
+          </span>
+        </div>
       </div>
     );
   };
@@ -100,8 +118,9 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ session, onSubmit, onC
         <Dialog.Content className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-                             <Dialog.Title className="text-xl font-semibold text-gray-900 mb-4">
-                 {session.review ? 'Edit Your Review' : 'Review Your Session'}
+                             <Dialog.Title className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                 <span className="text-2xl">⭐</span>
+                 <span>{session.review ? 'Edit Your Review' : 'Rate & Review Your Session'}</span>
                </Dialog.Title>
 
               {/* Session Info */}
@@ -126,7 +145,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ session, onSubmit, onC
                 {/* Rating */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    How would you rate your session?
+                    ⭐ How would you rate your session experience?
                   </label>
                   {renderStars(rating, true)}
                 </div>
