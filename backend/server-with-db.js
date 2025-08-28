@@ -690,6 +690,8 @@ app.post('/api/bookings', async (req, res) => {
   try {
     const { userId, slotId } = req.body;
     
+    console.log('🔍 DEBUG - Booking request received:', { userId, slotId });
+    
     // Get slot details directly from database
     const { data: slot, error: slotError } = await supabase
       .from('time_slots')
@@ -699,12 +701,11 @@ app.post('/api/bookings', async (req, res) => {
       .single();
     
     if (slotError || !slot) {
+      console.error('Slot not found:', slotError);
       return res.status(404).json({ error: 'Slot not found or not available' });
     }
     
-    if (!slot) {
-      return res.status(404).json({ error: 'Slot not found or not available' });
-    }
+    console.log('🔍 DEBUG - Slot found:', { id: slot.id, status: slot.status, listener_id: slot.listener_id });
 
     // For now, use the listener_id from the slot as the user_id
     // This is a temporary fix until we have proper user management
@@ -732,6 +733,8 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(500).json({ error: 'Failed to create booking', details: bookingError.message });
     }
 
+    console.log('🔍 DEBUG - Booking created successfully:', booking);
+
     // Update slot status to booked
     const { error: updateError } = await supabase
       .from('time_slots')
@@ -742,6 +745,8 @@ app.post('/api/bookings', async (req, res) => {
       console.error('Error updating slot status:', updateError);
       return res.status(500).json({ error: 'Failed to update slot status' });
     }
+
+    console.log('🔍 DEBUG - Slot status updated to booked');
 
     res.status(201).json({
       message: 'Booking created successfully',
@@ -754,7 +759,7 @@ app.post('/api/bookings', async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating booking:', error);
-    res.status(500).json({ error: 'Failed to create booking' });
+    res.status(500).json({ error: 'Failed to create booking', details: error.message });
   }
 });
 
