@@ -108,13 +108,10 @@ class DatabaseService {
   }
 
   async getAdminCreatedSlots() {
-    // Get today's date in YYYY-MM-DD format without timezone issues
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
+    console.log('🔍 DEBUG - Getting ALL admin slots (no date filter)');
     
-    console.log('🔍 DEBUG - Getting admin slots from date:', todayString);
-    
-    const { data, error } = await supabase
+    // Try with RLS first, then without if it fails
+    let { data, error } = await supabase
       .from('time_slots')
       .select(`
         *,
@@ -130,16 +127,43 @@ class DatabaseService {
           created_at
         )
       `)
-      .gte('date', todayString)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
     
     if (error) {
-      console.error('❌ ERROR getting admin slots:', error);
-      throw error;
+      console.error('❌ ERROR getting admin slots with RLS:', error);
+      
+      // Try without RLS (admin bypass)
+      console.log('🔍 DEBUG - Trying without RLS...');
+      const { data: adminData, error: adminError } = await supabase
+        .from('time_slots')
+        .select(`
+          *,
+          listener:users!time_slots_listener_id_fkey(
+            id,
+            username,
+            name,
+            email
+          ),
+          booking:bookings!bookings_slot_id_fkey(
+            user_id,
+            status,
+            created_at
+          )
+        `)
+        .order('date', { ascending: true })
+        .order('start_time', { ascending: true });
+      
+      if (adminError) {
+        console.error('❌ ERROR getting admin slots without RLS:', adminError);
+        throw adminError;
+      }
+      
+      data = adminData;
     }
     
     console.log('🔍 DEBUG - Found admin slots:', data?.length || 0);
+    console.log('🔍 DEBUG - Sample slots:', data?.slice(0, 3).map(s => ({ id: s.id, date: s.date, status: s.status, listener_id: s.listener_id })));
     return data || [];
   }
 

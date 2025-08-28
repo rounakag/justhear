@@ -203,6 +203,12 @@ app.get('/api/slots/admin-created', async (req, res) => {
     const slots = await databaseService.getAdminCreatedSlots();
     
     console.log('🔍 DEBUG - Retrieved', slots.length, 'admin-created slots');
+    console.log('🔍 DEBUG - Sample slots:', slots?.slice(0, 3).map(s => ({ 
+      id: s.id, 
+      date: s.date, 
+      status: s.status, 
+      listener_id: s.listener_id 
+    })));
     
     res.json({
       slots,
