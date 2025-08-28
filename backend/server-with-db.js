@@ -333,19 +333,20 @@ app.post('/api/slots', async (req, res) => {
     console.log('Received slot data:', slotData);
     
     // Validate required fields
-    if (!slotData.date || !slotData.startTime || !slotData.endTime || !slotData.listenerId) {
+    if (!slotData.date || !slotData.startTime || !slotData.endTime) {
       return res.status(400).json({ 
-        error: 'Missing required fields: date, startTime, endTime, listenerId' 
+        error: 'Missing required fields: date, startTime, endTime' 
       });
     }
     
     // Transform data to match database schema
+    // Admin creates unassigned slots - listener_id is null until booked
     const transformedData = {
       date: slotData.date,
       start_time: slotData.startTime,
       end_time: slotData.endTime,
       status: 'created',
-      listener_id: slotData.listenerId,
+      listener_id: null, // Start as unassigned - will be assigned when booked
       duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
     };
     
@@ -626,8 +627,20 @@ app.post('/api/bookings', async (req, res) => {
 
     const booking = await databaseService.createBooking(bookingData);
 
-    // Update slot status to booked
-    await databaseService.updateSlotStatus(slotId, 'booked');
+    // Update slot status to booked and assign a listener
+    // For now, assign the first available listener (in production, this would be more sophisticated)
+    const listeners = await databaseService.getListeners();
+    const availableListener = listeners.find(l => l.role === 'listener');
+    
+    if (availableListener) {
+      await databaseService.updateSlotAssignment(slotId, {
+        status: 'booked',
+        listener_id: availableListener.id
+      });
+    } else {
+      // If no listeners available, just update status
+      await databaseService.updateSlotStatus(slotId, 'booked');
+    }
 
     // Send meeting details (in production, this would be email/SMS)
     await meetingService.sendMeetingDetails(booking, meetingDetails);

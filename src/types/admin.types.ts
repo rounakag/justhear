@@ -9,7 +9,7 @@ export interface TimeSlot {
   isAvailable?: boolean;
   isBooked?: boolean;
   status: 'created' | 'booked' | 'completed';
-  listenerId: string; // Mandatory listener assignment
+  listenerId?: string; // Optional - null for unassigned slots
   listenerName?: string; // For display purposes
   listenerEmail?: string; // For display purposes
   createdAt?: string;
@@ -88,7 +88,6 @@ export interface BulkSlotCreation {
   startTime: string;
   endTime: string;
   duration: number;
-  listenerId: string; // Mandatory listener assignment
 }
 
 export interface SlotEditorData {
@@ -96,7 +95,6 @@ export interface SlotEditorData {
   date: string;
   startTime: string;
   endTime: string;
-  listenerId: string; // Mandatory listener assignment
   isAvailable: boolean;
 }
 

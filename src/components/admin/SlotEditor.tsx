@@ -38,7 +38,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
     date: '',
     startTime: '',
     endTime: '',
-    listenerId: '',
     isAvailable: true,
   });
   const [existingSlots, setExistingSlots] = useState<TimeSlot[]>([]);
@@ -60,7 +59,6 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         date: now.toISOString().split('T')[0],
         startTime: '09:00',
         endTime: '10:00',
-        listenerId: listeners.length > 0 ? listeners[0].id : '',
         isAvailable: true,
       });
     }
@@ -90,9 +88,8 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
       newErrors.endTime = 'End time is required';
     }
 
-    if (!formData.listenerId) {
-      newErrors.listenerId = 'Listener assignment is required';
-    }
+    // Note: Listener assignment is not required for slot creation
+    // Slots are created unassigned and get assigned when booked
 
     // Check if selected time is in the past for today's date
     if (formData.date && formData.startTime) {
@@ -244,30 +241,25 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
             </div>
           </div>
 
-          {/* Listener Assignment */}
-          <div>
-            <label htmlFor="listenerId" className="block text-sm font-medium text-gray-700 mb-1">
-              Assign Listener *
-            </label>
-            <select
-              id="listenerId"
-              value={formData.listenerId}
-              onChange={(e) => handleInputChange('listenerId', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.listenerId ? 'border-red-500' : 'border-gray-300'
-              }`}
-            >
-              <option value="">Select a listener</option>
-              {listeners.map((listener) => (
-                <option key={listener.id} value={listener.id}>
-                  {listener.name || listener.username} - {listener.role || 'Listener'}
-                </option>
-              ))}
-            </select>
-            {errors.listenerId && <p className="text-red-500 text-sm mt-1">{errors.listenerId}</p>}
-            <p className="text-sm text-gray-500 mt-1">
-              {formData.listenerId ? '✅ Listener assigned - slot will be visible to users' : '⚠️ Listener assignment is required'}
-            </p>
+          {/* Slot Information */}
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Slot Creation Info
+                </h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>✅ Slots are created as unassigned and will be visible to users</p>
+                  <p>✅ A listener will be automatically assigned when a user books the slot</p>
+                  <p>✅ Once booked, the slot will no longer be visible to other users</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Existing Slots Warning */}

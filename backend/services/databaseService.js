@@ -93,7 +93,7 @@ class DatabaseService {
         )
       `)
       .eq('status', 'created')
-      .not('listener_id', 'is', null) // Only show slots with assigned listeners
+      .is('listener_id', null) // Only show UNASSIGNED slots (no listener assigned yet)
       .gte('date', todayString)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
@@ -279,6 +279,29 @@ class DatabaseService {
     
     if (error) throw error;
     return data;
+  }
+
+  async updateSlotAssignment(slotId, updateData) {
+    const { data, error } = await supabase
+      .from('time_slots')
+      .update(updateData)
+      .eq('id', slotId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async getListeners() {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', 'listener')
+      .eq('is_active', true);
+    
+    if (error) throw error;
+    return data || [];
   }
 
   async updateSlotMeetingLink(slotId, meetingData) {
