@@ -322,13 +322,33 @@ app.get('/api/slots/available', async (req, res) => {
   try {
     console.log('🔍 DEBUG - Fetching all available slots for users');
     
-    const slots = await databaseService.getAvailableSlots();
+    const today = new Date().toISOString().split('T')[0];
     
-    console.log('🔍 DEBUG - Retrieved', slots.length, 'available slots');
+    // Direct query to get all available slots
+    const { data, error } = await supabase
+      .from('time_slots')
+      .select('*')
+      .eq('status', 'created')
+      .gte('date', today)
+      .order('date', { ascending: true })
+      .order('start_time', { ascending: true })
+      .limit(50);
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Transform slots for frontend compatibility
+    const transformedSlots = (data || []).map(slot => ({
+      ...slot,
+      status: 'available' // Always show as available for frontend
+    }));
+    
+    console.log('🔍 DEBUG - Retrieved', transformedSlots.length, 'available slots');
     
     res.json({
-      slots,
-      total: slots.length,
+      slots: transformedSlots,
+      total: transformedSlots.length,
       timestamp: new Date().toISOString(),
       cached: false
     });
