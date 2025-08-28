@@ -202,6 +202,7 @@ class UserService {
 
   async getUserSessions(): Promise<UserSession[]> {
     const bookings = await this.getUserBookings();
+    const reviews = await this.getUserReviews();
     
     return bookings.map(booking => {
       const now = new Date();
@@ -209,9 +210,13 @@ class UserService {
       const timeUntilSession = sessionTime > now ? 
         Math.floor((sessionTime.getTime() - now.getTime()) / (1000 * 60)) : undefined;
       
+      // Find if there's an existing review for this booking
+      const existingReview = reviews.find(review => review.bookingId === booking.id);
+      
       return {
         booking,
-        canReview: booking.status === 'completed',
+        review: existingReview,
+        canReview: booking.status === 'completed', // Allow review for any completed session
         canCancel: (booking.status === 'upcoming' || booking.status === 'confirmed') && timeUntilSession !== undefined && timeUntilSession > 60,
         timeUntilSession,
       };
