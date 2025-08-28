@@ -470,51 +470,32 @@ app.post('/api/slots', validateSlotData, async (req, res, next) => {
     
     const slot = await databaseService.createTimeSlot(transformedData);
     
-    // Handle meeting link - use provided link or generate demo link
-    let meetingLinkData = {};
-    
-    if (slotData.meeting_link && slotData.meeting_link.trim()) {
-      // Use the provided meeting link
-      meetingLinkData = {
-        meeting_link: slotData.meeting_link.trim(),
-        meeting_id: slotData.meeting_id || '',
-        meeting_provider: slotData.meeting_provider || 'google_meet'
-      };
-      console.log('🔍 DEBUG - Using provided meeting link:', meetingLinkData);
-    } else {
-      // Generate demo meeting link
-      try {
-        const meetingDetails = await meetingService.generateGoogleMeetLink({
-          slot,
-          userId: 'admin'
-        });
-        
-        meetingLinkData = {
-          meeting_link: meetingDetails.meetingLink,
-          meeting_id: meetingDetails.meetingId,
-          meeting_provider: meetingDetails.meetingProvider
-        };
-        console.log('🔍 DEBUG - Generated demo meeting link:', meetingLinkData);
-      } catch (meetingError) {
-        console.warn('Meeting link generation failed:', meetingError);
-        // Create a fallback demo link
-        meetingLinkData = {
-          meeting_link: `https://demo.justhear.com/meeting/demo-${slot.id}`,
-          meeting_id: `demo-${slot.id.substring(0, 8)}`,
-          meeting_provider: 'justhear_demo'
-        };
-        console.log('🔍 DEBUG - Using fallback demo meeting link:', meetingLinkData);
-      }
+    // Try to generate meeting link (non-blocking)
+    try {
+      const meetingDetails = await meetingService.generateGoogleMeetLink({
+        slot,
+        userId: 'admin'
+      });
+      
+      const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, {
+        meeting_link: meetingDetails.meetingLink,
+        meeting_id: meetingDetails.meetingId,
+        meeting_provider: meetingDetails.meetingProvider
+      });
+      
+      res.status(201).json({
+        success: true,
+        message: 'Slot created successfully with meeting link',
+        data: updatedSlot
+      });
+    } catch (meetingError) {
+      console.warn('Meeting link generation failed:', meetingError);
+      res.status(201).json({
+        success: true,
+        message: 'Slot created successfully (meeting link will be added later)',
+        data: slot
+      });
     }
-    
-    // Update slot with meeting link data
-    const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, meetingLinkData);
-    
-    res.status(201).json({
-      success: true,
-      message: 'Slot created successfully with meeting link',
-      data: updatedSlot
-    });
   } catch (error) {
     next(error);
   }
