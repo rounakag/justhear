@@ -695,7 +695,7 @@ app.post('/api/bookings', async (req, res) => {
       .from('time_slots')
       .select('*')
       .eq('id', slotId)
-      .eq('status', 'created')
+      .in('status', ['created', 'available'])
       .single();
     
     if (slotError || !slot) {
