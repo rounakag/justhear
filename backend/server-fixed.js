@@ -87,7 +87,7 @@ app.get('/api/slots/available', async (req, res, next) => {
         *,
         listener:users!time_slots_listener_id_fkey(id, username, email)
       `, { count: 'exact' })
-      .eq('status', 'created')
+      .in('status', ['created', 'available'])
       .gte('date', today)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true })
@@ -98,9 +98,15 @@ app.get('/api/slots/available', async (req, res, next) => {
       throw new APIError('Failed to fetch available slots', 500, 'DATABASE_ERROR');
     }
     
+    // Transform slots to show 'available' status for frontend compatibility
+    const transformedSlots = (data || []).map(slot => ({
+      ...slot,
+      status: slot.status === 'created' ? 'available' : slot.status
+    }));
+    
     res.json({
       success: true,
-      data: data || [],
+      slots: transformedSlots,
       pagination: {
         page,
         limit,
