@@ -8,14 +8,34 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = () => {
-  const { getContent } = useDynamicContent();
+  const { getContent, loading, error } = useDynamicContent();
 
-  // Use CMS content only - no hardcoded fallbacks
-  const heroTitle = getContent('hero', 'title', '');
-  const heroSubtitle = getContent('hero', 'subtitle', '');
-  const heroCtaText = getContent('hero', 'ctaText', '');
-  const heroSecondaryCtaText = getContent('hero', 'secondaryCtaText', '');
-  const heroSecondaryCtaHref = getContent('hero', 'secondaryCtaHref', '');
+  // Use CMS content with fallbacks for demo/production
+  const heroTitle = getContent('hero', 'title', 'JustHear - A Safe Space to Be Heard');
+  const heroSubtitle = getContent('hero', 'subtitle', 'Connect with compassionate listeners who provide a judgment-free space for you to share your thoughts, feelings, and experiences.');
+  const heroCtaText = getContent('hero', 'ctaText', 'Book Your Session');
+  const heroSecondaryCtaText = getContent('hero', 'secondaryCtaText', 'Learn More');
+  const heroSecondaryCtaHref = getContent('hero', 'secondaryCtaHref', '#features');
+
+  // Show loading state to prevent empty container flash
+  if (loading) {
+    return (
+      <section
+        id="top"
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white relative overflow-hidden"
+      >
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white/80">Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Show error state with fallback content
+  if (error) {
+    console.warn('CMS loading error, using fallback content:', error);
+  }
 
   return (
     <section

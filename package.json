@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc && vite build",
     "start": "npx serve -s dist -l $PORT --single",
     "serve": "npx serve -s dist -l $PORT",
     "lint": "eslint .",
