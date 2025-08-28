@@ -706,20 +706,14 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(404).json({ error: 'Slot not found or not available' });
     }
 
-    // Generate meeting link
-    const meetingDetails = await meetingService.generateGoogleMeetLink({
-      slot,
-      userId
-    });
-
-    // Create booking
+    // Create booking with existing meeting details from slot
     const bookingData = {
       user_id: userId,
       slot_id: slotId,
       status: 'confirmed',
-      meeting_link: slot.meeting_link, // Use existing meeting link from slot
-      meeting_id: slot.meeting_id,
-      meeting_provider: slot.meeting_provider
+      meeting_link: slot.meeting_link || null,
+      meeting_id: slot.meeting_id || null,
+      meeting_provider: slot.meeting_provider || 'google_meet'
     };
 
     // Create booking directly
@@ -745,13 +739,14 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(500).json({ error: 'Failed to update slot status' });
     }
 
-    // Send meeting details (in production, this would be email/SMS)
-    await meetingService.sendMeetingDetails(booking, meetingDetails);
-
     res.status(201).json({
       message: 'Booking created successfully',
       booking,
-      meetingDetails
+      meetingDetails: {
+        meetingLink: slot.meeting_link,
+        meetingId: slot.meeting_id,
+        meetingProvider: slot.meeting_provider || 'google_meet'
+      }
     });
   } catch (error) {
     console.error('Error creating booking:', error);
