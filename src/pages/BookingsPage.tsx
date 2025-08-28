@@ -70,13 +70,22 @@ export const BookingsPage: React.FC = () => {
       const data = await response.json();
       console.log('🔍 DEBUG - Available slots data:', data);
       
+      // Handle both old and new response formats
+      let slotsArray: TimeSlot[] = [];
+      
       if (data.slots && Array.isArray(data.slots)) {
-        setAvailableSlots(data.slots as TimeSlot[]);
-        console.log('🔍 DEBUG - Set available slots:', data.slots.length, 'slots');
+        // New format: data.slots is directly an array
+        slotsArray = data.slots as TimeSlot[];
+        console.log('🔍 DEBUG - Using new format, found:', slotsArray.length, 'slots');
+      } else if (data.slots && data.slots.slots && Array.isArray(data.slots.slots)) {
+        // Old format: data.slots.slots is the array
+        slotsArray = data.slots.slots as TimeSlot[];
+        console.log('🔍 DEBUG - Using old format, found:', slotsArray.length, 'slots');
       } else {
         console.log('🔍 DEBUG - No slots found in response:', data);
-        setAvailableSlots([]);
       }
+      
+      setAvailableSlots(slotsArray);
     } catch (error) {
       console.error('❌ ERROR fetching available slots:', error);
       setAvailableSlots([]);
