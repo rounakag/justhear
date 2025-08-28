@@ -39,6 +39,9 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
     startTime: '',
     endTime: '',
     isAvailable: true,
+    meeting_link: '',
+    meeting_id: '',
+    meeting_provider: 'google_meet',
   });
   const [existingSlots, setExistingSlots] = useState<TimeSlot[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -51,6 +54,9 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         endTime: formatTimeForInput(slot.end_time || slot.endTime || ''),
         listenerId: slot.listenerId || '',
         isAvailable: slot.isAvailable || true,
+        meeting_link: slot.meeting_link || '',
+        meeting_id: slot.meeting_id || '',
+        meeting_provider: slot.meeting_provider || 'google_meet',
       });
     } else {
       // Set default values for new slot
@@ -60,6 +66,9 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
         startTime: '09:00',
         endTime: '10:00',
         isAvailable: true,
+        meeting_link: '',
+        meeting_id: '',
+        meeting_provider: 'google_meet',
       });
     }
   }, [slot]);
@@ -238,6 +247,86 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
                 }`}
               />
               {errors.endTime && <p className="text-red-500 text-sm mt-1">{errors.endTime}</p>}
+            </div>
+          </div>
+
+          {/* Meeting Link Information */}
+          <div className="bg-purple-50 border border-purple-200 rounded-md p-3">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                  <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-purple-800">
+                  Meeting Link (Optional)
+                </h3>
+                <div className="mt-2 text-sm text-purple-700">
+                  <p>💡 Add a real meeting link for better PMF testing</p>
+                  <p>💡 Leave empty to use demo meeting link</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Meeting Link Fields */}
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="meeting_link" className="block text-sm font-medium text-gray-700 mb-1">
+                Meeting Link URL
+              </label>
+              <input
+                type="url"
+                id="meeting_link"
+                placeholder="https://meet.google.com/abc-defg-hij or https://zoom.us/j/123456789"
+                value={formData.meeting_link}
+                onChange={(e) => handleInputChange('meeting_link', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter the full meeting URL (Google Meet, Zoom, Teams, etc.)
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="meeting_id" className="block text-sm font-medium text-gray-700 mb-1">
+                  Meeting ID
+                </label>
+                <input
+                  type="text"
+                  id="meeting_id"
+                  placeholder="abc-defg-hij"
+                  value={formData.meeting_id}
+                  onChange={(e) => handleInputChange('meeting_id', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Meeting identifier (optional)
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="meeting_provider" className="block text-sm font-medium text-gray-700 mb-1">
+                  Meeting Provider
+                </label>
+                <select
+                  id="meeting_provider"
+                  value={formData.meeting_provider}
+                  onChange={(e) => handleInputChange('meeting_provider', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="google_meet">Google Meet</option>
+                  <option value="zoom">Zoom</option>
+                  <option value="teams">Microsoft Teams</option>
+                  <option value="justhear_demo">JustHear Demo</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Select the meeting platform
+                </p>
+              </div>
             </div>
           </div>
 

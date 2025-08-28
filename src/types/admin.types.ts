@@ -96,6 +96,9 @@ export interface SlotEditorData {
   startTime: string;
   endTime: string;
   isAvailable: boolean;
+  meeting_link?: string;
+  meeting_id?: string;
+  meeting_provider?: string;
 }
 
 export interface CalendarViewState {
