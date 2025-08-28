@@ -207,19 +207,19 @@ export const BookingsPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Book Your Session</h1>
-          <p className="text-gray-600">Choose your preferred date and time for your listening session</p>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Book Your Session</h1>
+          <p className="text-sm sm:text-base text-gray-600">Choose your preferred date and time for your listening session</p>
         </div>
 
         {loading ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading available slots...</p>
           </div>
         ) : datesWithSlots.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 text-center">
             <div className="text-6xl mb-4">📅</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">All Slots Booked</h3>
             <p className="text-gray-600 mb-4">
@@ -238,11 +238,11 @@ export const BookingsPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
             {/* Date Selection */}
             <div className="mb-8">
               <h3 className="font-semibold mb-4 text-gray-800">Select Date</h3>
-              <div className="grid grid-cols-7 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
                 {datesWithSlots.map((date) => (
                   <button
                     key={date.value}
@@ -250,13 +250,13 @@ export const BookingsPage: React.FC = () => {
                       setSelectedDate(date.value);
                       setSelectedTime(null);
                     }}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
                       selectedDate === date.value
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-gray-300 text-gray-700'
                     }`}
                   >
-                    <div className="text-sm font-medium">{date.label}</div>
+                    <div className="text-xs sm:text-sm font-medium">{date.label}</div>
                   </button>
                 ))}
               </div>
@@ -269,18 +269,18 @@ export const BookingsPage: React.FC = () => {
                   Select Time for {datesWithSlots.find(d => d.value === selectedDate)?.label}
                 </h3>
                 {times.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                     {times.map((time) => (
                       <button
                         key={time}
                         onClick={() => setSelectedTime(time)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
+                        className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
                           selectedTime === time
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'border-gray-200 hover:border-gray-300 text-gray-700'
                         }`}
                       >
-                        {time}
+                        <span className="text-sm sm:text-base">{time}</span>
                       </button>
                     ))}
                   </div>
