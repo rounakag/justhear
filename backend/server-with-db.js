@@ -263,14 +263,51 @@ app.get('/api/slots/available', async (req, res) => {
 // Get recurring schedules
 app.get('/api/schedules', async (req, res) => {
   try {
+    console.log('🔍 DEBUG - Fetching recurring schedules');
     const schedules = await databaseService.getRecurringSchedules();
+    console.log('🔍 DEBUG - Found schedules:', schedules?.length || 0);
     res.json({
-      schedules,
-      total: schedules.length
+      schedules: schedules || [],
+      total: schedules?.length || 0
     });
   } catch (error) {
-    console.error('Error fetching recurring schedules:', error);
-    res.status(500).json({ error: 'Failed to fetch recurring schedules' });
+    console.error('❌ ERROR fetching recurring schedules:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch recurring schedules',
+      message: error.message 
+    });
+  }
+});
+
+// Get admin stats
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG - Fetching admin stats');
+    
+    // Get basic stats
+    const totalSlots = await databaseService.getTotalSlots();
+    const bookedSlots = await databaseService.getBookedSlots();
+    const completedSlots = await databaseService.getCompletedSlots();
+    const totalUsers = await databaseService.getTotalUsers();
+    
+    const stats = {
+      totalSlots: totalSlots || 0,
+      bookedSlots: bookedSlots || 0,
+      completedSlots: completedSlots || 0,
+      availableSlots: (totalSlots || 0) - (bookedSlots || 0),
+      totalUsers: totalUsers || 0,
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('🔍 DEBUG - Admin stats:', stats);
+    
+    res.json(stats);
+  } catch (error) {
+    console.error('❌ ERROR fetching admin stats:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch admin stats',
+      message: error.message 
+    });
   }
 });
 

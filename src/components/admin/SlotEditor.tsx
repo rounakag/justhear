@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useAdminSlots } from '@/hooks/useAdminSlots';
 import type { TimeSlot, SlotEditorData, Listener } from '@/types/admin.types';
 
@@ -181,11 +181,14 @@ export const SlotEditor: React.FC<SlotEditorProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto" aria-describedby="slot-editor-description">
         <DialogHeader>
           <DialogTitle>
             {slot ? 'Edit Time Slot' : 'Create New Time Slot'}
           </DialogTitle>
+          <DialogDescription id="slot-editor-description">
+            {slot ? 'Modify the time slot details below.' : 'Create a new time slot by filling in the details below.'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

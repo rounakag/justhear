@@ -168,13 +168,73 @@ class DatabaseService {
   }
 
   async getRecurringSchedules() {
+    console.log('🔍 DEBUG - Getting recurring schedules');
     const { data, error } = await supabase
       .from('recurring_schedules')
       .select('*')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('❌ ERROR getting recurring schedules:', error);
+      throw error;
+    }
+    
+    console.log('🔍 DEBUG - Found recurring schedules:', data?.length || 0);
     return data || [];
+  }
+
+  async getTotalSlots() {
+    const { count, error } = await supabase
+      .from('time_slots')
+      .select('*', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error('❌ ERROR getting total slots:', error);
+      return 0;
+    }
+    
+    return count || 0;
+  }
+
+  async getBookedSlots() {
+    const { count, error } = await supabase
+      .from('time_slots')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'booked');
+    
+    if (error) {
+      console.error('❌ ERROR getting booked slots:', error);
+      return 0;
+    }
+    
+    return count || 0;
+  }
+
+  async getCompletedSlots() {
+    const { count, error } = await supabase
+      .from('time_slots')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'completed');
+    
+    if (error) {
+      console.error('❌ ERROR getting completed slots:', error);
+      return 0;
+    }
+    
+    return count || 0;
+  }
+
+  async getTotalUsers() {
+    const { count, error } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error('❌ ERROR getting total users:', error);
+      return 0;
+    }
+    
+    return count || 0;
   }
 
   async getSlotsByListener(listenerId) {
