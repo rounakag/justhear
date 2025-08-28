@@ -6,10 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:fast": "vite build --mode production",
+    "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist",
     "start": "npx serve -s dist -l $PORT --single",
     "serve": "npx serve -s dist -l $PORT",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "clean": "rm -rf dist node_modules/.vite",
+    "type-check": "tsc --noEmit",
+    "analyze": "node scripts/optimize-build.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
