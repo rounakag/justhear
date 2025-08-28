@@ -690,9 +690,17 @@ app.post('/api/bookings', async (req, res) => {
   try {
     const { userId, slotId } = req.body;
     
-    // Get slot details
-    const slots = await databaseService.getAvailableSlots();
-    const slot = slots.find(s => s.id === slotId);
+    // Get slot details directly from database
+    const { data: slot, error: slotError } = await supabase
+      .from('time_slots')
+      .select('*')
+      .eq('id', slotId)
+      .eq('status', 'created')
+      .single();
+    
+    if (slotError || !slot) {
+      return res.status(404).json({ error: 'Slot not found or not available' });
+    }
     
     if (!slot) {
       return res.status(404).json({ error: 'Slot not found or not available' });
@@ -714,21 +722,27 @@ app.post('/api/bookings', async (req, res) => {
       meeting_provider: slot.meeting_provider
     };
 
-    const booking = await databaseService.createBooking(bookingData);
-
-    // Update slot status to booked and assign a listener
-    // For now, assign the first available listener (in production, this would be more sophisticated)
-    const listeners = await databaseService.getListeners();
-    const availableListener = listeners.find(l => l.role === 'listener');
+    // Create booking directly
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .insert([bookingData])
+      .select()
+      .single();
     
-    if (availableListener) {
-      await databaseService.updateSlotAssignment(slotId, {
-        status: 'booked',
-        listener_id: availableListener.id
-      });
-    } else {
-      // If no listeners available, just update status
-      await databaseService.updateSlotStatus(slotId, 'booked');
+    if (bookingError) {
+      console.error('Error creating booking:', bookingError);
+      return res.status(500).json({ error: 'Failed to create booking' });
+    }
+
+    // Update slot status to booked
+    const { error: updateError } = await supabase
+      .from('time_slots')
+      .update({ status: 'booked' })
+      .eq('id', slotId);
+    
+    if (updateError) {
+      console.error('Error updating slot status:', updateError);
+      return res.status(500).json({ error: 'Failed to update slot status' });
     }
 
     // Send meeting details (in production, this would be email/SMS)
