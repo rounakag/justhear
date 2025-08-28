@@ -13,3 +13,9 @@ services:
         value: 7d
       - key: CORS_ORIGIN
         value: https://justhear.onrender.com
+      - key: SUPABASE_URL
+        value: https://mnuphupncodgrlofcubl.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1udXBodXBuY29kZ3Jsb2ZjdWJsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEwMjM1NywiZXhwIjoyMDcxNjc4MzU3fQ.yooZg3lA1bJQ3R1lQUhUJk1MUOSYMLQCqBp4MbTukXA
+      - key: SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1udXBodXBuY29kZ3Jsb2ZjdWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMDIzNTcsImV4cCI6MjA3MTY3ODM1N30.5h0ITj5VtSIEoCHqhUSLOzqjCP2oEdyXLuZwtbIrD4c

@@ -9,6 +9,82 @@ const databaseService = require('./services/databaseService');
 const meetingService = require('./services/meetingService');
 const { supabase } = require('./config/supabase');
 
+// 1. Fix rate limiting for production
+const RATE_LIMITS = {
+  development: { window: 1 * 60 * 1000, maxRequests: 1000 },
+  production: { window: 15 * 60 * 1000, maxRequests: 100 } // 15 minutes, 100 requests
+};
+
+const rateLimit = RATE_LIMITS[process.env.NODE_ENV] || RATE_LIMITS.production;
+
+// 2. Standardized error response utility
+class APIError extends Error {
+  constructor(message, statusCode = 500, type = 'INTERNAL_ERROR') {
+    super(message);
+    this.statusCode = statusCode;
+    this.type = type;
+  }
+}
+
+const handleAPIError = (error, req, res) => {
+  console.error(`API Error [${req.method} ${req.path}]:`, error);
+  
+  if (error instanceof APIError) {
+    return res.status(error.statusCode).json({
+      error: error.message,
+      type: error.type,
+      timestamp: new Date().toISOString(),
+      path: req.path
+    });
+  }
+  
+  // Database errors
+  if (error.code?.startsWith('P')) { // Prisma/Postgres error codes
+    return res.status(400).json({
+      error: 'Database operation failed',
+      type: 'DATABASE_ERROR',
+      timestamp: new Date().toISOString(),
+      path: req.path
+    });
+  }
+  
+  // Default server error
+  res.status(500).json({
+    error: 'Internal server error',
+    type: 'INTERNAL_ERROR',
+    timestamp: new Date().toISOString(),
+    path: req.path
+  });
+};
+
+// 3. Input validation middleware
+const validateSlotData = (req, res, next) => {
+  const { date, startTime, endTime } = req.body;
+  
+  if (!date || !startTime || !endTime) {
+    throw new APIError('Missing required fields: date, startTime, endTime', 400, 'VALIDATION_ERROR');
+  }
+  
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(date)) {
+    throw new APIError('Invalid date format. Expected YYYY-MM-DD', 400, 'VALIDATION_ERROR');
+  }
+  
+  // Validate time format (HH:MM)
+  const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+    throw new APIError('Invalid time format. Expected HH:MM', 400, 'VALIDATION_ERROR');
+  }
+  
+  // Validate that start time is before end time
+  if (startTime >= endTime) {
+    throw new APIError('End time must be after start time', 400, 'VALIDATION_ERROR');
+  }
+  
+  next();
+};
+
 // Helper function to calculate duration in minutes with validation
 function calculateDuration(startTime, endTime) {
   // Input validation
@@ -337,43 +413,49 @@ app.get('/api/slots/listener/:listenerId', async (req, res) => {
 });
 
 // Create time slot (admin/listener only)
-app.post('/api/slots', async (req, res) => {
+app.post('/api/slots', validateSlotData, async (req, res, next) => {
   try {
     const slotData = req.body;
     console.log('Received slot data:', slotData);
     
-    // Validate required fields
-    if (!slotData.date || !slotData.startTime || !slotData.endTime) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: date, startTime, endTime' 
-      });
+    // Check for overlapping slots
+    const existingSlots = await databaseService.getSlotsByDateAndListener(
+      slotData.date,
+      slotData.listenerId || 'system'
+    );
+    
+    const hasOverlap = existingSlots.some(slot => {
+      return (slotData.startTime < slot.end_time && slotData.endTime > slot.start_time);
+    });
+    
+    if (hasOverlap) {
+      throw new APIError(
+        'Slot overlaps with existing slot',
+        409,
+        'SLOT_OVERLAP'
+      );
     }
     
-    // Transform data to match database schema
-    // Admin creates unassigned slots - listener_id is null until booked
     const transformedData = {
       date: slotData.date,
       start_time: slotData.startTime,
       end_time: slotData.endTime,
       status: 'created',
-      listener_id: null, // Start as unassigned - will be assigned when booked
-      duration_minutes: calculateDuration(slotData.startTime, slotData.endTime)
+      listener_id: slotData.listenerId || '55f0d229-16eb-48db-8bfe-e817a7dee807',
+      duration_minutes: calculateDuration(slotData.startTime, slotData.endTime),
+      price: slotData.price || 50
     };
     
     console.log('🔍 DEBUG - Creating slot with data:', transformedData);
     
     const slot = await databaseService.createTimeSlot(transformedData);
     
-    // Generate Google Meet link for the slot
+    // Try to generate meeting link (non-blocking)
     try {
-      console.log('🔍 DEBUG - Generating Google Meet link for slot:', slot.id);
-      
       const meetingDetails = await meetingService.generateGoogleMeetLink({
         slot,
         userId: 'admin'
       });
-      
-      console.log('🔍 DEBUG - Generated meeting details:', meetingDetails);
       
       const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, {
         meeting_link: meetingDetails.meetingLink,
@@ -381,44 +463,21 @@ app.post('/api/slots', async (req, res) => {
         meeting_provider: meetingDetails.meetingProvider
       });
       
-      console.log('🔍 DEBUG - Updated slot with meeting link:', updatedSlot);
-      
       res.status(201).json({
+        success: true,
         message: 'Slot created successfully with meeting link',
-        slot: updatedSlot
+        data: updatedSlot
       });
     } catch (meetingError) {
-      console.error('🔍 DEBUG - Error generating meeting link:', meetingError);
+      console.warn('Meeting link generation failed:', meetingError);
       res.status(201).json({
-        message: 'Slot created successfully (without meeting link)',
-        slot
+        success: true,
+        message: 'Slot created successfully (meeting link will be added later)',
+        data: slot
       });
     }
   } catch (error) {
-    console.error('Error creating slot:', error);
-    
-    // Handle specific overlap error with user-friendly message
-    if (error.message && error.message.includes('Slot overlaps with existing slot')) {
-      return res.status(400).json({ 
-        error: 'Slot overlaps with existing slot for this listener on the same date. Please choose a different time or date.',
-        type: 'overlap_error',
-        details: 'The selected time conflicts with an existing slot for the same listener. Each listener can only have one slot at a time.'
-      });
-    }
-    
-    // Handle other database constraint errors
-    if (error.code === 'P0001' || error.message.includes('violates check constraint')) {
-      return res.status(400).json({ 
-        error: 'Invalid slot data. Please check the time and date values.',
-        type: 'validation_error',
-        details: error.message
-      });
-    }
-    
-    res.status(500).json({ 
-      error: `Failed to create slot: ${error.message}`,
-      details: error.details || error.hint || error.code
-    });
+    next(error);
   }
 });
 
@@ -1346,6 +1405,11 @@ app.delete('/api/cms/pricing/:id', async (req, res) => {
     console.error('Error deleting pricing plan:', error);
     res.status(500).json({ error: 'Failed to delete pricing plan' });
   }
+});
+
+// 6. Global error handler
+app.use((error, req, res, next) => {
+  handleAPIError(error, req, res);
 });
 
 // Serve test.html

@@ -74,37 +74,56 @@ class DatabaseService {
     return data;
   }
 
-  async getAvailableSlots() {
-    // Get today's date in YYYY-MM-DD format without timezone issues
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
-    
-    console.log('🔍 DEBUG - Getting available slots from date:', todayString);
-    
-    const { data, error } = await supabase
-      .from('time_slots')
-      .select(`
-        *,
-        listener:users!time_slots_listener_id_fkey(
-          id,
-          username,
-          name,
-          email
-        )
-      `)
-      .eq('status', 'created')
-      .is('listener_id', null) // Only show UNASSIGNED slots (no listener assigned yet)
-      .gte('date', todayString)
-      .order('date', { ascending: true })
-      .order('start_time', { ascending: true });
-    
-    if (error) {
-      console.error('❌ ERROR getting available slots:', error);
+  async getAvailableSlots(page = 1, limit = 50) {
+    try {
+      const offset = (page - 1) * limit;
+      const today = new Date().toISOString().split('T')[0];
+      
+      console.log('🔍 DEBUG - Getting available slots from date:', today);
+      
+      // Get system user ID
+      const { data: systemUser, error: systemError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', 'system')
+        .single();
+      
+      if (systemError) {
+        console.error('❌ ERROR getting system user:', systemError);
+        throw new Error('System configuration error');
+      }
+      
+      const { data, error, count } = await supabase
+        .from('time_slots')
+        .select(`
+          *,
+          listener:users!time_slots_listener_id_fkey(id, username, email)
+        `, { count: 'exact' })
+        .eq('status', 'created')
+        .eq('listener_id', systemUser.id)
+        .gte('date', today)
+        .order('date', { ascending: true })
+        .order('start_time', { ascending: true })
+        .range(offset, offset + limit - 1);
+      
+      if (error) {
+        console.error('❌ ERROR getting available slots:', error);
+        throw new Error('Failed to fetch available slots');
+      }
+      
+      console.log('🔍 DEBUG - Found available slots:', data?.length || 0);
+      
+      return {
+        slots: data || [],
+        total: count || 0,
+        page,
+        limit,
+        hasMore: count > (page * limit)
+      };
+    } catch (error) {
+      console.error('❌ ERROR in getAvailableSlots:', error);
       throw error;
     }
-    
-    console.log('🔍 DEBUG - Found available slots:', data?.length || 0);
-    return data || [];
   }
 
   async getAdminCreatedSlots() {
@@ -133,7 +152,6 @@ class DatabaseService {
           listener:users!time_slots_listener_id_fkey(
             id,
             username,
-            name,
             email
           )
         `)
@@ -1092,6 +1110,23 @@ class DatabaseService {
       return true;
     } catch (error) {
       console.error('Error deleting reach out content:', error);
+      throw error;
+    }
+  }
+
+  async getSlotsByDateAndListener(date, listenerId) {
+    try {
+      const { data, error } = await supabase
+        .from('time_slots')
+        .select('*')
+        .eq('date', date)
+        .eq('listener_id', listenerId)
+        .order('start_time', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting slots by date and listener:', error);
       throw error;
     }
   }
