@@ -713,7 +713,7 @@ app.post('/api/bookings', async (req, res) => {
       status: 'confirmed',
       meeting_link: slot.meeting_link || null,
       meeting_id: slot.meeting_id || null,
-      meeting_provider: slot.meeting_provider || 'google_meet'
+      meeting_provider: 'google_meet' // Force to allowed value
     };
 
     // Create booking directly
@@ -745,7 +745,7 @@ app.post('/api/bookings', async (req, res) => {
       meetingDetails: {
         meetingLink: slot.meeting_link,
         meetingId: slot.meeting_id,
-        meetingProvider: slot.meeting_provider || 'google_meet'
+        meetingProvider: 'google_meet'
       }
     });
   } catch (error) {
