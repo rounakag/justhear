@@ -15,18 +15,21 @@ class MeetingService {
    */
   async generateGoogleMeetLink(booking) {
     try {
-      // For now, generate a simple meeting link
-      // In production, this would use Google Calendar API
+      // For demo purposes, create a meeting link that clearly indicates it's not a real meeting
+      // In production, this would integrate with Google Calendar API to create actual meetings
       const meetingId = this.generateMeetingId();
-      const meetingLink = `https://meet.google.com/${meetingId}`;
+      
+      // Use a demo URL that clearly indicates this is not a real meeting
+      const meetingLink = `https://demo.justhear.com/meeting/${meetingId}`;
       
       return {
         meetingId,
         meetingLink,
-        meetingProvider: 'google_meet',
+        meetingProvider: 'justhear_demo',
         startTime: booking.slot.startTime,
         endTime: booking.slot.endTime,
-        duration: booking.slot.durationMinutes
+        duration: booking.slot.durationMinutes,
+        isDemo: true
       };
     } catch (error) {
       console.error('Error generating Google Meet link:', error);
@@ -39,17 +42,11 @@ class MeetingService {
    * @returns {string} Meeting ID
    */
   generateMeetingId() {
-    // Generate a 12-character meeting ID (Google Meet format)
-    const chars = 'abcdefghijklmnopqrstuvwxyz';
-    let result = '';
-    for (let i = 0; i < 12; i++) {
-      if (i === 3 || i === 7) {
-        result += '-';
-      } else {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-    }
-    return result;
+    // For now, use a placeholder that indicates this is a demo
+    // In production, this would integrate with Google Calendar API to create real meetings
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 6);
+    return `demo-${timestamp}-${random}`;
   }
 
   /**

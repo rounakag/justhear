@@ -683,15 +683,21 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
                   {slot.meeting_link ? (
-                    <a 
-                      href={slot.meeting_link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Join Meeting
-                    </a>
+                    slot.meeting_link.includes('demo.justhear.com') ? (
+                      <span className="text-orange-600 font-medium">
+                        Demo Meeting
+                      </span>
+                    ) : (
+                      <a 
+                        href={slot.meeting_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Join Meeting
+                      </a>
+                    )
                   ) : (
                     <span className="text-gray-500">No link</span>
                   )}
@@ -716,15 +722,27 @@ const SlotList: React.FC<SlotListProps> = ({ slots, listeners, onSlotClick, onMa
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div className="flex space-x-2">
                   {slot.status === 'booked' && slot.meeting_link && (
-                    <button 
-                      className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 rounded-md transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(slot.meeting_link, '_blank');
-                      }}
-                    >
-                      Join
-                    </button>
+                    slot.meeting_link.includes('demo.justhear.com') ? (
+                      <button 
+                        className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300 rounded-md transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          alert('This is a demo meeting link. In production, this would open a real Google Meet session.');
+                        }}
+                      >
+                        Demo
+                      </button>
+                    ) : (
+                      <button 
+                        className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 rounded-md transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(slot.meeting_link, '_blank');
+                        }}
+                      >
+                        Join
+                      </button>
+                    )
                   )}
                   {slot.status === 'booked' && (
                     <button 
