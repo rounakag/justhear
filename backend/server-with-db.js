@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+const morgan = require('morgan');
 require('dotenv').config();
 
 // Import services
@@ -9,40 +13,281 @@ const databaseService = require('./services/databaseService');
 const meetingService = require('./services/meetingService');
 const { supabase } = require('./config/supabase');
 
-// 1. Fix rate limiting for production
-const RATE_LIMITS = {
-  development: { window: 1 * 60 * 1000, maxRequests: 1000 },
-  production: { window: 15 * 60 * 1000, maxRequests: 100 } // 15 minutes, 100 requests
-};
+// ============================================================================
+// CRITICAL SECURITY IMPROVEMENTS - IMPLEMENTATION
+// ============================================================================
 
-const rateLimit = RATE_LIMITS[process.env.NODE_ENV] || RATE_LIMITS.production;
+// 1. Environment Variables Validation
+const requiredEnvVars = [
+  'JWT_SECRET',
+  'SUPABASE_URL', 
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'NODE_ENV'
+];
 
-// 2. Standardized error response utility
-class APIError extends Error {
-  constructor(message, statusCode = 500, type = 'INTERNAL_ERROR') {
-    super(message);
-    this.statusCode = statusCode;
-    this.type = type;
+requiredEnvVars.forEach(envVar => {
+  if (!process.env[envVar]) {
+    console.error(`❌ Missing required environment variable: ${envVar}`);
+    process.exit(1);
   }
-}
+});
 
-const handleAPIError = (error, req, res) => {
-  console.error(`API Error [${req.method} ${req.path}]:`, error);
+// 2. Authentication Middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
   
-  if (error instanceof APIError) {
-    return res.status(error.statusCode).json({
-      error: error.message,
-      type: error.type,
+  if (!token) {
+    return res.status(401).json({ 
+      error: 'Access token required',
+      type: 'AUTHENTICATION_ERROR',
       timestamp: new Date().toISOString(),
       path: req.path
     });
   }
   
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ 
+        error: 'Invalid or expired token',
+        type: 'AUTHENTICATION_ERROR',
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// 3. Role-based Authorization Middleware
+const requireRole = (requiredRole) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        type: 'AUTHORIZATION_ERROR',
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+    
+    if (req.user.role !== requiredRole) {
+      return res.status(403).json({
+        error: `Access denied. Required role: ${requiredRole}`,
+        type: 'AUTHORIZATION_ERROR',
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+    
+    next();
+  };
+};
+
+// 4. Comprehensive Input Validation Middleware
+const validateSlotData = [
+  body('date')
+    .isISO8601()
+    .withMessage('Date must be in ISO 8601 format (YYYY-MM-DD)')
+    .custom(value => {
+      const date = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (date < today) {
+        throw new Error('Date cannot be in the past');
+      }
+      return true;
+    }),
+  body('startTime')
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('Start time must be in HH:MM format'),
+  body('endTime')
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('End time must be in HH:MM format')
+    .custom((value, { req }) => {
+      if (value <= req.body.startTime) {
+        throw new Error('End time must be after start time');
+      }
+      return true;
+    }),
+  body('price')
+    .optional()
+    .isNumeric()
+    .withMessage('Price must be a number')
+    .isFloat({ min: 0 })
+    .withMessage('Price must be non-negative'),
+  body('meeting_link')
+    .optional()
+    .isURL()
+    .withMessage('Meeting link must be a valid URL'),
+  body('meeting_id')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Meeting ID must be between 1 and 100 characters'),
+  body('meeting_provider')
+    .optional()
+    .isIn(['google_meet', 'zoom', 'teams', 'other'])
+    .withMessage('Meeting provider must be one of: google_meet, zoom, teams, other'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        type: 'VALIDATION_ERROR',
+        details: errors.array(),
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+    next();
+  }
+];
+
+const validateBookingData = [
+  body('slotId')
+    .isUUID()
+    .withMessage('Slot ID must be a valid UUID'),
+  body('userId')
+    .isUUID()
+    .withMessage('User ID must be a valid UUID'),
+  body('notes')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Notes must not exceed 500 characters'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        type: 'VALIDATION_ERROR',
+        details: errors.array(),
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+    next();
+  }
+];
+
+const validateReviewData = [
+  body('rating')
+    .isInt({ min: 1, max: 5 })
+    .withMessage('Rating must be between 1 and 5'),
+  body('review')
+    .isString()
+    .trim()
+    .isLength({ min: 10, max: 1000 })
+    .withMessage('Review must be between 10 and 1000 characters'),
+  body('isAnonymous')
+    .optional()
+    .isBoolean()
+    .withMessage('isAnonymous must be a boolean'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        type: 'VALIDATION_ERROR',
+        details: errors.array(),
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+    next();
+  }
+];
+
+// 5. Async Error Handler Wrapper
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// 6. Centralized Error Classes
+class AppError extends Error {
+  constructor(message, statusCode, errorCode, isOperational = true) {
+    super(message);
+    this.statusCode = statusCode;
+    this.errorCode = errorCode;
+    this.isOperational = isOperational;
+    this.timestamp = new Date().toISOString();
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+class ValidationError extends AppError {
+  constructor(message, errors = []) {
+    super(message, 400, 'VALIDATION_ERROR');
+    this.errors = errors;
+  }
+}
+
+class BusinessLogicError extends AppError {
+  constructor(message, statusCode = 422) {
+    super(message, statusCode, 'BUSINESS_LOGIC_ERROR');
+  }
+}
+
+class AuthenticationError extends AppError {
+  constructor(message) {
+    super(message, 401, 'AUTHENTICATION_ERROR');
+  }
+}
+
+class AuthorizationError extends AppError {
+  constructor(message) {
+    super(message, 403, 'AUTHORIZATION_ERROR');
+  }
+}
+
+// 7. Enhanced Error Handler
+const handleAPIError = (error, req, res, next) => {
+  console.error(`🚨 API Error [${req.method} ${req.path}]:`, {
+    message: error.message,
+    stack: error.stack,
+    user: req.user?.id,
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
+  
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      error: error.message,
+      type: error.errorCode,
+      timestamp: error.timestamp,
+      path: req.path,
+      ...(error.errors && { details: error.errors })
+    });
+  }
+  
   // Database errors
-  if (error.code?.startsWith('P')) { // Prisma/Postgres error codes
+  if (error.code?.startsWith('P') || error.code?.startsWith('235')) {
     return res.status(400).json({
       error: 'Database operation failed',
       type: 'DATABASE_ERROR',
+      timestamp: new Date().toISOString(),
+      path: req.path
+    });
+  }
+  
+  // JWT errors
+  if (error.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      error: 'Invalid token',
+      type: 'AUTHENTICATION_ERROR',
+      timestamp: new Date().toISOString(),
+      path: req.path
+    });
+  }
+  
+  if (error.name === 'TokenExpiredError') {
+    return res.status(401).json({
+      error: 'Token expired',
+      type: 'AUTHENTICATION_ERROR',
       timestamp: new Date().toISOString(),
       path: req.path
     });
@@ -57,33 +302,27 @@ const handleAPIError = (error, req, res) => {
   });
 };
 
-// 3. Input validation middleware
-const validateSlotData = (req, res, next) => {
-  const { date, startTime, endTime } = req.body;
-  
-  if (!date || !startTime || !endTime) {
-    throw new APIError('Missing required fields: date, startTime, endTime', 400, 'VALIDATION_ERROR');
-  }
-  
-  // Validate date format (YYYY-MM-DD)
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(date)) {
-    throw new APIError('Invalid date format. Expected YYYY-MM-DD', 400, 'VALIDATION_ERROR');
-  }
-  
-  // Validate time format (HH:MM)
-  const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-  if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-    throw new APIError('Invalid time format. Expected HH:MM', 400, 'VALIDATION_ERROR');
-  }
-  
-  // Validate that start time is before end time
-  if (startTime >= endTime) {
-    throw new APIError('End time must be after start time', 400, 'VALIDATION_ERROR');
-  }
-  
+// 8. Request Logging Middleware
+const requestLogger = (req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`📝 ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms - ${req.ip}`);
+  });
   next();
 };
+
+// ============================================================================
+// EXISTING CODE CONTINUES BELOW
+// ============================================================================
+
+// 1. Fix rate limiting for production
+const RATE_LIMITS = {
+  development: { window: 1 * 60 * 1000, maxRequests: 1000 },
+  production: { window: 15 * 60 * 1000, maxRequests: 100 } // 15 minutes, 100 requests
+};
+
+const rateLimitConfig = RATE_LIMITS[process.env.NODE_ENV] || RATE_LIMITS.production;
 
 // Helper function to calculate duration in minutes with validation
 function calculateDuration(startTime, endTime) {
@@ -149,48 +388,87 @@ function generateSlotsFromBulkData(bulkData) {
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Security middleware
-app.use((req, res, next) => {
-  // Add security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  next();
-});
+// ============================================================================
+// ENHANCED MIDDLEWARE SETUP
+// ============================================================================
 
-// Rate limiting (relaxed for development)
-const requestCounts = new Map();
-const RATE_LIMIT_WINDOW = 1 * 60 * 1000; // 1 minute
-const MAX_REQUESTS = 1000; // 1000 requests per minute (much higher)
-
-app.use((req, res, next) => {
-  const clientIP = req.ip || req.connection.remoteAddress;
-  const now = Date.now();
-  
-  if (!requestCounts.has(clientIP)) {
-    requestCounts.set(clientIP, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-  } else {
-    const clientData = requestCounts.get(clientIP);
-    if (now > clientData.resetTime) {
-      clientData.count = 1;
-      clientData.resetTime = now + RATE_LIMIT_WINDOW;
-    } else {
-      clientData.count++;
-    }
-    
-    if (clientData.count > MAX_REQUESTS) {
-      console.log(`⚠️ Rate limit exceeded for IP: ${clientIP}, count: ${clientData.count}`);
-      return res.status(429).json({
-        error: 'Rate limit exceeded',
-        message: 'Too many requests, please try again later',
-        retryAfter: Math.ceil((clientData.resetTime - now) / 1000)
-      });
-    }
+// 1. Security Headers with Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
   }
-  
-  next();
+}));
+
+// 2. Force HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (!req.secure && req.get('x-forwarded-proto') !== 'https') {
+      return res.redirect(`https://${req.hostname}${req.url}`);
+    }
+    next();
+  });
+}
+
+// 3. Request Logging
+app.use(morgan('combined'));
+app.use(requestLogger);
+
+// 4. Enhanced Rate Limiting
+const limiter = rateLimit({
+  windowMs: rateLimitConfig.window,
+  max: rateLimitConfig.maxRequests,
+  message: {
+    error: 'Too many requests from this IP',
+    type: 'RATE_LIMIT_ERROR',
+    timestamp: new Date().toISOString(),
+    retryAfter: Math.ceil(rateLimitConfig.window / 1000)
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+
+// Apply rate limiting to all routes
+app.use(limiter);
+
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 requests per 15 minutes
+  message: {
+    error: 'Too many authentication attempts',
+    type: 'RATE_LIMIT_ERROR',
+    timestamp: new Date().toISOString()
+  }
+});
+
+// 5. Body parsing and CORS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:3000', 
+    'https://justhear.onrender.com', 
+    'https://justhear-frontend.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+}));
+
+// ============================================================================
+// ROUTE PROTECTION AND ORGANIZATION
+// ============================================================================
 
 // Middleware
 app.use(cors({
@@ -248,34 +526,57 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Get available slots
-app.get('/api/slots', async (req, res) => {
-  try {
-    console.log('🔍 DEBUG - Fetching available slots');
-    
-    const slots = await databaseService.getAvailableSlots();
-    
-    console.log('🔍 DEBUG - Retrieved', slots.length, 'available slots');
-    
-    res.json({
-      slots,
-      total: slots.length,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('❌ ERROR fetching slots:', error);
-    
-    // Enhanced error response
-    const errorResponse = {
-      error: 'Failed to fetch slots',
-      message: error.message,
-      timestamp: new Date().toISOString(),
-      path: req.path
-    };
-    
-    res.status(500).json(errorResponse);
-  }
+// ============================================================================
+// PUBLIC ROUTES (No Authentication Required)
+// ============================================================================
+
+// Health check endpoints
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Backend API is running with Supabase!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    port: PORT
+  });
 });
+
+app.get('/health/simple', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'Backend API is running with Supabase!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '2.0.0'
+  });
+});
+
+// ============================================================================
+// AUTHENTICATED ROUTES
+// ============================================================================
+
+// Get available slots (authenticated)
+app.get('/api/slots', authenticateToken, asyncHandler(async (req, res) => {
+  console.log('🔍 DEBUG - Fetching available slots for user:', req.user.id);
+  
+  const slots = await databaseService.getAvailableSlots();
+  
+  console.log('🔍 DEBUG - Retrieved', slots.length, 'available slots');
+  
+  res.json({
+    slots,
+    total: slots.length,
+    timestamp: new Date().toISOString()
+  });
+}));
 
 // Get admin-created slots (for users)
 app.get('/api/slots/admin-created', async (req, res) => {
@@ -433,94 +734,88 @@ app.get('/api/slots/listener/:listenerId', async (req, res) => {
 });
 
 // Create time slot (admin/listener only)
-app.post('/api/slots', validateSlotData, async (req, res, next) => {
-  try {
-    const slotData = req.body;
-    console.log('🔍 DEBUG - Received slot data:', slotData);
-    
-    // Get system user ID for overlap checking
-    let systemUserId = '55f0d229-16eb-48db-8bfe-e817a7dee807'; // Default fallback
-    try {
-      const { data: systemUser, error: systemError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('username', 'system')
-        .single();
-      
-      if (!systemError && systemUser) {
-        systemUserId = systemUser.id;
-      }
-    } catch (error) {
-      console.log('🔍 DEBUG - Using fallback system user ID');
-    }
-    
-    // Check for overlapping slots
-    const existingSlots = await databaseService.getSlotsByDateAndListener(
-      slotData.date,
-      slotData.listenerId || systemUserId
+app.post('/api/slots', authenticateToken, requireRole('admin'), validateSlotData, asyncHandler(async (req, res) => {
+  const slotData = req.body;
+  console.log('Received slot data:', slotData);
+  
+  // Check for overlapping slots
+  const existingSlots = await databaseService.getSlotsByDateAndListener(
+    slotData.date,
+    slotData.listenerId || 'system'
+  );
+  
+  const hasOverlap = existingSlots.some(slot => {
+    return (slotData.startTime < slot.end_time && slotData.endTime > slot.start_time);
+  });
+  
+  if (hasOverlap) {
+    throw new AppError(
+      'Slot overlaps with existing slot',
+      409,
+      'SLOT_OVERLAP'
     );
-    
-    const hasOverlap = existingSlots.some(slot => {
-      return (slotData.startTime < slot.end_time && slotData.endTime > slot.start_time);
-    });
-    
-    if (hasOverlap) {
-      throw new APIError(
-        'Slot overlaps with existing slot',
-        409,
-        'SLOT_OVERLAP'
-      );
-    }
-    
-    const transformedData = {
-      date: slotData.date,
-      start_time: slotData.startTime,
-      end_time: slotData.endTime,
-      status: 'created',
-      listener_id: slotData.listenerId || '55f0d229-16eb-48db-8bfe-e817a7dee807',
-      duration_minutes: calculateDuration(slotData.startTime, slotData.endTime),
-      price: slotData.price || 50
+  }
+  
+  const transformedData = {
+    date: slotData.date,
+    start_time: slotData.startTime,
+    end_time: slotData.endTime,
+    status: 'created',
+    listener_id: slotData.listenerId || '55f0d229-16eb-48db-8bfe-e817a7dee807',
+    duration_minutes: calculateDuration(slotData.startTime, slotData.endTime),
+    price: slotData.price || 50
+  };
+  
+  console.log('🔍 DEBUG - Creating slot with data:', transformedData);
+  
+  const slot = await databaseService.createTimeSlot(transformedData);
+  
+  // Handle meeting link - use provided link or generate demo link
+  let meetingLinkData = {};
+  
+  if (slotData.meeting_link && slotData.meeting_link.trim()) {
+    // Use the provided meeting link
+    meetingLinkData = {
+      meeting_link: slotData.meeting_link.trim(),
+      meeting_id: slotData.meeting_id || '',
+      meeting_provider: slotData.meeting_provider || 'google_meet'
     };
-    
-    console.log('🔍 DEBUG - Creating slot with data:', transformedData);
-    
-    const slot = await databaseService.createTimeSlot(transformedData);
-    
-    // Handle meeting link - use provided link or generate demo link
-    let meetingLinkData = {};
-    
-    if (slotData.meeting_link && slotData.meeting_link.trim()) {
-      // Use the provided meeting link
+    console.log('🔍 DEBUG - Using provided meeting link:', meetingLinkData);
+  } else {
+    // Generate demo meeting link
+    try {
+      const meetingDetails = await meetingService.generateGoogleMeetLink({
+        slot,
+        userId: 'admin'
+      });
+      
       meetingLinkData = {
-        meeting_link: slotData.meeting_link.trim(),
-        meeting_id: slotData.meeting_id || '',
-        meeting_provider: slotData.meeting_provider || 'google_meet'
+        meeting_link: meetingDetails.meetingLink,
+        meeting_id: meetingDetails.meetingId,
+        meeting_provider: meetingDetails.meetingProvider
       };
-      console.log('🔍 DEBUG - Using provided meeting link:', meetingLinkData);
-    } else {
-      // Create a simple demo link without using meeting service
+      console.log('🔍 DEBUG - Generated demo meeting link:', meetingLinkData);
+    } catch (meetingError) {
+      console.warn('Meeting link generation failed:', meetingError);
+      // Create a fallback demo link
       meetingLinkData = {
         meeting_link: `https://demo.justhear.com/meeting/demo-${slot.id}`,
         meeting_id: `demo-${slot.id.substring(0, 8)}`,
         meeting_provider: 'justhear_demo'
       };
-      console.log('🔍 DEBUG - Created simple demo meeting link:', meetingLinkData);
+      console.log('🔍 DEBUG - Using fallback demo meeting link:', meetingLinkData);
     }
-    
-    // Update slot with meeting link data
-    const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, meetingLinkData);
-    
-    res.status(201).json({
-      success: true,
-      message: 'Slot created successfully with meeting link',
-      data: updatedSlot
-    });
-      } catch (error) {
-      console.error('🔍 DEBUG - Error in slot creation:', error);
-      console.error('🔍 DEBUG - Error stack:', error.stack);
-      next(error);
-    }
-});
+  }
+  
+  // Update slot with meeting link data
+  const updatedSlot = await databaseService.updateSlotMeetingLink(slot.id, meetingLinkData);
+  
+  res.status(201).json({
+    success: true,
+    message: 'Slot created successfully with meeting link',
+    data: updatedSlot
+  });
+}));
 
 // Bulk create slots (admin only)
 // Create bulk slots (DISABLED FOR NOW)
@@ -707,111 +1002,106 @@ app.get('/api/bookings/user/:userId', async (req, res) => {
 });
 
 // Create booking with meeting link
-app.post('/api/bookings', async (req, res) => {
-  try {
-    const { userId, slotId } = req.body;
-    
-    console.log('🔍 DEBUG - Booking request received:', { userId, slotId });
-    
-    // Get slot details directly from database
-    const { data: slot, error: slotError } = await supabase
-      .from('time_slots')
-      .select('*')
-      .eq('id', slotId)
-      .in('status', ['created', 'available'])
-      .single();
-    
-    if (slotError || !slot) {
-      console.error('Slot not found:', slotError);
-      return res.status(404).json({ error: 'Slot not found or not available' });
-    }
-    
-    console.log('🔍 DEBUG - Slot found:', { id: slot.id, status: slot.status, listener_id: slot.listener_id });
+app.post('/api/bookings', authenticateToken, validateBookingData, asyncHandler(async (req, res) => {
+  const { userId, slotId } = req.body;
+  
+  console.log('🔍 DEBUG - Booking request received:', { userId, slotId });
+  
+  // Get slot details directly from database
+  const { data: slot, error: slotError } = await supabase
+    .from('time_slots')
+    .select('*')
+    .eq('id', slotId)
+    .in('status', ['created', 'available'])
+    .single();
+  
+  if (slotError || !slot) {
+    console.error('Slot not found:', slotError);
+    return res.status(404).json({ error: 'Slot not found or not available' });
+  }
+  
+  console.log('🔍 DEBUG - Slot found:', { id: slot.id, status: slot.status, listener_id: slot.listener_id });
 
-    // Check if user exists, if not create a simple user record
-    const { data: existingUser, error: userError } = await supabase
+  // Check if user exists, if not create a simple user record
+  const { data: existingUser, error: userError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', userId)
+    .single();
+  
+  if (userError || !existingUser) {
+    console.log('🔍 DEBUG - User not found, creating simple user record');
+    // Create a simple user record for the booking
+    const { data: newUser, error: createUserError } = await supabase
       .from('users')
-      .select('id')
-      .eq('id', userId)
-      .single();
-    
-    if (userError || !existingUser) {
-      console.log('🔍 DEBUG - User not found, creating simple user record');
-      // Create a simple user record for the booking
-      const { data: newUser, error: createUserError } = await supabase
-        .from('users')
-        .insert([{
-          id: userId,
-          username: `user_${userId.substring(0, 8)}`,
-          email: `user_${userId.substring(0, 8)}@justhear.com`,
-          password_hash: 'temp_password_hash',
-          role: 'user'
-        }])
-        .select()
-        .single();
-      
-      if (createUserError) {
-        console.error('Error creating user:', createUserError);
-        return res.status(500).json({ error: 'Failed to create user record' });
-      }
-      
-      console.log('🔍 DEBUG - User created:', newUser);
-    }
-
-    // Use the actual user's ID from the request
-    const bookingData = {
-      user_id: userId, // Use the actual user who is booking
-      slot_id: slotId,
-      status: 'confirmed',
-      meeting_link: slot.meeting_link || null,
-      meeting_id: slot.meeting_id || null,
-      meeting_provider: 'google_meet' // Force to allowed value
-    };
-
-    console.log('🔍 DEBUG - Creating booking with data:', bookingData);
-
-    // Create booking directly
-    const { data: booking, error: bookingError } = await supabase
-      .from('bookings')
-      .insert([bookingData])
+      .insert([{
+        id: userId,
+        username: `user_${userId.substring(0, 8)}`,
+        email: `user_${userId.substring(0, 8)}@justhear.com`,
+        password_hash: 'temp_password_hash',
+        role: 'user'
+      }])
       .select()
       .single();
     
-    if (bookingError) {
-      console.error('Error creating booking:', bookingError);
-      console.error('Booking data that failed:', bookingData);
-      return res.status(500).json({ error: 'Failed to create booking', details: bookingError.message });
+    if (createUserError) {
+      console.error('Error creating user:', createUserError);
+      return res.status(500).json({ error: 'Failed to create user record' });
     }
-
-    console.log('🔍 DEBUG - Booking created successfully:', booking);
-
-    // Update slot status to booked
-    const { error: updateError } = await supabase
-      .from('time_slots')
-      .update({ status: 'booked' })
-      .eq('id', slotId);
     
-    if (updateError) {
-      console.error('Error updating slot status:', updateError);
-      return res.status(500).json({ error: 'Failed to update slot status' });
-    }
-
-    console.log('🔍 DEBUG - Slot status updated to booked');
-
-    res.status(201).json({
-      message: 'Booking created successfully',
-      booking,
-      meetingDetails: {
-        meetingLink: slot.meeting_link,
-        meetingId: slot.meeting_id,
-        meetingProvider: 'google_meet'
-      }
-    });
-  } catch (error) {
-    console.error('Error creating booking:', error);
-    res.status(500).json({ error: 'Failed to create booking', details: error.message });
+    console.log('🔍 DEBUG - User created:', newUser);
   }
-});
+
+  // Use the actual user's ID from the request
+  const bookingData = {
+    user_id: userId, // Use the actual user who is booking
+    slot_id: slotId,
+    status: 'confirmed',
+    meeting_link: slot.meeting_link || null,
+    meeting_id: slot.meeting_id || null,
+    meeting_provider: 'google_meet' // Force to allowed value
+  };
+
+  console.log('🔍 DEBUG - Creating booking with data:', bookingData);
+
+  // Create booking directly
+  const { data: booking, error: bookingError } = await supabase
+    .from('bookings')
+    .insert([bookingData])
+    .select()
+    .single();
+  
+  if (bookingError) {
+    console.error('Error creating booking:', bookingError);
+    console.error('Booking data that failed:', bookingData);
+    return res.status(500).json({ error: 'Failed to create booking', details: bookingError.message });
+  }
+
+  console.log('🔍 DEBUG - Booking created successfully:', booking);
+
+  // Update slot status to booked
+  const { error: updateError } = await supabase
+    .from('time_slots')
+    .update({ status: 'booked' })
+    .eq('id', slotId);
+  
+  if (updateError) {
+    console.error('Error updating slot status:', updateError);
+    return res.status(500).json({ error: 'Failed to update slot status' });
+  }
+
+  console.log('🔍 DEBUG - Slot status updated to booked');
+
+  res.status(201).json({
+    message: 'Booking created successfully',
+    booking,
+    meetingDetails: {
+      meetingLink: slot.meeting_link,
+      meetingId: slot.meeting_id,
+      meetingProvider: 'google_meet'
+    }
+  });
+}));
 
 // Update booking status
 app.put('/api/bookings/:bookingId', async (req, res) => {
@@ -1495,9 +1785,13 @@ app.delete('/api/cms/pricing/:id', async (req, res) => {
   }
 });
 
-// 6. Global error handler
+// ============================================================================
+// GLOBAL ERROR HANDLER
+// ============================================================================
+
+// Global error handler (must be last)
 app.use((error, req, res, next) => {
-  handleAPIError(error, req, res);
+  handleAPIError(error, req, res, next);
 });
 
 // Serve test.html
@@ -1513,6 +1807,7 @@ app.get('/', (req, res) => {
       <p><a href="/api/health">API Health</a></p>
       <p><strong>Database:</strong> Supabase PostgreSQL</p>
       <p><strong>Features:</strong> Real database, Meeting links, User management</p>
+      <p><strong>Security:</strong> Enhanced with authentication, validation, and rate limiting</p>
     </body>
     </html>
   `);
