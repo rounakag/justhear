@@ -110,32 +110,23 @@ class DatabaseService {
   async getAdminCreatedSlots() {
     console.log('🔍 DEBUG - Getting ALL admin slots (no date filter)');
     
-    // Try with RLS first, then without if it fails
-    let { data, error } = await supabase
-      .from('time_slots')
-      .select(`
-        *,
-        listener:users!time_slots_listener_id_fkey(
-          id,
-          username,
-          name,
-          email
-        ),
-        booking:bookings!bookings_slot_id_fkey(
-          user_id,
-          status,
-          created_at
-        )
-      `)
-      .order('date', { ascending: true })
-      .order('start_time', { ascending: true });
-    
-    if (error) {
-      console.error('❌ ERROR getting admin slots with RLS:', error);
+    try {
+      // First, try a simple query without joins to see if the table is accessible
+      let { data: simpleData, error: simpleError } = await supabase
+        .from('time_slots')
+        .select('*')
+        .order('date', { ascending: true })
+        .order('start_time', { ascending: true });
       
-      // Try without RLS (admin bypass)
-      console.log('🔍 DEBUG - Trying without RLS...');
-      const { data: adminData, error: adminError } = await supabase
+      if (simpleError) {
+        console.error('❌ ERROR getting admin slots (simple query):', simpleError);
+        throw simpleError;
+      }
+      
+      console.log('🔍 DEBUG - Simple query successful, found slots:', simpleData?.length || 0);
+      
+      // Now try with listener join
+      const { data, error } = await supabase
         .from('time_slots')
         .select(`
           *,
@@ -144,27 +135,32 @@ class DatabaseService {
             username,
             name,
             email
-          ),
-          booking:bookings!bookings_slot_id_fkey(
-            user_id,
-            status,
-            created_at
           )
         `)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true });
       
-      if (adminError) {
-        console.error('❌ ERROR getting admin slots without RLS:', adminError);
-        throw adminError;
+      if (error) {
+        console.error('❌ ERROR getting admin slots with listener join:', error);
+        // Return simple data if join fails
+        return simpleData || [];
       }
       
-      data = adminData;
+      console.log('🔍 DEBUG - Found admin slots with listener info:', data?.length || 0);
+      console.log('🔍 DEBUG - Sample slots:', data?.slice(0, 3).map(s => ({ 
+        id: s.id, 
+        date: s.date, 
+        status: s.status, 
+        listener_id: s.listener_id,
+        listener_name: s.listener?.name || s.listener?.username || 'Unknown'
+      })));
+      
+      return data || [];
+      
+    } catch (error) {
+      console.error('❌ CRITICAL ERROR in getAdminCreatedSlots:', error);
+      throw error;
     }
-    
-    console.log('🔍 DEBUG - Found admin slots:', data?.length || 0);
-    console.log('🔍 DEBUG - Sample slots:', data?.slice(0, 3).map(s => ({ id: s.id, date: s.date, status: s.status, listener_id: s.listener_id })));
-    return data || [];
   }
 
   async getRecurringSchedules() {

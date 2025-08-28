@@ -25,9 +25,9 @@ export function AuthModal({ children }: AuthModalProps) {
           <DialogTitle className="text-xl font-bold text-white">
             {mode === 'login' ? '🔐 Welcome Back' : '✨ Create Account'}
           </DialogTitle>
-          <p className="text-blue-100 text-sm mt-1" id="auth-modal-description">
+          <DialogDescription id="auth-modal-description" className="text-blue-100 text-sm mt-1">
             {mode === 'login' ? 'Sign in to your anonymous account' : 'Join our anonymous community'}
-          </p>
+          </DialogDescription>
         </div>
         <div className="p-6 overflow-y-auto flex-1">
           {mode === 'login' ? (
