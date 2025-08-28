@@ -716,6 +716,8 @@ app.post('/api/bookings', async (req, res) => {
       meeting_provider: 'google_meet' // Force to allowed value
     };
 
+    console.log('🔍 DEBUG - Creating booking with data:', bookingData);
+
     // Create booking directly
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
@@ -725,7 +727,8 @@ app.post('/api/bookings', async (req, res) => {
     
     if (bookingError) {
       console.error('Error creating booking:', bookingError);
-      return res.status(500).json({ error: 'Failed to create booking' });
+      console.error('Booking data that failed:', bookingData);
+      return res.status(500).json({ error: 'Failed to create booking', details: bookingError.message });
     }
 
     // Update slot status to booked
