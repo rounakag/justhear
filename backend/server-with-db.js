@@ -436,7 +436,7 @@ app.get('/api/slots/listener/:listenerId', async (req, res) => {
 app.post('/api/slots', validateSlotData, async (req, res, next) => {
   try {
     const slotData = req.body;
-    console.log('Received slot data:', slotData);
+    console.log('🔍 DEBUG - Received slot data:', slotData);
     
     // Check for overlapping slots
     const existingSlots = await databaseService.getSlotsByDateAndListener(
@@ -515,9 +515,11 @@ app.post('/api/slots', validateSlotData, async (req, res, next) => {
       message: 'Slot created successfully with meeting link',
       data: updatedSlot
     });
-  } catch (error) {
-    next(error);
-  }
+      } catch (error) {
+      console.error('🔍 DEBUG - Error in slot creation:', error);
+      console.error('🔍 DEBUG - Error stack:', error.stack);
+      next(error);
+    }
 });
 
 // Bulk create slots (admin only)

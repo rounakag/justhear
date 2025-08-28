@@ -323,6 +323,8 @@ class DatabaseService {
   }
 
   async updateSlotMeetingLink(slotId, meetingData) {
+    console.log('🔍 DEBUG - Updating slot meeting link:', { slotId, meetingData });
+    
     const { data, error } = await supabase
       .from('time_slots')
       .update({
@@ -334,7 +336,12 @@ class DatabaseService {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('🔍 DEBUG - Error updating slot meeting link:', error);
+      throw error;
+    }
+    
+    console.log('🔍 DEBUG - Successfully updated slot meeting link:', data);
     return data;
   }
 
