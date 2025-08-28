@@ -16,14 +16,27 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
       const newTimeUntil: Record<string, number> = {};
 
       sessions.forEach(session => {
-        // Combine date and time for proper calculation
-        const dateTimeString = `${session.booking.date}T${session.booking.startTime}`;
-        const sessionTime = new Date(dateTimeString).getTime();
-        const timeDiff = sessionTime - now;
-        
-        if (timeDiff > 0) {
-          newTimeUntil[session.booking.id] = Math.floor(timeDiff / (1000 * 60)); // minutes
-        } else {
+        try {
+          // Combine date and time for proper calculation
+          const dateTimeString = `${session.booking.date}T${session.booking.startTime}`;
+          const sessionTime = new Date(dateTimeString).getTime();
+          
+          // Check if the date is valid
+          if (isNaN(sessionTime)) {
+            console.error('Invalid session time:', { date: session.booking.date, time: session.booking.startTime });
+            newTimeUntil[session.booking.id] = 0;
+            return;
+          }
+          
+          const timeDiff = sessionTime - now;
+          
+          if (timeDiff > 0) {
+            newTimeUntil[session.booking.id] = Math.floor(timeDiff / (1000 * 60)); // minutes
+          } else {
+            newTimeUntil[session.booking.id] = 0;
+          }
+        } catch (error) {
+          console.error('Error calculating time until session:', error);
           newTimeUntil[session.booking.id] = 0;
         }
       });
@@ -32,23 +45,37 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
     };
 
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000); // Update every minute
+    const interval = setInterval(updateCountdown, 30000); // Update every 30 seconds for better UX
 
     return () => clearInterval(interval);
   }, [sessions]);
 
   const formatTimeUntil = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes} minutes`;
+    if (minutes <= 0) {
+      return 'Session is ready to start!';
+    } else if (minutes < 60) {
+      return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
     } else if (minutes < 1440) {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = minutes % 60;
-      return `${hours} hours ${remainingMinutes} minutes`;
+      if (remainingMinutes === 0) {
+        return `${hours} hour${hours !== 1 ? 's' : ''}`;
+      } else {
+        return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
+      }
     } else {
       const days = Math.floor(minutes / 1440);
       const hours = Math.floor((minutes % 1440) / 60);
       const remainingMinutes = minutes % 60;
-      return `${days} days ${hours} hours ${remainingMinutes} minutes`;
+      
+      let result = `${days} day${days !== 1 ? 's' : ''}`;
+      if (hours > 0) {
+        result += ` ${hours} hour${hours !== 1 ? 's' : ''}`;
+      }
+      if (remainingMinutes > 0) {
+        result += ` ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
+      }
+      return result;
     }
   };
 
@@ -185,6 +212,11 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
                            ⏰ {formatTimeUntil(timeUntil)}
                          </span>
                        )}
+                       {timeUntil <= 0 && (
+                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                           🟢 Ready to Join
+                         </span>
+                       )}
                      </div>
                                          <p className="text-gray-600 mb-2">
                        {formatDateTime(session.booking.date, session.booking.startTime)}
@@ -210,32 +242,39 @@ export const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, on
                  {timeUntil <= 0 ? (
                    <button
                      onClick={() => {
-                       // Open Google Meet link if available
+                       // Open meeting link if available
                        if (session.booking.meetingLink) {
                          window.open(session.booking.meetingLink, '_blank');
                        } else {
-                         window.open(`/session/${session.booking.id}`, '_blank');
+                         alert('Meeting link not available. Please contact support.');
                        }
                      }}
                      className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-md hover:bg-green-700 transition-colors"
                    >
-                     Join Session
+                     🎥 Join Session
                    </button>
                  ) : (
                    <button
                      disabled
                      className="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed opacity-60"
                    >
-                     Join Session
+                     ⏳ Join Session
                    </button>
                  )}
                  {timeUntil > 0 && (
                    <div className="text-center mt-2">
                      <p className="text-sm text-gray-600">
-                       Session will start in <span className="font-medium text-blue-600">{formatTimeUntil(timeUntil)}</span>
+                       Your session will start in <span className="font-medium text-blue-600">{formatTimeUntil(timeUntil)}</span>
                      </p>
                      <p className="text-xs text-gray-500 mt-1">
-                       Button will become active when session time is reached
+                       Meeting link will be available when session begins
+                     </p>
+                   </div>
+                 )}
+                 {timeUntil <= 0 && session.booking.meetingLink && (
+                   <div className="text-center mt-2">
+                     <p className="text-xs text-green-600 font-medium">
+                       ✅ Session is ready! Click to join your meeting.
                      </p>
                    </div>
                  )}
