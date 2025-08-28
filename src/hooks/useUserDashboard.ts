@@ -103,10 +103,39 @@ export function useUserDashboard(): UseUserDashboardReturn {
   }, [fetchData]);
 
   // Computed values
-  const upcomingSessions = sessions.filter(session => 
-    session.booking.status === 'upcoming' || session.booking.status === 'confirmed'
-  );
-  const completedSessions = sessions.filter(session => session.booking.status === 'completed');
+  const now = new Date();
+  
+  const upcomingSessions = sessions.filter(session => {
+    // Check if session time has passed
+    try {
+      const sessionDateTime = new Date(`${session.booking.date}T${session.booking.startTime}`);
+      const sessionEndTime = new Date(sessionDateTime.getTime() + (60 * 60 * 1000)); // Add 1 hour for session duration
+      
+      // Session is upcoming if it hasn't ended yet AND status is upcoming/confirmed
+      return sessionEndTime > now && 
+             (session.booking.status === 'upcoming' || session.booking.status === 'confirmed');
+    } catch (error) {
+      console.error('Error calculating session time:', error);
+      // Fallback to status-based filtering
+      return session.booking.status === 'upcoming' || session.booking.status === 'confirmed';
+    }
+  });
+  
+  const completedSessions = sessions.filter(session => {
+    // Check if session time has passed OR status is completed
+    try {
+      const sessionDateTime = new Date(`${session.booking.date}T${session.booking.startTime}`);
+      const sessionEndTime = new Date(sessionDateTime.getTime() + (60 * 60 * 1000)); // Add 1 hour for session duration
+      
+      // Session is completed if it has ended OR status is completed
+      return sessionEndTime <= now || session.booking.status === 'completed';
+    } catch (error) {
+      console.error('Error calculating session time:', error);
+      // Fallback to status-based filtering
+      return session.booking.status === 'completed';
+    }
+  });
+  
   const sessionsNeedingReview = sessions.filter(session => session.canReview);
 
   return {
