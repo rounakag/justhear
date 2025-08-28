@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server-with-db.js",
     "start:improved": "node server-improved.js",
+    "start:fixed": "node server-fixed.js",
     "dev": "nodemon server-with-db.js",
     "dev:improved": "nodemon server-improved.js",
     "test": "jest",
