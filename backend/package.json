@@ -5,8 +5,12 @@
   "main": "server-with-db.js",
   "scripts": {
     "start": "node server-with-db.js",
+    "start:improved": "node server-improved.js",
     "dev": "nodemon server-with-db.js",
+    "dev:improved": "nodemon server-improved.js",
     "test": "jest",
+    "test:suite": "node run-tests.js",
+    "test:quick": "node -e \"require('./utils/testSuite').runAllTests()\"",
     "build": "echo 'Build completed - no build step required'"
   },
   "keywords": [
