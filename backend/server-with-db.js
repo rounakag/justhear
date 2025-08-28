@@ -707,10 +707,39 @@ app.post('/api/bookings', async (req, res) => {
     
     console.log('🔍 DEBUG - Slot found:', { id: slot.id, status: slot.status, listener_id: slot.listener_id });
 
-    // For now, use the listener_id from the slot as the user_id
-    // This is a temporary fix until we have proper user management
+    // Check if user exists, if not create a simple user record
+    const { data: existingUser, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (userError || !existingUser) {
+      console.log('🔍 DEBUG - User not found, creating simple user record');
+      // Create a simple user record for the booking
+      const { data: newUser, error: createUserError } = await supabase
+        .from('users')
+        .insert([{
+          id: userId,
+          username: `user_${userId.substring(0, 8)}`,
+          email: `user_${userId.substring(0, 8)}@justhear.com`,
+          password_hash: 'temp_password_hash',
+          role: 'user'
+        }])
+        .select()
+        .single();
+      
+      if (createUserError) {
+        console.error('Error creating user:', createUserError);
+        return res.status(500).json({ error: 'Failed to create user record' });
+      }
+      
+      console.log('🔍 DEBUG - User created:', newUser);
+    }
+
+    // Use the actual user's ID from the request
     const bookingData = {
-      user_id: slot.listener_id, // Use the listener from the slot
+      user_id: userId, // Use the actual user who is booking
       slot_id: slotId,
       status: 'confirmed',
       meeting_link: slot.meeting_link || null,

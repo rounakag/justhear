@@ -166,7 +166,7 @@ export const BookingsPage: React.FC = () => {
         await fetchAvailableSlots(); // Refresh available slots
         
         // Trigger dashboard refresh to show the new booking
-        triggerDashboardRefresh();
+        window.dispatchEvent(new CustomEvent('refresh-dashboard'));
       } else {
         const errorData = await response.json();
         alert(`❌ Booking failed: ${errorData.error || 'Unknown error'}`);
