@@ -94,7 +94,7 @@ ALTER TABLE time_slots
 ADD CONSTRAINT time_slots_status_check 
 CHECK (status IN ('created', 'booked', 'completed'));
 
--- 7. Drop all existing RLS policies and recreate them
+-- 7. Drop ALL possible existing RLS policies (comprehensive cleanup)
 DROP POLICY IF EXISTS "Enable read access for all users" ON time_slots;
 DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON time_slots;
 DROP POLICY IF EXISTS "Enable update for authenticated users only" ON time_slots;
@@ -102,6 +102,19 @@ DROP POLICY IF EXISTS "Enable delete for authenticated users only" ON time_slots
 DROP POLICY IF EXISTS "Enable insert for admin users only" ON time_slots;
 DROP POLICY IF EXISTS "Enable update for admin users only" ON time_slots;
 DROP POLICY IF EXISTS "Enable delete for admin users only" ON time_slots;
+DROP POLICY IF EXISTS "Admin can see all slots" ON time_slots;
+DROP POLICY IF EXISTS "Admin can insert slots" ON time_slots;
+DROP POLICY IF EXISTS "Admin can update slots" ON time_slots;
+DROP POLICY IF EXISTS "Admin can delete slots" ON time_slots;
+DROP POLICY IF EXISTS "Users can view available slots" ON time_slots;
+DROP POLICY IF EXISTS "Users can book slots" ON time_slots;
+DROP POLICY IF EXISTS "Listeners can view their slots" ON time_slots;
+DROP POLICY IF EXISTS "Listeners can update their slots" ON time_slots;
+DROP POLICY IF EXISTS "time_slots_policy" ON time_slots;
+DROP POLICY IF EXISTS "time_slots_select_policy" ON time_slots;
+DROP POLICY IF EXISTS "time_slots_insert_policy" ON time_slots;
+DROP POLICY IF EXISTS "time_slots_update_policy" ON time_slots;
+DROP POLICY IF EXISTS "time_slots_delete_policy" ON time_slots;
 
 -- 8. Create new RLS policies that allow admin to see all slots
 -- First, enable RLS
