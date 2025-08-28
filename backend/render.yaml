@@ -3,7 +3,7 @@ services:
     name: justhear-backend
     env: node
     buildCommand: npm install
-    startCommand: npm start # Using fixed server-with-db.js
+    startCommand: npm start # Using fixed server-with-db.js - v2
     envVars:
       - key: NODE_ENV
         value: production
