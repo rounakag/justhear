@@ -81,18 +81,6 @@ app.get('/api/slots/available', async (req, res, next) => {
     
     console.log('🔍 DEBUG - Fetching available slots from date:', today);
     
-    // Get system user ID
-    const { data: systemUser, error: systemError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', 'system')
-      .single();
-    
-    if (systemError) {
-      console.error('System user error:', systemError);
-      throw new APIError('System configuration error', 500, 'CONFIG_ERROR');
-    }
-    
     const { data, error, count } = await supabase
       .from('time_slots')
       .select(`
@@ -100,7 +88,6 @@ app.get('/api/slots/available', async (req, res, next) => {
         listener:users!time_slots_listener_id_fkey(id, username, email)
       `, { count: 'exact' })
       .eq('status', 'created')
-      .eq('listener_id', systemUser.id)
       .gte('date', today)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true })
@@ -131,30 +118,22 @@ app.get('/api/slots/available', async (req, res, next) => {
 // Create slot endpoint
 app.post('/api/slots', async (req, res, next) => {
   try {
-    const { date, startTime, endTime, price = 50 } = req.body;
+    const { date, startTime, endTime, price = 50, listenerId } = req.body;
     
     // Validation
     if (!date || !startTime || !endTime) {
       throw new APIError('Missing required fields: date, startTime, endTime', 400, 'VALIDATION_ERROR');
     }
     
-    // Get system user ID
-    const { data: systemUser, error: systemError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', 'system')
-      .single();
-    
-    if (systemError) {
-      throw new APIError('System configuration error', 500, 'CONFIG_ERROR');
-    }
+    // Use provided listener ID or default to system user
+    const finalListenerId = listenerId || '55f0d229-16eb-48db-8bfe-e817a7dee807';
     
     const slotData = {
       date,
       start_time: startTime,
       end_time: endTime,
       status: 'created',
-      listener_id: systemUser.id,
+      listener_id: finalListenerId,
       duration_minutes: calculateDuration(startTime, endTime),
       price
     };
