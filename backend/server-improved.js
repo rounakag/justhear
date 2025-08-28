@@ -13,9 +13,9 @@ const { cacheMiddleware } = require('./utils/cache');
 const { validateSlotCreation, validateBooking, validateUUID } = require('./middleware/validation');
 
 // Import services
-const databaseService = require('./services/databaseService');
+const databaseService = require('./services/databaseService-improved');
 const meetingService = require('./services/meetingService');
-const { supabase } = require('./config/supabase');
+const { supabase } = require('./config/supabase-improved');
 
 // Helper function to calculate duration in minutes
 function calculateDuration(startTime, endTime) {

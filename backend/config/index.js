@@ -28,16 +28,23 @@ const config = {
   }
 };
 
-// Validate required configuration
-const requiredConfig = ['jwtSecret', 'supabase.url', 'supabase.serviceRoleKey'];
-requiredConfig.forEach(key => {
-  const value = key.includes('.') 
-    ? key.split('.').reduce((obj, k) => obj?.[k], config)
-    : config[key];
-  
-  if (!value) {
-    throw new Error(`Required config ${key} is missing`);
+// Validate required configuration (only in production)
+if (process.env.NODE_ENV === 'production') {
+  const requiredConfig = ['jwtSecret', 'supabase.url', 'supabase.serviceRoleKey'];
+  requiredConfig.forEach(key => {
+    const value = key.includes('.') 
+      ? key.split('.').reduce((obj, k) => obj?.[k], config)
+      : config[key];
+    
+    if (!value) {
+      throw new Error(`Required config ${key} is missing`);
+    }
+  });
+} else {
+  // In development, provide default values for missing configs
+  if (!config.jwtSecret) {
+    config.jwtSecret = 'dev-secret-key';
   }
-});
+}
 
 module.exports = config;
