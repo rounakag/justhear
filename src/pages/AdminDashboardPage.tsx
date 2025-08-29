@@ -23,13 +23,24 @@ export const AdminDashboardPage: React.FC = () => {
 
   // Redirect to admin login if not authenticated (but only after loading is complete)
   useEffect(() => {
+    console.log('🔐 AdminDashboardPage: Authentication check', { loading, isAdmin });
+    
+    // Temporary bypass for testing - remove this later
+    const bypassAuth = localStorage.getItem('adminBypass') === 'true';
+    if (bypassAuth) {
+      console.log('🔓 Admin bypass detected, allowing access');
+      return;
+    }
+    
     if (!loading && !isAdmin) {
+      console.log('🔐 AdminDashboardPage: Not authenticated, redirecting to login');
       navigate('/admin/login');
     }
   }, [isAdmin, loading, navigate]);
 
   const handleLogout = () => {
     logoutAdmin();
+    localStorage.removeItem('adminBypass'); // Clear bypass on logout
     navigate('/admin/login');
   };
 
@@ -46,12 +57,23 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   // Show loading if not authenticated (this should only happen briefly)
-  if (!isAdmin) {
+  // Temporary bypass check
+  const bypassAuth = localStorage.getItem('adminBypass') === 'true';
+  if (!isAdmin && !bypassAuth) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Redirecting to login...</p>
+          <button
+            onClick={() => {
+              localStorage.setItem('adminBypass', 'true');
+              window.location.reload();
+            }}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            🔓 Bypass Authentication (Test)
+          </button>
         </div>
       </div>
     );

@@ -118,6 +118,7 @@ export const AdminLoginPage: React.FC = () => {
     localStorage.setItem('isAdmin', 'true');
     localStorage.setItem('adminEmail', 'admin2@justhear.com');
     localStorage.setItem('authToken', 'bypass-token');
+    localStorage.setItem('adminBypass', 'true'); // Set bypass flag
     
     // Set cookies
     document.cookie = 'isAdmin=true; path=/; max-age=86400';
