@@ -10,6 +10,13 @@ export const AdminLoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Add debugging
+  useEffect(() => {
+    console.log('🔄 AdminLoginPage mounted');
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔍 isAdmin state:', isAdmin);
+  }, []);
+
   // Redirect to admin dashboard if already logged in
   useEffect(() => {
     console.log('Admin login page - isAdmin state:', isAdmin);
@@ -44,6 +51,37 @@ export const AdminLoginPage: React.FC = () => {
     }
   };
 
+  // Add default admin credentials for testing
+  const handleQuickLogin = async () => {
+    setEmail('admin2@justhear.com');
+    setPassword('admin123');
+    
+    // Auto-submit after setting credentials
+    setTimeout(async () => {
+      setLoading(true);
+      setError('');
+      
+      try {
+        console.log('Quick login attempt...');
+        const success = await loginAsAdmin('admin2@justhear.com', 'admin123');
+        console.log('Quick login result:', success);
+        
+        if (success) {
+          console.log('Quick login successful, navigating to dashboard...');
+          navigate('/admin/dashboard');
+        } else {
+          console.log('Quick login failed, showing error...');
+          setError('Quick login failed. Please try manual login.');
+        }
+      } catch (err) {
+        console.error('Quick login error:', err);
+        setError('Quick login failed. Please try manual login.');
+      } finally {
+        setLoading(false);
+      }
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -57,6 +95,25 @@ export const AdminLoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Quick Login Button for Testing */}
+          <div className="mb-6">
+            <button
+              type="button"
+              onClick={handleQuickLogin}
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+            >
+              {loading ? 'Logging in...' : 'Quick Login (Test)'}
+            </button>
+            <p className="mt-2 text-xs text-gray-500 text-center">
+              Uses default admin credentials for testing
+            </p>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6">
+            <p className="text-sm text-gray-600 text-center mb-4">Or login manually:</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -98,51 +155,29 @@ export const AdminLoginPage: React.FC = () => {
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-sm text-red-600">{error}</p>
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Login Error</h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>{error}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
-
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <p className="text-sm text-blue-600">
-                <strong>Admin Credentials:</strong><br />
-                Email: admin2@justhear.com<br />
-                Password: admin123
-              </p>
-            </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-              <p className="text-sm text-yellow-600">
-                <strong>First Time Setup:</strong><br />
-                If admin login fails, click the button below to create admin user
-              </p>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const response = await fetch('https://justhear-backend.onrender.com/api/auth/setup-admin', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    alert(data.message);
-                  } catch (error) {
-                    alert('Failed to setup admin: ' + error);
-                  }
-                }}
-                className="mt-2 w-full px-4 py-2 text-sm font-medium text-yellow-800 bg-yellow-100 border border-yellow-300 rounded-md hover:bg-yellow-200"
-              >
-                Setup Admin User
-              </button>
-            </div>
 
             <div>
               <button
                 type="submit"
                 disabled={loading}
-
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {loading ? 'Signing in...' : 'Sign in to Admin Panel'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
           </form>
@@ -153,10 +188,14 @@ export const AdminLoginPage: React.FC = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Secure Admin Access
-                </span>
+                <span className="px-2 bg-white text-gray-500">Default Credentials</span>
               </div>
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-500">
+                Email: admin2@justhear.com<br />
+                Password: admin123
+              </p>
             </div>
           </div>
         </div>

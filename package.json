@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist node_modules/.vite",
     "type-check": "tsc --noEmit",
-    "analyze": "node scripts/optimize-build.js"
+    "analyze": "node scripts/optimize-build.js",
+    "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

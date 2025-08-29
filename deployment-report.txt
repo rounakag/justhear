@@ -1,0 +1,21 @@
+Deployment Report - Thu Aug 28 21:52:17 IST 2025
+========================
+Build Size: 556K
+Build Time: Thu Aug 28 21:52:17 IST 2025
+Node Version: v22.18.0
+NPM Version: 10.9.3
+
+Build Artifacts:
+total 48
+drwxr-xr-x@  9 saritasahana  staff   288 Aug 28 21:52 .
+drwxr-xr-x@ 52 saritasahana  staff  1664 Aug 28 21:52 ..
+-rw-r--r--@  1 saritasahana  staff    24 Aug 28 21:52 _redirects
+drwxr-xr-x@  4 saritasahana  staff   128 Aug 28 21:52 assets
+-rw-r--r--@  1 saritasahana  staff   177 Aug 28 21:52 favicon.ico
+-rw-r--r--@  1 saritasahana  staff   183 Aug 28 21:52 favicon.png
+-rw-r--r--@  1 saritasahana  staff   655 Aug 28 21:52 favicon.svg
+-rw-r--r--@  1 saritasahana  staff  2135 Aug 28 21:52 index.html
+-rw-r--r--@  1 saritasahana  staff  1497 Aug 28 21:52 vite.svg
+
+Large Files (>100KB):
+-rw-r--r--@ 1 saritasahana  staff   345K Aug 28 21:52 dist/assets/js/index-CM7Hnn9t.js
