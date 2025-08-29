@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './components/auth/AuthProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -33,9 +33,65 @@ const AdminTestPage: React.FC = () => (
   </div>
 );
 
+// Cache Busting Component
+const CacheBuster: React.FC = () => {
+  useEffect(() => {
+    // Force cache refresh for admin routes
+    if (window.location.pathname.startsWith('/admin')) {
+      console.log('🔄 Admin route detected - forcing cache refresh');
+      
+      // Clear any cached data
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            caches.delete(name);
+          });
+        });
+      }
+      
+      // Clear localStorage for admin
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('adminEmail');
+      localStorage.removeItem('authToken');
+      
+      // Clear cookies
+      document.cookie = 'isAdmin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      
+      console.log('🧹 Cache cleared for admin routes');
+    }
+  }, []);
+
+  return null;
+};
+
 export const AppRouter: React.FC = () => {
+  useEffect(() => {
+    // Add debugging for all routes
+    console.log('🚀 AppRouter mounted');
+    console.log('📍 Current URL:', window.location.href);
+    console.log('🌐 User Agent:', navigator.userAgent);
+    console.log('📱 Screen Size:', window.screen.width, 'x', window.screen.height);
+    console.log('🕒 Timestamp:', new Date().toISOString());
+    
+    // Force reload if admin route and cache issues detected
+    if (window.location.pathname.startsWith('/admin')) {
+      const lastVisit = localStorage.getItem('lastAdminVisit');
+      const now = Date.now();
+      
+      if (lastVisit && (now - parseInt(lastVisit)) < 5000) {
+        console.log('⚠️ Potential cache issue detected - forcing reload');
+        window.location.reload();
+        return;
+      }
+      
+      localStorage.setItem('lastAdminVisit', now.toString());
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
+      <CacheBuster />
       <AuthProvider>
         <Router>
           <Routes>

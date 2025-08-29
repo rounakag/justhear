@@ -9,12 +9,40 @@ export const AdminLoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [debugInfo, setDebugInfo] = useState<any>({});
 
   // Add debugging
   useEffect(() => {
     console.log('🔄 AdminLoginPage mounted');
     console.log('🔍 Current URL:', window.location.href);
     console.log('🔍 isAdmin state:', isAdmin);
+    
+    // Collect debug information
+    const debug = {
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      screenSize: `${window.screen.width}x${window.screen.height}`,
+      timestamp: new Date().toISOString(),
+      localStorage: {
+        isAdmin: localStorage.getItem('isAdmin'),
+        adminEmail: localStorage.getItem('adminEmail'),
+        authToken: localStorage.getItem('authToken'),
+      },
+      cookies: document.cookie,
+      pathname: window.location.pathname,
+      search: window.location.search,
+    };
+    
+    setDebugInfo(debug);
+    console.log('🔍 Debug info:', debug);
+    
+    // Force cache refresh
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        console.log('🗑️ Clearing caches:', names);
+        names.forEach(name => caches.delete(name));
+      });
+    }
   }, []);
 
   // Redirect to admin dashboard if already logged in
@@ -82,6 +110,32 @@ export const AdminLoginPage: React.FC = () => {
     }, 100);
   };
 
+  const handleForceRefresh = () => {
+    console.log('🔄 Force refreshing page...');
+    window.location.reload();
+  };
+
+  const handleClearCache = () => {
+    console.log('🧹 Clearing all cache...');
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Clear caches
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
+    
+    console.log('✅ Cache cleared, refreshing...');
+    setTimeout(() => window.location.reload(), 500);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -95,6 +149,35 @@ export const AdminLoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Debug Information */}
+          <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Debug Info:</h3>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p>URL: {debugInfo.url}</p>
+              <p>Screen: {debugInfo.screenSize}</p>
+              <p>Time: {debugInfo.timestamp}</p>
+              <p>isAdmin: {debugInfo.localStorage?.isAdmin}</p>
+            </div>
+          </div>
+
+          {/* Cache Control Buttons */}
+          <div className="mb-6 space-y-2">
+            <button
+              type="button"
+              onClick={handleForceRefresh}
+              className="w-full text-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              🔄 Force Refresh Page
+            </button>
+            <button
+              type="button"
+              onClick={handleClearCache}
+              className="w-full text-center py-2 px-4 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100"
+            >
+              🧹 Clear All Cache & Refresh
+            </button>
+          </div>
+
           {/* Quick Login Button for Testing */}
           <div className="mb-6">
             <button

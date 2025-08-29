@@ -21,6 +21,12 @@ services:
       - path: /index.html
         name: Cache-Control
         value: public, max-age=0, must-revalidate
+      - path: /admin/*
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+      - path: /admin-fallback.html
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
       - path: /*
         name: Cache-Control
         value: public, max-age=3600
