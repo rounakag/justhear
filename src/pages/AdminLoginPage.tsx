@@ -110,6 +110,25 @@ export const AdminLoginPage: React.FC = () => {
     }, 100);
   };
 
+  // Bypass login for testing (temporary)
+  const handleBypassLogin = () => {
+    console.log('🔓 Bypass login activated');
+    
+    // Set admin state directly
+    localStorage.setItem('isAdmin', 'true');
+    localStorage.setItem('adminEmail', 'admin2@justhear.com');
+    localStorage.setItem('authToken', 'bypass-token');
+    
+    // Set cookies
+    document.cookie = 'isAdmin=true; path=/; max-age=86400';
+    document.cookie = 'authToken=bypass-token; path=/; max-age=86400';
+    
+    console.log('🔓 Bypass login completed, redirecting...');
+    setTimeout(() => {
+      window.location.href = '/admin/dashboard';
+    }, 500);
+  };
+
   const handleForceRefresh = () => {
     console.log('🔄 Force refreshing page...');
     window.location.reload();
@@ -190,6 +209,20 @@ export const AdminLoginPage: React.FC = () => {
             </button>
             <p className="mt-2 text-xs text-gray-500 text-center">
               Uses default admin credentials for testing
+            </p>
+          </div>
+
+          {/* Bypass Login Button for Testing */}
+          <div className="mb-6">
+            <button
+              type="button"
+              onClick={handleBypassLogin}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+            >
+              {loading ? 'Bypassing...' : 'Bypass Login (Test)'}
+            </button>
+            <p className="mt-2 text-xs text-gray-500 text-center">
+              Temporarily bypasses authentication for testing
             </p>
           </div>
 

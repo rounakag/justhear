@@ -23,10 +23,18 @@ export function useAdminAuth(): UseAdminAuthReturn {
   // Admin users will be fetched from backend
 
   useEffect(() => {
+    console.log('🔐 useAdminAuth: Checking authentication state...');
+    
     // Check if admin is already logged in from localStorage and cookies
     const isAdmin = localStorage.getItem('isAdmin');
     const adminEmail = localStorage.getItem('adminEmail');
     const token = localStorage.getItem('authToken');
+    
+    console.log('🔐 useAdminAuth: localStorage values:', {
+      isAdmin,
+      adminEmail,
+      hasToken: !!token
+    });
     
     // Also check cookies for consistency with regular auth
     const getCookie = (name: string) => {
@@ -39,8 +47,17 @@ export function useAdminAuth(): UseAdminAuthReturn {
     const cookieToken = getCookie('authToken');
     const cookieIsAdmin = getCookie('isAdmin');
     
+    console.log('🔐 useAdminAuth: cookie values:', {
+      cookieIsAdmin,
+      hasCookieToken: !!cookieToken
+    });
+    
     // Check both localStorage and cookies for admin status
-    if ((isAdmin === 'true' && adminEmail && token) || (cookieIsAdmin === 'true' && cookieToken)) {
+    const isAdminLoggedIn = (isAdmin === 'true' && adminEmail && token) || (cookieIsAdmin === 'true' && cookieToken);
+    
+    console.log('🔐 useAdminAuth: isAdminLoggedIn:', isAdminLoggedIn);
+    
+    if (isAdminLoggedIn) {
       // Admin is logged in, restore the state
       const adminUser: AdminUser = {
         id: 'admin',
@@ -49,17 +66,21 @@ export function useAdminAuth(): UseAdminAuthReturn {
         permissions: ['manage_slots', 'manage_listeners', 'view_analytics', 'manage_schedules'],
       };
       setAdminUser(adminUser);
+      console.log('🔐 useAdminAuth: Admin user restored:', adminUser);
+    } else {
+      console.log('🔐 useAdminAuth: No admin user found, staying logged out');
     }
     
     // Set loading to false after a small delay to prevent race conditions
     setTimeout(() => {
       setLoading(false);
+      console.log('🔐 useAdminAuth: Loading set to false, isAdmin:', !!adminUser);
     }, 100);
   }, []);
 
   const loginAsAdmin = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log('Admin login attempt:', { email });
+      console.log('🔐 Admin login attempt:', { email });
       
       const response = await fetch('https://justhear-backend.onrender.com/api/auth/login', {
         method: 'POST',
@@ -70,7 +91,7 @@ export function useAdminAuth(): UseAdminAuthReturn {
       });
       
       const data = await response.json();
-      console.log('Admin login response:', { 
+      console.log('🔐 Admin login response:', { 
         status: response.status, 
         ok: response.ok,
         data,
@@ -95,10 +116,10 @@ export function useAdminAuth(): UseAdminAuthReturn {
         document.cookie = `isAdmin=true; path=/; max-age=86400`; // 24 hours
         document.cookie = `authToken=${data.token}; path=/; max-age=86400`; // 24 hours
         
-        console.log('Admin login successful:', adminUser);
+        console.log('🔐 Admin login successful:', adminUser);
         return true;
       } else {
-        console.log('Admin login failed - response details:', {
+        console.log('🔐 Admin login failed - response details:', {
           responseOk: response.ok,
           hasUser: !!data.user,
           userRole: data.user?.role,
@@ -107,15 +128,16 @@ export function useAdminAuth(): UseAdminAuthReturn {
         });
       }
       
-      console.log('Admin login failed:', data);
+      console.log('🔐 Admin login failed:', data);
       return false;
     } catch (error) {
-      console.error('Admin login error:', error);
+      console.error('🔐 Admin login error:', error);
       return false;
     }
   };
 
   const logoutAdmin = () => {
+    console.log('🔐 Admin logout called');
     setAdminUser(null);
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('adminEmail');
@@ -124,11 +146,19 @@ export function useAdminAuth(): UseAdminAuthReturn {
     // Also clear cookies for consistency
     document.cookie = 'isAdmin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    
+    console.log('🔐 Admin logout completed');
   };
 
   const checkAdminPermissions = (permission: string): boolean => {
     return adminUser?.permissions.includes(permission) || false;
   };
+
+  console.log('🔐 useAdminAuth: Current state:', {
+    isAdmin: !!adminUser,
+    adminUser,
+    loading
+  });
 
   return {
     isAdmin: !!adminUser,
